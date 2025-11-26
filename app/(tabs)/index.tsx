@@ -46,6 +46,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <Header />
       <ScrollView 
         ref={scrollRef}
         contentContainerStyle={styles.scrollContent} 
@@ -65,7 +66,7 @@ export default function HomeScreen() {
             <Text style={{ color: Colors.primary, fontWeight: '600' }}>Refreshing...</Text>
           </View>
         )}
-        <Header />
+        <View style={{ height: Colors.spacing }} />
         
         {/* Search Bar */}
         <TouchableOpacity 

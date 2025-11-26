@@ -4,7 +4,14 @@ import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const widgetsByCategory = {
+type Widget = {
+  id: number;
+  title: string;
+  icon: any;
+  color: string;
+};
+
+const widgetsByCategory: Record<string, Widget[]> = {
   'HR & Leave': [
     { id: 1, title: 'Apply Leave', icon: Briefcase, color: '#EC4899' },
     { id: 2, title: 'WFH Request', icon: Home, color: '#4E5FBF' },
@@ -121,7 +128,10 @@ export default function AppStoreScreen() {
           ) : (
             // Category View
             <>
-              {(selectedCategory === 'All' ? Object.entries(widgetsByCategory) : [[selectedCategory, widgetsByCategory[selectedCategory]]]).map(([category, widgets]) => (
+              {(selectedCategory === 'All' 
+                ? Object.entries(widgetsByCategory) 
+                : [[selectedCategory, widgetsByCategory[selectedCategory]]] as [string, Widget[]][]
+              ).map(([category, widgets]) => (
                 <View key={category} style={styles.categorySection}>
                   <Text style={styles.categoryHeading}>{category}</Text>
                   <View style={styles.widgetsGrid}>
@@ -250,7 +260,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   widgetCard: {
-    width: '31%',
+    width: '30%',
     backgroundColor: '#FFF',
     borderRadius: 16,
     padding: 14,

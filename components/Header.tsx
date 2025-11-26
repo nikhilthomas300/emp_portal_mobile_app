@@ -2,7 +2,7 @@ import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { Bell, QrCode } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCodeModal from './QRCodeModal';
 import SearchModal from './SearchModal';
@@ -13,7 +13,7 @@ export default function Header() {
   const [searchVisible, setSearchVisible] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.container}>
         <View style={styles.row}>
           {/* Left: Avatar & Name */}
@@ -23,8 +23,8 @@ export default function Header() {
                 <Text style={styles.avatarText}>PV</Text>
               </View>
               <View style={styles.greetingContainer}>
-                <Text style={styles.greeting}>Good Afternoon</Text>
-                <Text style={styles.name}>Pavan</Text>
+                <Text style={styles.greeting}>Hello, Good Afternoon</Text>
+                <Text style={styles.name}>Pavan !</Text>
               </View>
             </TouchableOpacity>
           </Link>
@@ -50,16 +50,16 @@ export default function Header() {
 
       <QRCodeModal visible={qrVisible} onClose={() => setQrVisible(false)} />
       <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: Colors.background,
+    backgroundColor: 'transparent',
   },
   container: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'transparent',
     paddingHorizontal: Colors.spacing,
     paddingVertical: 12,
   },
