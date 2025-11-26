@@ -1,0 +1,274 @@
+import Colors from '@/constants/Colors';
+import { BarChart, Bell, Briefcase, Calendar, Clock, DollarSign, FileText, Grid, Home, MessageSquare, Search, Settings, Users } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const widgetsByCategory = {
+  'HR & Leave': [
+    { id: 1, title: 'Apply Leave', icon: Briefcase, color: '#EC4899' },
+    { id: 2, title: 'WFH Request', icon: Home, color: '#4E5FBF' },
+    { id: 6, title: 'Timesheet', icon: Clock, color: '#8B5CF6' },
+  ],
+  'Communication': [
+    { id: 4, title: 'Calendar', icon: Calendar, color: '#10B981' },
+    { id: 5, title: 'Team Directory', icon: Users, color: '#A78BFA' },
+    { id: 10, title: 'Chat', icon: MessageSquare, color: '#3B82F6' },
+    { id: 11, title: 'Notifications', icon: Bell, color: '#F59E0B' },
+  ],
+  'Documents & Finance': [
+    { id: 3, title: 'My Letters', icon: FileText, color: '#F59E0B' },
+    { id: 7, title: 'Expenses', icon: DollarSign, color: '#10B981' },
+  ],
+  'Analytics': [
+    { id: 8, title: 'Reports', icon: BarChart, color: '#F59E0B' },
+    { id: 9, title: 'Settings', icon: Settings, color: '#6B7280' },
+  ],
+};
+
+export default function AppStoreScreen() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const categories = ['All', ...Object.keys(widgetsByCategory)];
+
+  const getFilteredWidgets = () => {
+    if (searchQuery) {
+      const allWidgets = Object.values(widgetsByCategory).flat();
+      return allWidgets.filter(widget =>
+        widget.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return null;
+  };
+
+  const filteredWidgets = getFilteredWidgets();
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.titleSection}>
+            <View style={styles.iconContainer}>
+              <Grid size={20} color="#FFF" />
+            </View>
+            <Text style={styles.title}>App Store</Text>
+          </View>
+          
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Search size={18} color={Colors.secondaryText} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search apps..."
+              placeholderTextColor={Colors.secondaryText}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+
+        {/* Categories - Horizontal Scroll */}
+        {!searchQuery && (
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoriesScroll}
+            contentContainerStyle={styles.categoriesContent}
+          >
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryChip,
+                  selectedCategory === category && styles.categoryChipActive
+                ]}
+                onPress={() => setSelectedCategory(category)}
+              >
+                <Text style={[
+                  styles.categoryText,
+                  selectedCategory === category && styles.categoryTextActive
+                ]}>
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+
+        {/* Widgets by Category or Search Results */}
+        <ScrollView 
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {searchQuery ? (
+            // Search Results
+            <>
+              <Text style={styles.sectionTitle}>Found {filteredWidgets?.length || 0} apps</Text>
+              <View style={styles.widgetsGrid}>
+                {filteredWidgets?.map((widget) => (
+                  <TouchableOpacity key={widget.id} style={styles.widgetCard}>
+                    <View style={[styles.widgetIcon, { backgroundColor: `${widget.color}20` }]}>
+                      <widget.icon size={22} color={widget.color} />
+                    </View>
+                    <Text style={styles.widgetTitle}>{widget.title}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>
+          ) : (
+            // Category View
+            <>
+              {(selectedCategory === 'All' ? Object.entries(widgetsByCategory) : [[selectedCategory, widgetsByCategory[selectedCategory]]]).map(([category, widgets]) => (
+                <View key={category} style={styles.categorySection}>
+                  <Text style={styles.categoryHeading}>{category}</Text>
+                  <View style={styles.widgetsGrid}>
+                    {widgets.map((widget) => (
+                      <TouchableOpacity key={widget.id} style={styles.widgetCard}>
+                        <View style={[styles.widgetIcon, { backgroundColor: `${widget.color}20` }]}>
+                          <widget.icon size={22} color={widget.color} />
+                        </View>
+                        <Text style={styles.widgetTitle}>{widget.title}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFF',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Colors.spacing,
+    paddingTop: 12,
+    paddingBottom: 12,
+    gap: 12,
+    ...Colors.shadows.medium,
+  },
+  titleSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.text,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      } as any,
+    }),
+  },
+  categoriesScroll: {
+    backgroundColor: '#FFF',
+    maxHeight: 50,
+  },
+  categoriesContent: {
+    paddingHorizontal: Colors.spacing,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  categoryChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.background,
+  },
+  categoryChipActive: {
+    backgroundColor: Colors.primary,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  categoryTextActive: {
+    color: '#FFF',
+  },
+  content: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: Colors.spacing,
+    gap: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  categorySection: {
+    gap: 12,
+  },
+  categoryHeading: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  widgetsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  widgetCard: {
+    width: '31%',
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 14,
+    alignItems: 'center',
+    gap: 8,
+    ...Colors.shadows.small,
+  },
+  widgetIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  widgetTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+});
