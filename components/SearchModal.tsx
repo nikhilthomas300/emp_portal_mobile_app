@@ -13,8 +13,8 @@ const suggestedWidgets = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, color: Colors.accent },
   { id: 2, title: 'WFH Request', icon: Home, color: Colors.primary },
   { id: 3, title: 'My Letters', icon: FileText, color: Colors.warning },
-  { id: 4, title: 'Calendar', icon: Calendar, color: Colors.success },
-  { id: 5, title: 'Team Directory', icon: Users, color: Colors.secondary },
+  { id: 4, title: 'My Approvals', icon: Calendar, color: Colors.success },
+  { id: 5, title: 'My Assets', icon: Users, color: Colors.secondary },
 ];
 
 export function SearchContent({ onClose, style }: { onClose: () => void; style?: any }) {

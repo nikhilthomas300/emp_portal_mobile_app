@@ -3,84 +3,69 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
-const BANNER_WIDTH = width - (Colors.spacing * 2);
 
 const banners = [
-  { 
-    id: 1, 
-    image: require('../assets/images/banner1.png'),
-  },
-  { 
-    id: 2, 
-    image: require('../assets/images/banner2.png'),
-  },
-  { 
-    id: 3, 
-    image: require('../assets/images/banner3.png'),
-  },
+  { id: 1, image: require('../assets/images/banner1.png') },
+  { id: 2, image: require('../assets/images/banner2.png') },
+  { id: 3, image: require('../assets/images/banner3.png') },
 ];
 
 export default function BannerCarousel() {
-  const scrollRef = useRef<ScrollView>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      let nextIndex = currentIndex + 1;
-      if (nextIndex >= banners.length) {
-        nextIndex = 0;
-      }
-      
-      scrollRef.current?.scrollTo({
-        x: nextIndex * (BANNER_WIDTH + 16), // 16 is marginRight
-        animated: true,
+    const interval = setInterval(() => {
+      setActiveIndex((current) => {
+        const next = (current + 1) % banners.length;
+        scrollViewRef.current?.scrollTo({
+          x: next * width,
+          animated: true,
+        });
+        return next;
       });
-      setCurrentIndex(nextIndex);
-    }, 10000);
+    }, 5000);
 
-    return () => clearInterval(timer);
-  }, [currentIndex]);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleScroll = (event: any) => {
-    const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffsetX / (BANNER_WIDTH + 16));
-    if (index !== currentIndex) {
-      setCurrentIndex(index);
-    }
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const index = Math.round(scrollPosition / width);
+    setActiveIndex(index);
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={BANNER_WIDTH + 16}
-        decelerationRate="fast"
-        contentContainerStyle={styles.scrollContent}
-        onMomentumScrollEnd={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {banners.map((banner) => (
-          <View key={banner.id} style={styles.bannerContainer}>
-            <Image
-              source={banner.image}
-              style={styles.banner}
-              resizeMode="contain"
-            />
-          </View>
-        ))}
-      </ScrollView>
-      
+      <View style={styles.carouselWrapper}>
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={handleScroll}
+          decelerationRate="fast"
+          bounces={false}
+        >
+          {banners.map((banner) => (
+            <View key={banner.id} style={styles.slide}>
+              <View style={styles.bannerContainer}>
+                <Image source={banner.image} style={styles.banner} resizeMode="cover" />
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
       {/* Pagination Dots */}
       <View style={styles.pagination}>
         {banners.map((_, index) => (
-          <View 
-            key={index} 
+          <View
+            key={index}
             style={[
-              styles.dot, 
-              currentIndex === index && styles.activeDot
-            ]} 
+              styles.dot,
+              index === activeIndex && styles.activeDot,
+            ]}
           />
         ))}
       </View>
@@ -90,26 +75,31 @@ export default function BannerCarousel() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 0,
-    marginBottom: 12,
+    marginBottom: 24,
   },
-  scrollContent: {
+  carouselWrapper: {
+    overflow: 'hidden',
+  },
+  slide: {
+    width: width,
     paddingHorizontal: Colors.spacing,
   },
   bannerContainer: {
-    marginRight: 16,
-    borderRadius: Colors.radius,
+    width: width - (Colors.spacing * 2),
+    height: 120,
+    borderRadius: 20,
     overflow: 'hidden',
     ...Colors.shadows.medium,
   },
   banner: {
-    width: BANNER_WIDTH,
-    height: 140,
+    width: '100%',
+    height: '100%',
   },
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 12,
+    alignItems: 'center',
+    marginTop: 16,
     gap: 8,
   },
   dot: {
@@ -119,7 +109,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   activeDot: {
-    backgroundColor: Colors.primary,
     width: 24,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
   },
 });

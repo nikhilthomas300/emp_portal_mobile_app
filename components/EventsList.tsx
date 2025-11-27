@@ -1,4 +1,5 @@
 import Colors from '@/constants/Colors';
+import { Video } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -11,31 +12,35 @@ const meetings = [
 export default function EventsList() {
   return (
     <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Upcoming Meetings</Text>
+      
       <View style={styles.cardContainer}>
-        <Text style={styles.sectionTitle}>Upcoming Meetings</Text>
-        
-        <View style={styles.list}>
-          {meetings.map((meeting, index) => (
-            <View key={meeting.id} style={[styles.card, index !== meetings.length - 1 && styles.borderBottom]}>
-              {/* Date Badge */}
-              <View style={styles.dateBadge}>
-                <Text style={styles.dayText}>{meeting.day}</Text>
-                <Text style={styles.dateText}>{meeting.date}</Text>
-              </View>
-
-              {/* Info */}
-              <View style={styles.info}>
-                <Text style={styles.title} numberOfLines={2}>{meeting.title}</Text>
-                <Text style={styles.time}>{meeting.time}</Text>
-              </View>
-
-              {/* Join Button */}
-              <TouchableOpacity style={styles.joinButton}>
-                <Text style={styles.joinText}>Join</Text>
-              </TouchableOpacity>
+        {meetings.map((meeting, index) => (
+          <TouchableOpacity 
+            key={meeting.id} 
+            style={[
+              styles.card,
+              index !== meetings.length - 1 && styles.cardBorder
+            ]}
+          >
+            {/* Date Badge */}
+            <View style={styles.dateBadge}>
+              <Text style={styles.dayText}>{meeting.day}</Text>
+              <Text style={styles.dateText}>{meeting.date}</Text>
             </View>
-          ))}
-        </View>
+
+            {/* Info */}
+            <View style={styles.info}>
+              <Text style={styles.title} numberOfLines={2}>{meeting.title}</Text>
+              <Text style={styles.time}>{meeting.time}</Text>
+            </View>
+
+            {/* Join Button */}
+            <View style={styles.joinButton}>
+              <Video size={16} color="#FFF" strokeWidth={2.5} />
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
@@ -44,50 +49,48 @@ export default function EventsList() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Colors.spacing,
-    marginBottom: 40,
-  },
-  cardContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 24,
-    padding: 20,
-    ...Colors.shadows.small,
+    marginBottom: 100, // Extra space for floating tab bar
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: Colors.text,
     marginBottom: 16,
   },
-  list: {
-    // Removed background and shadow from list since it's now in cardContainer
+  cardContainer: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 20,
+    padding: 4,
+    ...Colors.shadows.medium,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    padding: 16,
   },
-  borderBottom: {
+  cardBorder: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
   dateBadge: {
     backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    paddingVertical: 8,
+    borderRadius: 14,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     alignItems: 'center',
     marginRight: 16,
-    minWidth: 56,
+    minWidth: 60,
   },
   dayText: {
     fontSize: 11,
     fontWeight: '700',
     color: Colors.primary,
-    marginBottom: 2,
+    marginBottom: 4,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   dateText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
     color: Colors.primary,
   },
@@ -99,22 +102,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 22,
   },
   time: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.secondaryText,
     fontWeight: '500',
   },
   joinButton: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
+    width: 40,
+    height: 40,
     borderRadius: 20,
-  },
-  joinText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '700',
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Colors.shadows.small,
   },
 });

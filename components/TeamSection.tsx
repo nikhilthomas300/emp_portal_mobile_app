@@ -1,14 +1,16 @@
 import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { CalendarOff, CheckCircle, Share2, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const widgets = [
-  { id: 1, title: 'Approvals', icon: CheckCircle, color: Colors.danger, link: '/approvals' },
-  { id: 2, title: 'Team', icon: Users, color: Colors.primary, link: null },
-  { id: 3, title: 'Leaves', icon: CalendarOff, color: Colors.accent, link: null },
-  { id: 4, title: 'Assets', icon: Share2, color: Colors.success, link: null },
+  { id: 1, title: 'My Approvals', icon: CheckCircle, color: Colors.danger, link: '/approvals' },
+  { id: 2, title: 'Team Attendance', icon: Users, color: Colors.primary, link: null },
+  { id: 3, title: 'Team Leaves', icon: CalendarOff, color: Colors.accent, link: null },
+  { id: 4, title: 'Team Shared Assets', icon: Share2, color: Colors.success, link: null },
+  {id :5, title: 'Team Letters', icon: CalendarOff, color: Colors.accent, link: null },
 ];
 
 export default function TeamSection() {
@@ -16,43 +18,46 @@ export default function TeamSection() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.cardContainer}>
-        <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>My Team</Text>
-          <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.seeAllBtn}>
-            <Text style={styles.seeAll}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.grid}>
-          {widgets.map((widget) => {
-            const CardContent = (
-              <>
-                <View style={[styles.iconBox, { backgroundColor: widget.color + '15' }]}>
-                  <widget.icon size={24} color={widget.color} />
-                </View>
-                <Text style={styles.title}>{widget.title}</Text>
-              </>
-            );
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionTitle}>My Team</Text>
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.seeAllBtn}>
+          <Text style={styles.seeAll}>See All</Text>
+        </TouchableOpacity>
+      </View>
+      
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {widgets.map((widget) => {
+          const CardContent = (
+            <>
+              <LinearGradient
+                colors={[widget.color + '20', widget.color + '08']}
+                style={styles.iconBox}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <widget.icon size={20} color={widget.color} strokeWidth={2.5} />
+              </LinearGradient>
+              <Text style={styles.title} numberOfLines={2}>{widget.title}</Text>
+            </>
+          );
 
-            if (widget.link) {
-              return (
-                <Link key={widget.id} href={widget.link as any} asChild>
-                  <TouchableOpacity style={styles.card}>
-                    {CardContent}
-                  </TouchableOpacity>
-                </Link>
-              );
-            }
-
-            return (
-              <TouchableOpacity key={widget.id} style={styles.card}>
+          return widget.link ? (
+            <Link key={widget.id} href={widget.link as any} asChild>
+              <TouchableOpacity style={styles.card}>
                 {CardContent}
               </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+            </Link>
+          ) : (
+            <TouchableOpacity key={widget.id} style={styles.card}>
+              {CardContent}
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
 
       {/* Modal */}
       <Modal
@@ -64,19 +69,24 @@ export default function TeamSection() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Team Widgets</Text>
+              <Text style={styles.modalTitle}>All Team Widgets</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <X size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
             <ScrollView contentContainerStyle={styles.modalGrid}>
               {widgets.map((widget) => (
-                <TouchableOpacity key={widget.id} style={styles.card}>
-                  <View style={[styles.iconBox, { backgroundColor: widget.color + '15' }]}>
-                    <widget.icon size={24} color={widget.color} />
-                  </View>
-                  <Text style={styles.title}>{widget.title}</Text>
-                </TouchableOpacity>
+            <TouchableOpacity key={widget.id} style={styles.modalCard}>
+              <LinearGradient
+                colors={[widget.color + '20', widget.color + '08']}
+                style={styles.modalIconBox}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <widget.icon size={20} color={widget.color} strokeWidth={2.5} />
+              </LinearGradient>
+              <Text style={styles.modalCardTitle}>{widget.title}</Text>
+            </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
@@ -88,66 +98,59 @@ export default function TeamSection() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Colors.spacing,
-  },
-  cardContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 24,
-    padding: 20,
-    ...Colors.shadows.small,
+    marginBottom: 24,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
+    paddingHorizontal: Colors.spacing,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: Colors.text,
   },
   seeAllBtn: {
     backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 14,
   },
   seeAll: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.primary,
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  scrollContent: {
+    paddingHorizontal: Colors.spacing,
     gap: 12,
   },
   card: {
-    width: '30%', // 3 columns
-    backgroundColor: '#F8F9FD',
+    width: 120,
+    backgroundColor: Colors.cardBackground,
     borderRadius: 16,
-    padding: 12,
+    padding: 14,
     alignItems: 'center',
-    justifyContent: 'center',
-    // ...Colors.shadows.small,
-    aspectRatio: 1,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    ...Colors.shadows.small,
+    borderWidth: 0.5,
+    borderColor: 'rgba(0,0,0,0.03)',
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   title: {
     fontSize: 12,
     fontWeight: '600',
     color: Colors.text,
     textAlign: 'center',
+    lineHeight: 16,
   },
   // Modal Styles
   modalOverlay: {
@@ -157,10 +160,10 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: Colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     padding: 24,
-    height: '60%',
+    height: '90%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -169,14 +172,39 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: Colors.text,
   },
   modalGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
+    gap: 12,
     paddingBottom: 40,
+  },
+  modalCard: {
+    width: '30.5%',
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 16,
+    padding: 14,
+    alignItems: 'center',
+    ...Colors.shadows.small,
+    borderWidth: 0.5,
+    borderColor: 'rgba(0,0,0,0.03)',
+  },
+  modalIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalCardTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });

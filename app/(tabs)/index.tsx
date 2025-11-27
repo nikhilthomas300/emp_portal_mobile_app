@@ -12,6 +12,7 @@ import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { Search } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -66,25 +67,48 @@ export default function HomeScreen() {
             <Text style={{ color: Colors.primary, fontWeight: '600' }}>Refreshing...</Text>
           </View>
         )}
-        <View style={{ height: Colors.spacing }} />
         
-        {/* Search Bar */}
-        <TouchableOpacity 
-          style={styles.searchBar}
-          activeOpacity={0.8}
-          onPress={() => setSearchVisible(true)}
-        >
-          <Search size={20} color={Colors.secondaryText} />
-          <Text style={styles.searchPlaceholder}>Search Widgets...</Text>
-        </TouchableOpacity>
+        <Animated.View entering={FadeInDown.delay(100).duration(500).springify()}>
+          {/* Search Bar */}
+          <TouchableOpacity 
+            style={styles.searchBar}
+            activeOpacity={0.8}
+            onPress={() => setSearchVisible(true)}
+          >
+            <Search size={20} color={Colors.secondaryText} />
+            <Text style={styles.searchPlaceholder}>Search Widgets...</Text>
+          </TouchableOpacity>
+        </Animated.View>
         
-        <BannerCarousel />
-        <UpcomingSchedule />
-        <QuickActions />
-        <MeSection />
-        <TeamSection />
-        <LeaveBalanceSection />
-        <EventsList />
+        <Animated.View entering={FadeInDown.delay(200).duration(500).springify()}>
+          <BannerCarousel />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(300).duration(500).springify()}>
+          <QuickActions />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(400).duration(500).springify()}>
+          <UpcomingSchedule />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(500).duration(500).springify()}>
+          <MeSection />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(600).duration(500).springify()}>
+          <TeamSection />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(700).duration(500).springify()}>
+          <LeaveBalanceSection />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(800).duration(500).springify()}>
+          <EventsList />
+        </Animated.View>
+        
+        <View style={{ height: 100 }} />
       </ScrollView>
       
       <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
@@ -93,16 +117,13 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: Colors.background,
-  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingBottom: 20,
-    gap: Colors.spacing,
+    gap: 0, // Removed gap to let components handle their own spacing
   },
   searchBar: {
     flexDirection: 'row',
@@ -110,10 +131,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     marginHorizontal: Colors.spacing,
     marginTop: 0,
-    marginBottom: 12,
+    marginBottom: 20,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 14,
+    paddingVertical: 14,
+    borderRadius: 16,
     gap: 12,
     ...Colors.shadows.small,
   },

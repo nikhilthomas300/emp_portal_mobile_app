@@ -1,75 +1,106 @@
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { Briefcase, FileText, Home } from 'lucide-react-native';
+import { Briefcase, FileText, Home, MoreHorizontal } from 'lucide-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const actions = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, color: Colors.accent, link: '/apply-leave' },
   { id: 2, title: 'WFH', icon: Home, color: Colors.primary, link: '/apply-wfh' },
   { id: 3, title: 'My Letters', icon: FileText, color: Colors.warning, link: '/(tabs)/index' },
+  { id: 4, title: 'More', icon: MoreHorizontal, color: Colors.secondary, link: '/(tabs)/index' },
 ];
 
 export default function QuickActions() {
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <View style={styles.headerRow}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
-
-        <View style={styles.row}>
-          {actions.map((action) => (
-            <Link key={action.id} href={action.link as any} asChild>
-              <TouchableOpacity style={styles.actionItem}>
-                <View style={styles.iconContainer}>
-                  <action.icon size={24} color={action.color} />
-                </View>
-                <Text style={styles.actionText}>{action.title}</Text>
-              </TouchableOpacity>
-            </Link>
-          ))}
-        </View>
       </View>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {actions.map((action) => (
+          <Link key={action.id} href={action.link as any} asChild>
+            <TouchableOpacity style={styles.chip}>
+              <View style={[styles.iconBox, { backgroundColor: action.color + '15' }]}>
+                <action.icon size={20} color={action.color} />
+              </View>
+              <Text style={styles.chipText}>{action.title}</Text>
+            </TouchableOpacity>
+          </Link>
+        ))}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Colors.spacing,
+    marginBottom: 24,
   },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 24,
-    padding: 20,
-    ...Colors.shadows.small,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 16,
-  },
-  row: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: Colors.spacing,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  seeAllBtn: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 14,
+  },
+  seeAll: {
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingHorizontal: Colors.spacing,
+    gap: 12,
+    paddingBottom: 5
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.cardBackground,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 30,
+    gap: 10,
+    ...Colors.shadows.small,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   actionItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 16,
     alignItems: 'center',
-    width: '30%',
+    marginBottom: 4,
+    ...Colors.shadows.small,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+  iconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    backgroundColor: '#F8F9FD',
   },
-  actionText: {
-    fontSize: 12,
+  chipText: {
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.text,
-    textAlign: 'center',
   },
 });

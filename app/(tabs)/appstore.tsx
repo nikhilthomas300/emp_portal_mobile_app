@@ -1,4 +1,5 @@
 import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { BarChart, Bell, Briefcase, Calendar, Clock, DollarSign, FileText, Grid, Home, MessageSquare, Search, Settings, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -13,23 +14,24 @@ type Widget = {
 
 const widgetsByCategory: Record<string, Widget[]> = {
   'HR & Leave': [
-    { id: 1, title: 'Apply Leave', icon: Briefcase, color: '#EC4899' },
-    { id: 2, title: 'WFH Request', icon: Home, color: '#4E5FBF' },
-    { id: 6, title: 'Timesheet', icon: Clock, color: '#8B5CF6' },
+    { id: 1, title: 'Self Service Portal', icon: Briefcase, color: '#EC4899' },
+    { id: 2, title: 'Human Capital Management (HCM)', icon: Home, color: '#4E5FBF' },
+    { id: 3, title: 'Timesheet Management System', icon: Clock, color: '#8B5CF6' },
+    {id: 4, title: 'Accolade', icon: Clock, color: '#8B5CF6' },
   ],
-  'Communication': [
-    { id: 4, title: 'Calendar', icon: Calendar, color: '#10B981' },
-    { id: 5, title: 'Team Directory', icon: Users, color: '#A78BFA' },
-    { id: 10, title: 'Chat', icon: MessageSquare, color: '#3B82F6' },
-    { id: 11, title: 'Notifications', icon: Bell, color: '#F59E0B' },
+  'Learning': [
+    { id: 5, title: 'Flex', icon: Calendar, color: '#10B981' },
+    { id: 6, title: 'Knowledge Hub', icon: Users, color: '#A78BFA' },
+    { id: 7, title: 'TalentNxt', icon: MessageSquare, color: '#3B82F6' },
+    { id: 8, title: 'CLAP', icon: Bell, color: '#F59E0B' },
   ],
-  'Documents & Finance': [
-    { id: 3, title: 'My Letters', icon: FileText, color: '#F59E0B' },
-    { id: 7, title: 'Expenses', icon: DollarSign, color: '#10B981' },
+  'Collaboration': [
+    { id: 9, title: 'Engage', icon: FileText, color: '#F59E0B' },
+    { id: 10, title: 'HR-Survey', icon: DollarSign, color: '#10B981' },
   ],
-  'Analytics': [
-    { id: 8, title: 'Reports', icon: BarChart, color: '#F59E0B' },
-    { id: 9, title: 'Settings', icon: Settings, color: '#6B7280' },
+  'Payroll': [
+    { id: 11, title: 'E-Payroll-India', icon: BarChart, color: '#F59E0B' },
+    { id: 12, title: 'Payroll', icon: Settings, color: '#6B7280' },
   ],
 };
 
@@ -54,18 +56,28 @@ export default function AppStoreScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
+        {/* Header with Gradient */}
+        <LinearGradient
+          colors={[Colors.primary, Colors.secondary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <View style={styles.titleSection}>
             <View style={styles.iconContainer}>
-              <Grid size={20} color="#FFF" />
+              <Grid size={24} color="#FFF" strokeWidth={2.5} />
             </View>
-            <Text style={styles.title}>App Store</Text>
+            <View>
+              <Text style={styles.titleLabel}>Discover</Text>
+              <Text style={styles.title}>App Store</Text>
+            </View>
           </View>
-          
-          {/* Search Bar */}
+        </LinearGradient>
+
+        {/* Search Bar - Outside gradient */}
+        <View style={styles.searchWrapper}>
           <View style={styles.searchContainer}>
-            <Search size={18} color={Colors.secondaryText} />
+            <Search size={20} color={Colors.secondaryText} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search apps..."
@@ -164,39 +176,51 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
     paddingHorizontal: Colors.spacing,
-    paddingTop: 12,
-    paddingBottom: 12,
-    gap: 12,
-    ...Colors.shadows.medium,
+    paddingTop: 20,
+    paddingBottom: 24,
   },
   titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 14,
+    marginBottom: 20,
   },
   iconContainer: {
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  titleLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 2,
+  },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
     color: '#FFF',
+    letterSpacing: 0.5,
+  },
+  searchWrapper: {
+    paddingHorizontal: Colors.spacing,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: Colors.background,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: 12,
+    ...Colors.shadows.small,
   },
   searchInput: {
     flex: 1,

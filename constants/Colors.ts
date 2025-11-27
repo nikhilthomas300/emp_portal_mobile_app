@@ -2,53 +2,53 @@ const tintColorLight = '#4E5FBF'; // Indigo
 const tintColorDark = '#fff';
 
 export default {
-  primary: '#4E5FBF', // Indigo
-  primaryLight: '#EEF2FF', // Very Light Indigo
-  secondary: '#A78BFA', // Light Purple accent
-  accent: '#EC4899', // Pink accent
-  success: '#10B981',
-  warning: '#F59E0B',
-  danger: '#EF4444',
-  text: '#1F2937', // Dark Grey/Black
-  secondaryText: '#6B7280', // Grey
-  background: '#F3F4F9', // Soft Lavender/Grey Background
-  cardBackground: '#FFFFFF', // White for cards
-  border: '#E5E7EB',
+  primary: '#4338ca', // Deep Indigo
+  primaryLight: '#e0e7ff', // Very Light Indigo
+  secondary: '#6366f1', // Indigo
+  accent: '#f472b6', // Pink
+  success: '#10b981', // Emerald
+  warning: '#f59e0b', // Amber
+  danger: '#ef4444', // Red
+  text: '#111827', // Gray 900
+  secondaryText: '#6b7280', // Gray 500
+  background: '#f3f4f6', // Gray 100
+  cardBackground: '#ffffff',
+  border: '#e5e7eb', // Gray 200
   tint: tintColorLight,
-  tabIconDefault: '#9CA3AF',
-  tabIconSelected: tintColorLight,
-  spacing: 24, // Increased spacing
-  radius: 24, // Increased radius
+  tabIconDefault: '#9ca3af', // Gray 400
+  tabIconSelected: '#4338ca', // Deep Indigo
+  spacing: 20,
+  radius: 20,
   shadows: {
     small: {
-      shadowColor: '#4E5FBF',
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 1,
       },
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
       elevation: 2,
     },
     medium: {
-      shadowColor: '#4E5FBF',
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 4,
       },
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOpacity: 0.05,
+      shadowRadius: 6,
+      elevation: 4,
     },
     large: {
-      shadowColor: '#4E5FBF',
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 8,
+        height: 10,
       },
       shadowOpacity: 0.1,
-      shadowRadius: 16,
-      elevation: 5,
+      shadowRadius: 15,
+      elevation: 10,
     },
   },
 };

@@ -1,69 +1,55 @@
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { Bell, QrCode } from 'lucide-react-native';
+import { AlignLeft, Bell } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import QRCodeModal from './QRCodeModal';
-import SearchModal from './SearchModal';
+import Drawer from './Drawer';
 
 export default function Header() {
   const insets = useSafeAreaInsets();
-  const [qrVisible, setQrVisible] = useState(false);
-  const [searchVisible, setSearchVisible] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   return (
-    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
-      <View style={styles.container}>
-        <View style={styles.row}>
-          {/* Left: Avatar & Name */}
-          <Link href="/profile" asChild>
-            <TouchableOpacity style={styles.leftSection}>
-              <View style={styles.avatarContainer}>
-                <Text style={styles.avatarText}>PV</Text>
-              </View>
-              <View style={styles.greetingContainer}>
-                <Text style={styles.greeting}>Hello, Good Afternoon</Text>
-                <Text style={styles.name}>Pavan !</Text>
-              </View>
+    <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
+      <View style={styles.headerContent}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity style={styles.menuButton} onPress={() => setDrawerVisible(true)}>
+            <AlignLeft size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.greeting}>Good Morning,</Text>
+            <Text style={styles.name}>Nikhil Thomas</Text>
+          </View>
+        </View>
+
+        <View style={styles.rightSection}>
+          <Link href="/approvals" asChild>
+            <TouchableOpacity style={styles.iconButton}>
+              <Bell size={24} color={Colors.text} />
+              <View style={styles.badge} />
             </TouchableOpacity>
           </Link>
-
-          {/* Right: Actions */}
-          <View style={styles.rightSection}>
-            <TouchableOpacity 
-              style={styles.iconButton}
-              onPress={() => setQrVisible(true)}
-            >
-              <QrCode size={22} color={Colors.text} />
+          <Link href="/profile" asChild>
+            <TouchableOpacity style={styles.avatarContainer}>
+              <Text style={styles.avatarText}>NT</Text>
             </TouchableOpacity>
-            
-            <Link href="/approvals" asChild>
-              <TouchableOpacity style={styles.iconButton}>
-                <Bell size={22} color={Colors.text} />
-                <View style={styles.badge} />
-              </TouchableOpacity>
-            </Link>
-          </View>
+          </Link>
         </View>
       </View>
 
-      <QRCodeModal visible={qrVisible} onClose={() => setQrVisible(false)} />
-      <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
+      <Drawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: 'transparent',
-  },
   container: {
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.background,
     paddingHorizontal: Colors.spacing,
-    paddingVertical: 12,
+    paddingBottom: 20,
   },
-  row: {
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -71,54 +57,59 @@ const styles = StyleSheet.create({
   leftSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
-  avatarContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-  greetingContainer: {
-    justifyContent: 'center',
+  menuButton: {
+    padding: 8,
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 12,
+    ...Colors.shadows.small,
   },
   greeting: {
     fontSize: 14,
     color: Colors.secondaryText,
-    marginBottom: 2,
+    fontWeight: '500',
   },
   name: {
     fontSize: 18,
-    fontWeight: '700',
     color: Colors.text,
+    fontWeight: '700',
   },
   rightSection: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   iconButton: {
-    width: 44,
-    height: 44,
-    backgroundColor: '#FFF',
+    padding: 8,
+    backgroundColor: Colors.cardBackground,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'relative',
     ...Colors.shadows.small,
   },
   badge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 8,
+    right: 8,
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: Colors.danger,
+    borderWidth: 1,
+    borderColor: Colors.cardBackground,
+  },
+  avatarContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Colors.shadows.small,
+  },
+  avatarText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

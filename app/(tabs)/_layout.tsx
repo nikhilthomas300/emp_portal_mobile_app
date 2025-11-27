@@ -10,21 +10,26 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         // @ts-ignore
-        unmountOnBlur: true, // Reset tab state on switch (scrolls to top)
+        unmountOnBlur: true,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 0,
-          height: Platform.OS === 'ios' ? 70 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-          paddingTop: 8,
-          ...Colors.shadows.medium,
+          height: Platform.OS === 'ios' ? 80 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+          paddingTop: 12,
+          position: 'absolute',
+          bottom: 20,
+          left: 20,
+          right: 20,
+          borderRadius: 30,
+          ...Colors.shadows.large,
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.tabIconDefault,
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
-          marginTop: 2,
+          marginTop: 4,
         },
       }}
     >
