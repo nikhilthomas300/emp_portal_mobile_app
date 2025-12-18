@@ -16,7 +16,7 @@ export default function PageHeader({ title }: PageHeaderProps) {
   return (
     <View style={styles.container}>
       <View
-        style={[styles.headerWrapper, { paddingTop: insets.top + 12 }]}
+        style={[styles.headerWrapper, { paddingTop: insets.top }]}
       >
         <View style={styles.headerContent}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -37,15 +37,16 @@ const styles = StyleSheet.create({
   },
   headerWrapper: {
     backgroundColor: '#FFF',
-    paddingHorizontal: Colors.spacing,
-    paddingBottom: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 12, // Reduced from 20
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: '#F3F4F6', // Lighter border
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: 44, // Explicit height for standard header feel
   },
   backButton: {
     width: 40,
@@ -54,9 +55,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
+    fontSize: 17, // Standard Header size
+    fontWeight: '600',
+    color: '#111827',
   },
 });
 

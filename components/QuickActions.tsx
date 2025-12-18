@@ -1,17 +1,27 @@
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { Briefcase, FileText, Home, MoreHorizontal } from 'lucide-react-native';
-import React from 'react';
+import { Briefcase, FileText, Home, MoreHorizontal, QrCode } from 'lucide-react-native';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import QRCodeModal from './QRCodeModal';
 
 const actions = [
+  { id: 0, title: 'Digital Identity', icon: QrCode, color: Colors.primary, action: 'qr' },
   { id: 1, title: 'Apply Leave', icon: Briefcase, color: Colors.accent, link: '/apply-leave' },
-  { id: 2, title: 'WFH', icon: Home, color: Colors.primary, link: '/apply-wfh' },
+  { id: 2, title: 'Apply WFH', icon: Home, color: Colors.primary, link: '/apply-wfh' },
   { id: 3, title: 'My Letters', icon: FileText, color: Colors.warning, link: '/(tabs)/index' },
   { id: 4, title: 'More', icon: MoreHorizontal, color: Colors.secondary, link: '/(tabs)/index' },
 ];
 
 export default function QuickActions() {
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+
+  const handleActionPress = (action: any) => {
+    if (action.action === 'qr') {
+      setQrModalVisible(true);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -23,16 +33,31 @@ export default function QuickActions() {
         contentContainerStyle={styles.scrollContent}
       >
         {actions.map((action) => (
-          <Link key={action.id} href={action.link as any} asChild>
-            <TouchableOpacity style={styles.chip}>
+          action.link ? (
+            <Link key={action.id} href={action.link as any} asChild>
+              <TouchableOpacity style={styles.chip}>
+                <View style={[styles.iconBox, { backgroundColor: action.color + '15' }]}>
+                  <action.icon size={20} color={action.color} />
+                </View>
+                <Text style={styles.chipText}>{action.title}</Text>
+              </TouchableOpacity>
+            </Link>
+          ) : (
+            <TouchableOpacity 
+              key={action.id} 
+              style={styles.chip}
+              onPress={() => handleActionPress(action)}
+            >
               <View style={[styles.iconBox, { backgroundColor: action.color + '15' }]}>
                 <action.icon size={20} color={action.color} />
               </View>
               <Text style={styles.chipText}>{action.title}</Text>
             </TouchableOpacity>
-          </Link>
+          )
         ))}
       </ScrollView>
+
+      <QRCodeModal visible={qrModalVisible} onClose={() => setQrModalVisible(false)} />
     </View>
   );
 }

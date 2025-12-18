@@ -1,174 +1,321 @@
 import PageHeader from '@/components/PageHeader';
 import Colors from '@/constants/Colors';
 import { Stack } from 'expo-router';
-import { Check, X } from 'lucide-react-native';
+import { Calendar, Search } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const TABS = ['WFH', 'Leave'];
+const CATEGORIES = ['All', 'Leave', 'WFH', 'Expense', 'Shift', 'Overtime'];
 
-const MOCK_DATA = {
-  'WFH': [
+// Helper to get initials
+const getInitials = (name: string) => {
+  const names = name.split(' ');
+  if (names.length >= 2) {
+    return `${names[0][0]}${names[1][0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+};
+
+const MOCK_DATA = [
     { 
       id: '1', 
+      category: 'WFH',
       name: 'John Doe', 
-      startDate: 'Jan 15, 2025',
-      endDate: 'Jan 17, 2025',
-      wfhType: 'Full Day',
-      comments: 'Need to work from home due to personal reasons',
-      date: 'Today'
+      role: 'Senior Developer',
+      startDate: 'Jan 15',
+      endDate: 'Jan 17',
+      duration: '3 Days',
+      type: 'Full Day',
+      reason: 'Personal work at home. Will be available on Slack.',
+      appliedDate: 'Today',
+      amount: null
     },
     { 
       id: '2', 
+      category: 'WFH',
       name: 'Jane Smith', 
-      startDate: 'Jan 20, 2025',
-      endDate: 'Jan 20, 2025',
-      wfhType: 'Half Day',
-      comments: 'Medical appointment in the morning',
-      date: 'Yesterday'
+      role: 'Product Designer',
+      startDate: 'Jan 20',
+      endDate: 'Jan 20',
+      duration: '1 Day',
+      type: 'Half Day',
+      reason: 'Medical appointment.',
+      appliedDate: 'Yesterday',
+      amount: null
     },
-  ],
-  'Leave': [
     { 
       id: '3', 
+      category: 'Leave',
       name: 'Mike Ross', 
-      startDate: 'Jan 22, 2025',
-      endDate: 'Jan 24, 2025',
-      reason: 'Sick leave - Fever and cold',
-      date: 'Today'
+      role: 'Legal Advisor',
+      startDate: 'Jan 22',
+      endDate: 'Jan 24',
+      duration: '3 Days',
+      type: 'Sick Leave',
+      reason: 'Suffering from high fever and cold.',
+      appliedDate: 'Today',
+      amount: null
     },
     { 
       id: '4', 
+      category: 'Leave',
       name: 'Rachel Green', 
-      startDate: 'Feb 1, 2025',
-      endDate: 'Feb 5, 2025',
-      reason: 'Vacation - Family trip',
-      date: '2 days ago'
+      role: 'Marketing Head',
+      startDate: 'Feb 01',
+      endDate: 'Feb 05',
+      duration: '5 Days',
+      type: 'Earned Leave',
+      reason: 'Annual family vacation trip.',
+      appliedDate: '2d ago',
+      amount: null
     },
-  ],
-};
+    { 
+        id: '5', 
+        category: 'Expense',
+        name: 'Robert Fox', 
+        role: 'DevOps Engineer',
+        startDate: 'Jan 10',
+        endDate: 'Jan 10',
+        duration: null,
+        type: 'Travel Reimbursement',
+        reason: 'Client meeting travel expenses (Cab + Meals).',
+        appliedDate: '3d ago',
+        amount: '$45.00'
+    },
+];
 
 export default function ApprovalsScreen() {
-  const [activeTab, setActiveTab] = useState<'WFH' | 'Leave'>('WFH');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [actionType, setActionType] = useState<'Approve' | 'Reject' | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
-  const renderWFHItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-        </View>
-        <View style={styles.headerInfo}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.date}>{item.date}</Text>
-        </View>
-      </View>
-      
-      <View style={styles.detailsSection}>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>Start Date:</Text>
-          <Text style={styles.value}>{item.startDate}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>End Date:</Text>
-          <Text style={styles.value}>{item.endDate}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>Type:</Text>
-          <Text style={styles.value}>{item.wfhType}</Text>
-        </View>
-        {item.comments && (
-          <View style={[styles.detailRow, { flexDirection: 'column', alignItems: 'flex-start' }]}>
-            <Text style={styles.label}>Comments:</Text>
-            <Text style={[styles.value, { marginTop: 4 }]}>{item.comments}</Text>
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.actions}>
-        <TouchableOpacity style={[styles.actionBtn, styles.rejectBtn]}>
-          <X size={20} color={Colors.danger} />
-          <Text style={[styles.btnText, { color: Colors.danger }]}>Reject</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, styles.approveBtn]}>
-          <Check size={20} color="#FFF" />
-          <Text style={[styles.btnText, { color: '#FFF' }]}>Approve</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  const initiateAction = (item: any, type: 'Approve' | 'Reject') => {
+    setSelectedItem(item);
+    setActionType(type);
+    setRejectReason(''); 
+    setModalVisible(true);
+  };
 
-  const renderLeaveItem = ({ item }: { item: any }) => (
+  const handleConfirm = () => {
+    if (actionType === 'Reject' && !rejectReason.trim()) {
+      Alert.alert('Error', 'Please enter a reason for rejection.');
+      return;
+    }
+    setModalVisible(false);
+    setTimeout(() => {
+        Alert.alert('Success', `Request ${actionType === 'Approve' ? 'Approved' : 'Rejected'}`);
+    }, 400);
+  };
+
+  const getFilteredData = () => {
+    let data = MOCK_DATA;
+    if (activeCategory !== 'All') {
+        data = data.filter(item => item.category === activeCategory);
+    }
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        data = data.filter(item => 
+          item.name.toLowerCase().includes(query) ||
+          item.reason.toLowerCase().includes(query)
+        );
+    }
+    return data;
+  };
+
+  const renderCard = ({ item }: { item: any }) => (
     <View style={styles.card}>
+      
+      {/* 1. Header with Initials Avatar */}
       <View style={styles.cardHeader}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-        </View>
-        <View style={styles.headerInfo}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.date}>{item.date}</Text>
-        </View>
+         <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>{getInitials(item.name)}</Text>
+         </View>
+         <View style={styles.headerMeta}>
+             <View style={styles.rowBetween}>
+                <Text style={styles.userName}>{item.name}</Text>
+                <Text style={styles.dateLabel}>{item.appliedDate}</Text>
+             </View>
+             <Text style={styles.userRole}>{item.role}</Text>
+         </View>
       </View>
-      
-      <View style={styles.detailsSection}>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>Start Date:</Text>
-          <Text style={styles.value}>{item.startDate}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>End Date:</Text>
-          <Text style={styles.value}>{item.endDate}</Text>
-        </View>
-        {item.reason && (
-          <View style={[styles.detailRow, { flexDirection: 'column', alignItems: 'flex-start' }]}>
-            <Text style={styles.label}>Reason:</Text>
-            <Text style={[styles.value, { marginTop: 4 }]}>{item.reason}</Text>
-          </View>
-        )}
+
+      <View style={styles.divider} />
+
+      {/* 2. Structured Details */}
+      <View style={styles.detailsContainer}>
+         <View style={styles.detailRow}>
+            <View style={styles.labelCol}>
+                <Text style={styles.label}>Category</Text>
+            </View>
+            <View style={styles.valCol}>
+                <View style={styles.pill}>
+                    <Text style={styles.pillText}>{item.category} • {item.type}</Text>
+                </View>
+            </View>
+         </View>
+
+         <View style={styles.detailRow}>
+            <View style={styles.labelCol}>
+                <Text style={styles.label}>Date</Text>
+            </View>
+            <View style={styles.valCol}>
+                <View style={styles.dateValRow}>
+                    <Calendar size={13} color="#4B5563" style={{ marginRight: 5 }} />
+                    <Text style={styles.valText}>{item.startDate} - {item.endDate}</Text>
+                    {item.duration && (
+                         <Text style={styles.subText}> ({item.duration})</Text>
+                    )}
+                </View>
+            </View>
+         </View>
+
+         {item.amount && (
+            <View style={styles.detailRow}>
+                <View style={styles.labelCol}>
+                    <Text style={styles.label}>Amount</Text>
+                </View>
+                <View style={styles.valCol}>
+                    <Text style={styles.amountText}>{item.amount}</Text>
+                </View>
+            </View>
+         )}
+
+         {/* Reason Section */}
+         <View style={styles.reasonBox}>
+            <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
+         </View>
       </View>
-      
-      <View style={styles.actions}>
-        <TouchableOpacity style={[styles.actionBtn, styles.rejectBtn]}>
-          <X size={20} color={Colors.danger} />
-          <Text style={[styles.btnText, { color: Colors.danger }]}>Reject</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, styles.approveBtn]}>
-          <Check size={20} color="#FFF" />
-          <Text style={[styles.btnText, { color: '#FFF' }]}>Approve</Text>
-        </TouchableOpacity>
+
+      {/* 3. Footer Actions */}
+      <View style={styles.footer}>
+         <TouchableOpacity 
+            style={[styles.btn, styles.rejectBtn]}
+            onPress={() => initiateAction(item, 'Reject')}
+         >
+            <Text style={styles.rejectBtnText}>Reject</Text>
+         </TouchableOpacity>
+         
+         <TouchableOpacity 
+            style={[styles.btn, styles.approveBtn]}
+            onPress={() => initiateAction(item, 'Approve')}
+         >
+            <Text style={styles.approveBtnText}>Approve</Text>
+         </TouchableOpacity>
       </View>
+
     </View>
   );
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <PageHeader title="My Approvals" />
+      <PageHeader title="Approvals" />
       
-      {/* Tabs */}
-      <View style={styles.tabContainer}>
-        {TABS.map((tab) => (
-          <TouchableOpacity 
-            key={tab} 
-            style={[styles.tab, activeTab === tab && styles.activeTab]}
-            onPress={() => setActiveTab(tab as 'WFH' | 'Leave')}
-          >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Top Controls */}
+      <View style={styles.controlsSection}>
+         {/* Search */}
+         <View style={styles.searchBar}>
+            <Search size={18} color="#9CA3AF" />
+            <TextInput 
+                style={styles.searchInput}
+                placeholder="Search..."
+                placeholderTextColor="#9CA3AF"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+            />
+         </View>
+
+         {/* Category Tabs */}
+         <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsScroll}
+         >
+            {CATEGORIES.map(cat => {
+                const isActive = activeCategory === cat;
+                return (
+                    <TouchableOpacity 
+                        key={cat}
+                        style={[styles.tabItem, isActive && styles.activeTabItem]}
+                        onPress={() => setActiveCategory(cat)}
+                    >
+                        <Text style={[styles.tabText, isActive && styles.activeTabText]}>{cat}</Text>
+                    </TouchableOpacity>
+                );
+            })}
+         </ScrollView>
       </View>
 
-      {/* List */}
-      <FlatList
-        data={MOCK_DATA[activeTab]}
-        renderItem={activeTab === 'WFH' ? renderWFHItem : renderLeaveItem}
-        keyExtractor={(item) => item.id}
+      <FlatList 
+        data={getFilteredData()}
+        renderItem={renderCard}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No pending approvals</Text>
-          </View>
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No items to show</Text>
+            </View>
         }
       />
+
+       {/* Modal */}
+       <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.modalOverlay}
+        >
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>
+                {actionType === 'Approve' ? 'Confirm Approval' : 'Reject Request'}
+            </Text>
+            <Text style={styles.modalMsg}>
+                {actionType === 'Approve' 
+                 ? `Are you sure you want to approve this request for ${selectedItem?.name}?` 
+                 : `Please provide a reason to reject ${selectedItem?.name}.`}
+            </Text>
+
+            {actionType === 'Reject' && (
+                <TextInput 
+                    style={styles.reasonInput}
+                    placeholder="Reason..."
+                    value={rejectReason}
+                    onChangeText={setRejectReason}
+                    multiline
+                />
+            )}
+
+            <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setModalVisible(false)}>
+                    <Text style={styles.modalBtnCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[
+                        styles.modalBtnConfirm, 
+                        // Dynamically set background color based on action
+                        actionType === 'Reject' ? { backgroundColor: Colors.danger } : { backgroundColor: Colors.success }
+                    ]} 
+                    onPress={handleConfirm}
+                >
+                    <Text style={styles.modalBtnConfirmText}>
+                        {actionType === 'Approve' ? 'Confirm' : 'Reject'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
     </View>
   );
 }
@@ -176,136 +323,291 @@ export default function ApprovalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F3F4F6', // Neutral light gray background
   },
-  tabContainer: {
-    flexDirection: 'row',
+  controlsSection: {
     backgroundColor: '#FFF',
-    paddingHorizontal: Colors.spacing,
-    paddingVertical: 10,
-    gap: 10,
-    ...Colors.shadows.small,
+    paddingTop: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  tab: {
-    paddingVertical: 8,
-    paddingHorizontal: 18,
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    marginHorizontal: 16,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#111827',
+  },
+  tabsScroll: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    gap: 8,
+  },
+  tabItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  activeTab: {
+  activeTabItem: {
     backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.secondaryText,
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#6B7280',
   },
   activeTabText: {
     color: '#FFF',
+    fontWeight: '600',
   },
   listContent: {
-    padding: Colors.spacing,
+    padding: 16,
+    paddingBottom: 40,
   },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
-    ...Colors.shadows.small,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: Colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  avatarText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  headerInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  name: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  date: {
-    fontSize: 11,
-    color: Colors.secondaryText,
-    fontWeight: '500',
-  },
-  detailsSection: {
-    marginBottom: 12,
-    gap: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.secondaryText,
-  },
-  value: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: Colors.text,
-    flex: 1,
-    textAlign: 'right',
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 10,
-    gap: 6,
-  },
-  rejectBtn: {
-    backgroundColor: '#FFF',
-    borderWidth: 1.5,
-    borderColor: Colors.danger,
-  },
-  approveBtn: {
-    backgroundColor: Colors.success,
-  },
-  btnText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  emptyState: {
-    padding: 40,
+  emptyContainer: {
+    marginTop: 60,
     alignItems: 'center',
   },
   emptyText: {
-    color: Colors.secondaryText,
-    fontSize: 16,
+    color: '#9CA3AF',
+    fontSize: 15,
+  },
+
+  /* Enterprise Card */
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    ...Colors.shadows?.small,
+  },
+  
+  /* Header */
+  cardHeader: {
+    flexDirection: 'row',
+    padding: 14,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginRight: 12,
+  },
+  avatarText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4B5563',
+  },
+  headerMeta: {
+    flex: 1,
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  userName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  userRole: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F3F4F6',
+    marginHorizontal: 14,
+  },
+
+  /* Details Body */
+  detailsContainer: {
+    padding: 14,
+    gap: 10,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  labelCol: {
+    width: 65,
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  valCol: {
+    flex: 1,
+  },
+  pill: {
+    backgroundColor: '#F9FAFB',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  pillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4B5563',
+  },
+  dateValRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  valText: {
+    fontSize: 13,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  subText: {
+    fontSize: 13,
+    color: '#6B7280',
+  }, 
+  amountText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  reasonBox: {
+    marginTop: 4,
+    backgroundColor: '#F9FAFB',
+    padding: 10,
+    borderRadius: 8,
+  },
+  reasonText: {
+    fontSize: 13,
+    color: '#4B5563',
+    lineHeight: 18,
+  },
+
+  /* Footer */
+  footer: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    padding: 12,
+    gap: 12,
+  },
+  btn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rejectBtn: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: Colors.danger, // Red Border
+  },
+  approveBtn: {
+    backgroundColor: Colors.success, // Green Background
+  },
+  rejectBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.danger, // Red Text
+  },
+  approveBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFF', // White Text
+  },
+
+  /* Modal */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 24,
+    ...Colors.shadows?.medium,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalMsg: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  reasonInput: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    padding: 12,
+    height: 80,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalBtnCancel: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalBtnConfirm: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: Colors.success, // Default Confirm is Green
+  },
+  modalBtnConfirmText: {
+    color: '#FFF',
+    fontWeight: '600',
+  },
+  modalBtnCancelText: {
+    color: '#4B5563',
+    fontWeight: '600',
   },
 });
