@@ -1,308 +1,230 @@
 import Colors from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BarChart, Bell, Briefcase, Calendar, Clock, DollarSign, FileText, Grid, Home, MessageSquare, Search, Settings, Users } from 'lucide-react-native';
+// Force reload
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
+import {
+  BarChart,
+  BookOpen,
+  Box,
+  Briefcase,
+  CheckCircle,
+  Cloud,
+  Code,
+  Database,
+  FileText,
+  Globe,
+  HardDrive,
+  Layout,
+  Link,
+  Mail,
+  MessageCircle,
+  Monitor,
+  Plane,
+  Search,
+  Server,
+  Shield,
+  ShieldCheck,
+  Terminal,
+  TrendingUp,
+  Users,
+  Video
+} from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type Widget = {
-  id: number;
-  title: string;
-  icon: any;
-  color: string;
-};
+const { width } = Dimensions.get('window');
+// 3 Columns Layout
+const GAP = 12;
+const SIDE_PADDING = 20;
+const CARD_WIDTH = (width - (SIDE_PADDING * 2) - (GAP * 2)) / 3;
 
-const widgetsByCategory: Record<string, Widget[]> = {
-  'HR & Leave': [
-    { id: 1, title: 'Self Service Portal', icon: Briefcase, color: '#EC4899' },
-    { id: 2, title: 'Human Capital Management (HCM)', icon: Home, color: '#4E5FBF' },
-    { id: 3, title: 'Timesheet Management System', icon: Clock, color: '#8B5CF6' },
-    {id: 4, title: 'Accolade', icon: Clock, color: '#8B5CF6' },
-  ],
-  'Learning': [
-    { id: 5, title: 'Flex', icon: Calendar, color: '#10B981' },
-    { id: 6, title: 'Knowledge Hub', icon: Users, color: '#A78BFA' },
-    { id: 7, title: 'TalentNxt', icon: MessageSquare, color: '#3B82F6' },
-    { id: 8, title: 'CLAP', icon: Bell, color: '#F59E0B' },
-  ],
-  'Collaboration': [
-    { id: 9, title: 'Engage', icon: FileText, color: '#F59E0B' },
-    { id: 10, title: 'HR-Survey', icon: DollarSign, color: '#10B981' },
-  ],
-  'Payroll': [
-    { id: 11, title: 'E-Payroll-India', icon: BarChart, color: '#F59E0B' },
-    { id: 12, title: 'Payroll', icon: Settings, color: '#6B7280' },
-  ],
-};
+const APPS = [
+  { id: 1, name: 'Digital Risk Management', icon: Shield, color: '#DC2626', bg: '#FEF2F2' },
+  { id: 2, name: 'Workday', icon: Briefcase, color: '#0051E0', bg: '#E0EBFF' },
+  { id: 3, name: 'Slack', icon: MessageCircle, color: '#E01E5A', bg: '#FFE5EC' },
+  { id: 4, name: 'Zoom', icon: Video, color: '#2D8CFF', bg: '#E5F0FF' },
+  { id: 5, name: 'Jira', icon: CheckCircle, color: '#0052CC', bg: '#DEEBFF' },
+  { id: 6, name: 'Confluence', icon: FileText, color: '#172B4D', bg: '#E6EFFC' },
+  { id: 7, name: 'GitHub', icon: Code, color: '#24292E', bg: '#F3F4F6' },
+  { id: 8, name: 'Drive', icon: HardDrive, color: '#1FA463', bg: '#E3FCEF' },
+  { id: 9, name: 'Outlook', icon: Mail, color: '#0078D4', bg: '#DEECF9' },
+  { id: 10, name: 'Teams', icon: Users, color: '#6264A7', bg: '#E8E8F5' },
+  { id: 11, name: 'Trello', icon: Layout, color: '#0079BF', bg: '#DFF0FA' },
+  { id: 12, name: 'Asana', icon: CheckCircle, color: '#F06A6A', bg: '#FFEBEB' },
+  { id: 13, name: 'Notion', icon: Box, color: '#000000', bg: '#F3F4F6' },
+  { id: 14, name: 'Figma', icon: Monitor, color: '#F24E1E', bg: '#FFEEE5' },
+  { id: 15, name: 'Dropbox', icon: Box, color: '#0061FF', bg: '#E5F0FF' },
+  { id: 16, name: 'Salesforce', icon: Cloud, color: '#00A1E0', bg: '#E0F5FF' },
+  { id: 17, name: 'SAP', icon: Database, color: '#008FD3', bg: '#E0F2FA' },
+  { id: 18, name: 'Oracle', icon: Server, color: '#C74634', bg: '#FCEBE9' },
+  { id: 19, name: 'ServiceNow', icon: CheckCircle, color: '#81B5A1', bg: '#E8F5F1' },
+  { id: 20, name: 'Zendesk', icon: MessageCircle, color: '#03363D', bg: '#E0F2F1' },
+  { id: 21, name: 'Tableau', icon: BarChart, color: '#E97627', bg: '#FCEFE5' },
+  { id: 22, name: 'VS Code', icon: Terminal, color: '#007ACC', bg: '#E0F2FF' },
+  { id: 23, name: 'Webex', icon: Globe, color: '#00BCEB', bg: '#E0F9FF' },
+  { id: 24, name: 'Intranet', icon: Link, color: '#6B7280', bg: '#F3F4F6' },
+  { id: 25, name: 'Learning Management', icon: BookOpen, color: '#F59E0B', bg: '#FEF3C7' },
+  { id: 26, name: 'Travel & Expense', icon: Plane, color: '#0EA5E9', bg: '#E0F2FE' },
+  { id: 27, name: 'Info Security', icon: ShieldCheck, color: '#10B981', bg: '#D1FAE5' },
+  { id: 28, name: 'Portfolio Tool', icon: Briefcase, color: '#8B5CF6', bg: '#EDE9FE' },
+  { id: 29, name: 'BI Analytics', icon: TrendingUp, color: '#EC4899', bg: '#FCE7F3' },
+  { id: 30, name: 'Cloud Infra', icon: Server, color: '#64748B', bg: '#F1F5F9' },
+];
 
 export default function AppStoreScreen() {
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = ['All', ...Object.keys(widgetsByCategory)];
+  const filteredApps = APPS.filter(app => 
+    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const getFilteredWidgets = () => {
-    if (searchQuery) {
-      const allWidgets = Object.values(widgetsByCategory).flat();
-      return allWidgets.filter(widget =>
-        widget.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const handleAppOpen = async (url: string) => {
+    try {
+      await openBrowserAsync(url, {
+        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+        controlsColor: Colors.primary, 
+        toolbarColor: '#FFFFFF',
+      });
+    } catch (error) {
+      console.error("Failed to open browser:", error);
     }
-    return null;
   };
 
-  const filteredWidgets = getFilteredWidgets();
-
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.container}>
-        {/* Header with Gradient */}
-        <LinearGradient
-          colors={[Colors.primary, Colors.secondary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          <View style={styles.titleSection}>
-            <View style={styles.iconContainer}>
-              <Grid size={24} color="#FFF" strokeWidth={2.5} />
-            </View>
-            <View>
-              <Text style={styles.titleLabel}>Discover</Text>
-              <Text style={styles.title}>App Store</Text>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Search Bar - Outside gradient */}
-        <View style={styles.searchWrapper}>
-          <View style={styles.searchContainer}>
-            <Search size={20} color={Colors.secondaryText} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search apps..."
-              placeholderTextColor={Colors.secondaryText}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      
+      {/* Search Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Enterprise Apps</Text>
+        
+        <View style={styles.searchBar}>
+            <Search size={20} color="#6B7280" />
+            <TextInput 
+                style={styles.searchInput}
+                placeholder="Search..."
+                placeholderTextColor="#9CA3AF"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                clearButtonMode="while-editing"
             />
-          </View>
         </View>
-
-        {/* Categories - Horizontal Scroll */}
-        {!searchQuery && (
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoriesScroll}
-            contentContainerStyle={styles.categoriesContent}
-          >
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category}
-                style={[
-                  styles.categoryChip,
-                  selectedCategory === category && styles.categoryChipActive
-                ]}
-                onPress={() => setSelectedCategory(category)}
-              >
-                <Text style={[
-                  styles.categoryText,
-                  selectedCategory === category && styles.categoryTextActive
-                ]}>
-                  {category}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
-
-        {/* Widgets by Category or Search Results */}
-        <ScrollView 
-          style={styles.content}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {searchQuery ? (
-            // Search Results
-            <>
-              <Text style={styles.sectionTitle}>Found {filteredWidgets?.length || 0} apps</Text>
-              <View style={styles.widgetsGrid}>
-                {filteredWidgets?.map((widget) => (
-                  <TouchableOpacity key={widget.id} style={styles.widgetCard}>
-                    <View style={[styles.widgetIcon, { backgroundColor: `${widget.color}20` }]}>
-                      <widget.icon size={22} color={widget.color} />
-                    </View>
-                    <Text style={styles.widgetTitle}>{widget.title}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
-          ) : (
-            // Category View
-            <>
-              {(selectedCategory === 'All' 
-                ? Object.entries(widgetsByCategory) 
-                : [[selectedCategory, widgetsByCategory[selectedCategory]]] as [string, Widget[]][]
-              ).map(([category, widgets]) => (
-                <View key={category} style={styles.categorySection}>
-                  <Text style={styles.categoryHeading}>{category}</Text>
-                  <View style={styles.widgetsGrid}>
-                    {widgets.map((widget) => (
-                      <TouchableOpacity key={widget.id} style={styles.widgetCard}>
-                        <View style={[styles.widgetIcon, { backgroundColor: `${widget.color}20` }]}>
-                          <widget.icon size={22} color={widget.color} />
-                        </View>
-                        <Text style={styles.widgetTitle}>{widget.title}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              ))}
-            </>
-          )}
-        </ScrollView>
       </View>
-    </SafeAreaView>
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+      >
+          {filteredApps.length === 0 ? (
+              <View style={styles.emptyState}>
+                  <Text style={styles.emptyText}>No apps found</Text>
+              </View>
+          ) : (
+            <View style={styles.gridContainer}>
+                {filteredApps.map((app) => (
+                    <TouchableOpacity 
+                      key={app.id} 
+                      style={styles.appCard}
+                      onPress={() => handleAppOpen('https://www.cricbuzz.com')}
+                    >
+                        <View style={[styles.iconContainer, { backgroundColor: app.bg }]}>
+                           {React.createElement(app.icon as any, { size: 28, color: app.color, strokeWidth: 2 })}
+                        </View>
+                        
+                        <Text style={styles.appName} numberOfLines={3}>{app.name}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+          )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFF',
-  },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F9FAFB', 
   },
   header: {
-    paddingHorizontal: Colors.spacing,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  titleSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    marginBottom: 20,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  titleLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 2,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#FFF',
-    letterSpacing: 0.5,
-  },
-  searchWrapper: {
-    paddingHorizontal: Colors.spacing,
-    paddingTop: 12,
+    paddingHorizontal: SIDE_PADDING,
     paddingBottom: 16,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F9FAFB',
   },
-  searchContainer: {
+  headerTitle: {
+    fontSize: 32, // Large and bold like native iOS
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 16,
+    marginTop: 10,
+    letterSpacing: -0.5,
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 16, 
     gap: 12,
-    ...Colors.shadows.small,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.03, 
+    shadowRadius: 8, 
+    elevation: 2
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.text,
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      } as any,
-    }),
-  },
-  categoriesScroll: {
-    backgroundColor: '#FFF',
-    maxHeight: 50,
-  },
-  categoriesContent: {
-    paddingHorizontal: Colors.spacing,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  categoryChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.background,
-  },
-  categoryChipActive: {
-    backgroundColor: Colors.primary,
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  categoryTextActive: {
-    color: '#FFF',
-  },
-  content: {
-    flex: 1,
+    color: '#1F2937',
+    fontWeight: '500',
   },
   scrollContent: {
-    padding: Colors.spacing,
-    gap: 24,
+    paddingHorizontal: SIDE_PADDING, 
+    paddingTop: 8,
+    paddingBottom: 110,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  categorySection: {
-    gap: 12,
-  },
-  categoryHeading: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  widgetsGrid: {
+  gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: GAP,
   },
-  widgetCard: {
-    width: '30%',
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    padding: 14,
+  appCard: {
+    width: CARD_WIDTH,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 12, 
     alignItems: 'center',
-    gap: 8,
-    ...Colors.shadows.small,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+    aspectRatio: 0.95, // Slightly taller than square
   },
-  widgetIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  iconContainer: {
+    width: 48, 
+    height: 48, 
+    borderRadius: 16, 
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
   },
-  widgetTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.text,
+  appName: {
+    fontSize: 12, 
+    fontWeight: '700',
+    color: '#1F2937',
     textAlign: 'center',
+    lineHeight: 16,
   },
+  emptyState: {
+      paddingVertical: 60,
+      alignItems: 'center',
+  },
+  emptyText: {
+      color: '#9CA3AF',
+      fontSize: 16,
+      fontWeight: '500',
+  }
 });
