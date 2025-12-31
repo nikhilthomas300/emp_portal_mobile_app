@@ -9,7 +9,7 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3F4F9', paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: '#FFF', paddingTop: insets.top }}>
       <SearchContent 
         onClose={() => router.replace('/(tabs)')} 
         style={{ marginTop: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0, flex: 1 }}

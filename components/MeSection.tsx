@@ -5,11 +5,10 @@ import { Activity, Box, Clock, CreditCard, DollarSign, FileText, Grid3X3, Truck,
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  Easing,
   FadeIn,
   FadeOut,
-  SlideInUp,
-  SlideOutDown
+  SlideOutDown,
+  ZoomIn
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from './SectionHeader';
@@ -129,7 +128,7 @@ export default function MeSection() {
           {/* Bottom Sheet */}
           {showContent && (
             <Animated.View 
-              entering={SlideInUp.duration(350).easing(Easing.out(Easing.quad))}
+              entering={ZoomIn.duration(350).springify()}
               exiting={SlideOutDown.duration(200)}
               style={[styles.bottomSheet, { height: sheetHeight }]}
             >

@@ -1,10 +1,11 @@
 import PageHeader from '@/components/PageHeader';
+import StatusModal, { ModalType } from '@/components/StatusModal';
 import Colors from '@/constants/Colors';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack, router } from 'expo-router';
 import { Calendar, ChevronDown } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const WSS_HISTORY = [
   { id: '1', date: 'Oct 15, 2024', type: 'WFH - Short Term', reason: 'Plumber check', status: 'Approved' },
@@ -23,21 +24,45 @@ export default function ApplyWSSScreen() {
   // WSS Fields
   const [wssType, setWssType] = useState(WSS_TYPES[0]);
   const [wfhTerm, setWfhTerm] = useState(WFH_TERMS[0]); 
-
+  
   const [reason, setReason] = useState('');
   
   const [showWssType, setShowWssType] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
+  // Status Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    type: 'info' as ModalType,
+    title: '',
+    description: '',
+    action: undefined as (() => void) | undefined
+  });
+
   const handleSubmit = () => {
     if (!reason.trim()) {
-      Alert.alert('Required', 'Please enter a reason.');
+      setModalConfig({
+        type: 'error',
+        title: 'Reason Required',
+        description: 'Please enter a valid reason for your WSS request.',
+        action: undefined
+      });
+      setModalVisible(true);
       return;
     }
-    Alert.alert('Submitted', 'WSS request submitted!', [
-      { text: 'OK', onPress: () => router.back() }
-    ]);
+
+    // Simulate API submission
+    setModalConfig({
+        type: 'success',
+        title: 'Request Submitted',
+        description: 'Your WSS request has been submitted successfully.',
+        action: () => {
+           setModalVisible(false);
+           router.back();
+        }
+    });
+    setModalVisible(true);
   };
 
   const formatDate = (date: Date) => {
@@ -253,6 +278,21 @@ export default function ApplyWSSScreen() {
         ) : (
           showEndPicker && <DateTimePicker value={endDate} mode="date" onChange={(_, d) => { setShowEndPicker(false); if(d) setEndDate(d); }} />
        )}
+
+       <StatusModal 
+        visible={modalVisible}
+        onClose={() => {
+            if (modalConfig.action) {
+                modalConfig.action();
+            } else {
+                setModalVisible(false);
+            }
+        }}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        primaryButtonText={modalConfig.type === 'success' ? 'Done' : 'Okay'}
+      />
     </View>
   );
 }

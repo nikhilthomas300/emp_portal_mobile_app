@@ -1,10 +1,11 @@
 import PageHeader from '@/components/PageHeader';
+import StatusModal, { ModalType } from '@/components/StatusModal';
 import Colors from '@/constants/Colors';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack, router } from 'expo-router';
 import { Calendar, ChevronDown, FileText, PieChart } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const MY_LEAVE_HISTORY = [
   { id: '1', type: 'Sick Leave', startDate: 'Oct 12, 2024', endDate: 'Oct 14, 2024', days: '3', status: 'Approved' },
@@ -31,17 +32,41 @@ export default function ApplyLeave() {
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [showLeaveTypeDropdown, setShowLeaveTypeDropdown] = useState(false);
 
+  // Status Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    type: 'info' as ModalType,
+    title: '',
+    description: '',
+    action: undefined as (() => void) | undefined
+  });
+
   // Leave Types
   const leaveTypes = ['Casual Leave', 'Sick Leave', 'Earned Leave', 'Comp Off'];
 
   const handleSubmit = () => {
     if (!leaveType || !reason) {
-      Alert.alert('Required', 'Please fill all fields.');
+      setModalConfig({
+        type: 'error',
+        title: 'Missing Details',
+        description: 'Please select a leave type and provide a reason for your leave request.',
+        action: undefined
+      });
+      setModalVisible(true);
       return;
     }
-    Alert.alert('Submitted', 'Leave request sent.', [
-      { text: 'OK', onPress: () => router.back() }
-    ]);
+    
+    // Simulate API submission
+    setModalConfig({
+        type: 'success',
+        title: 'Request Submitted',
+        description: 'Your leave request has been submitted successfully for approval.',
+        action: () => {
+           setModalVisible(false);
+           router.back();
+        }
+    });
+    setModalVisible(true);
   };
 
   const formatDate = (date: Date) => {
@@ -283,6 +308,21 @@ export default function ApplyLeave() {
         ) : (
           showEndPicker && <DateTimePicker value={endDate} mode="date" onChange={(_, d) => { setShowEndPicker(false); if(d) setEndDate(d); }} />
        )}
+
+       <StatusModal 
+        visible={modalVisible}
+        onClose={() => {
+            if (modalConfig.action) {
+                modalConfig.action();
+            } else {
+                setModalVisible(false);
+            }
+        }}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        primaryButtonText={modalConfig.type === 'success' ? 'Done' : 'Okay'}
+      />
 
     </View>
   );

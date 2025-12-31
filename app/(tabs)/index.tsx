@@ -1,7 +1,7 @@
+import AnnouncementModal from '@/components/AnnouncementModal';
 import BannerCarousel from '@/components/BannerCarousel';
 import Header from '@/components/Header';
 import LeaveBalanceSection from '@/components/LeaveBalanceSection';
-import Loader from '@/components/Loader';
 import MeSection from '@/components/MeSection';
 import QuickActions from '@/components/QuickActions';
 import SearchModal from '@/components/SearchModal';
@@ -33,6 +33,7 @@ export default function HomeScreen() {
 
   const [refreshing, setRefreshing] = React.useState(false);
   const [searchVisible, setSearchVisible] = React.useState(false);
+  const [showAnnouncement, setShowAnnouncement] = React.useState(false);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -76,13 +77,17 @@ export default function HomeScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
-    return <Loader />;
-  }
+  useEffect(() => {
+    // Simulate API fetch for announcements
+    const timer = setTimeout(() => {
+      setShowAnnouncement(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -160,6 +165,14 @@ export default function HomeScreen() {
       </ScrollView>
       
       <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
+
+      {/* Announcement Modal */}
+      <AnnouncementModal 
+        visible={showAnnouncement}
+        onClose={() => setShowAnnouncement(false)}
+        title="Scheduled Maintenance"
+        description="We will be undergoing scheduled maintenance this Sunday from 2:00 AM to 4:00 AM UTC. Please ensure your work is saved."
+      />
     </View>
   );
 }

@@ -1,9 +1,10 @@
 import PageHeader from '@/components/PageHeader';
+import StatusModal, { ModalType } from '@/components/StatusModal';
 import Colors from '@/constants/Colors';
 import { Stack } from 'expo-router';
 import { Calendar, Search } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const CATEGORIES = ['All', 'Leave', 'WFH', 'Expense', 'Shift', 'Overtime'];
 
@@ -88,11 +89,19 @@ export default function ApprovalsScreen() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Modal State
+  // Action Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [actionType, setActionType] = useState<'Approve' | 'Reject' | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState('');
+
+  // Status Modal State
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [statusModalConfig, setStatusModalConfig] = useState({
+    type: 'info' as ModalType,
+    title: '',
+    description: ''
+  });
 
   const initiateAction = (item: any, type: 'Approve' | 'Reject') => {
     setSelectedItem(item);
@@ -103,12 +112,28 @@ export default function ApprovalsScreen() {
 
   const handleConfirm = () => {
     if (actionType === 'Reject' && !rejectReason.trim()) {
-      Alert.alert('Error', 'Please enter a reason for rejection.');
+      setStatusModalConfig({
+        type: 'error',
+        title: 'Reason Required',
+        description: 'Please enter a reason for rejection to proceed.'
+      });
+      setStatusModalVisible(true);
       return;
     }
-    setModalVisible(false);
+
+    setModalVisible(false); // Close Action Modal
+    
+    // Simulate API delay then show success
     setTimeout(() => {
-        Alert.alert('Success', `Request ${actionType === 'Approve' ? 'Approved' : 'Rejected'}`);
+        const isApprove = actionType === 'Approve';
+        setStatusModalConfig({
+            type: isApprove ? 'success' : 'success', // Both are "successful actions" even if one is a rejection
+            title: isApprove ? 'Request Approved' : 'Request Rejected',
+            description: isApprove 
+                ? `You have successfully approved the request for ${selectedItem?.name}.`
+                : `You have successfully rejected the request for ${selectedItem?.name}.`
+        });
+        setStatusModalVisible(true);
     }, 400);
   };
 
@@ -264,7 +289,7 @@ export default function ApprovalsScreen() {
         }
       />
 
-       {/* Modal */}
+       {/* Action Modal */}
        <Modal
         animationType="fade"
         transparent={true}
@@ -315,6 +340,15 @@ export default function ApprovalsScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Status Modal */}
+      <StatusModal 
+        visible={statusModalVisible}
+        onClose={() => setStatusModalVisible(false)}
+        type={statusModalConfig.type}
+        title={statusModalConfig.title}
+        description={statusModalConfig.description}
+      />
 
     </View>
   );
