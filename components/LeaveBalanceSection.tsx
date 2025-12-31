@@ -1,55 +1,63 @@
 import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
-import { Calendar, ChevronRight } from 'lucide-react-native';
+import { Briefcase, Calendar, ChevronRight, Clock, Umbrella } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import SectionHeader from './SectionHeader';
 
 export default function LeaveBalanceSection() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Leave Balance</Text>
-      </View>
+      <SectionHeader 
+        title="Leave Balance" 
+        icon={Umbrella}
+        iconColor="#10B981"
+      />
 
-      <View style={styles.cardContainer}>
-        <View style={styles.balanceGrid}>
-          <View style={styles.balanceItem}>
-            <View style={[styles.iconBadge, { backgroundColor: Colors.primary + '15' }]}>
-              <Calendar size={18} color={Colors.primary} strokeWidth={2.5} />
-            </View>
-            <Text style={styles.balanceLabel}>Casual & Sick</Text>
-            <Text style={[styles.balanceValue, { color: Colors.primary }]}>8</Text>
-            <Text style={styles.subLabel}>days available</Text>
+      <View style={styles.cardWrapper}>
+        <View style={styles.unifiedCard}>
+          
+          {/* Casual */}
+          <View style={styles.balanceSection}>
+             <View style={[styles.miniIcon, { backgroundColor: '#EEF2FF' }]}>
+                <Clock size={12} color="#4F46E5" />
+             </View>
+             <Text style={styles.value}>08</Text>
+             <Text style={styles.label}>Casual</Text>
           </View>
 
           <View style={styles.divider} />
 
-          <View style={styles.balanceItem}>
-            <View style={[styles.iconBadge, { backgroundColor: Colors.success + '15' }]}>
-              <Calendar size={18} color={Colors.success} strokeWidth={2.5} />
-            </View>
-            <Text style={styles.balanceLabel}>Earned Leave</Text>
-            <Text style={[styles.balanceValue, { color: Colors.success }]}>14</Text>
-            <Text style={styles.subLabel}>days available</Text>
+          {/* Earned */}
+          <View style={styles.balanceSection}>
+             <View style={[styles.miniIcon, { backgroundColor: '#ECFDF5' }]}>
+                <Briefcase size={12} color="#059669" />
+             </View>
+             <Text style={styles.value}>14</Text>
+             <Text style={styles.label}>Earned</Text>
           </View>
-        </View>
 
-        {/* New Holiday Calendar Button */}
-        <TouchableOpacity 
-          style={styles.holidayButton}
-          onPress={() => router.push('/holidays')}
-          activeOpacity={0.7}
-        >
-          <View style={styles.holidayBtnContent}>
-            <Text style={styles.holidayBtnText}>View Holiday Calendar</Text>
-            <Text style={styles.holidayBtnSubtext}>See all public & optional holidays</Text>
-          </View>
-          <View style={styles.arrowContainer}>
-            <ChevronRight size={20} color={Colors.primary} strokeWidth={2.5} />
-          </View>
-        </TouchableOpacity>
+          <View style={styles.divider} />
+
+          {/* Holiday Link */}
+          <TouchableOpacity 
+            style={styles.holidaySection}
+            onPress={() => router.push('/holidays')}
+            activeOpacity={0.7}
+          >
+             <View style={[styles.miniIcon, { backgroundColor: '#FFF7ED' }]}>
+                <Calendar size={12} color="#EA580C" />
+             </View>
+             <View style={styles.holidayTextContainer}>
+               <Text style={styles.holidayTitle}>Holiday</Text>
+               <Text style={styles.holidaySubtitle}>Calendar</Text>
+             </View>
+             <ChevronRight size={14} color="#94A3B8" />
+          </TouchableOpacity>
+
+        </View>
       </View>
     </View>
   );
@@ -57,97 +65,73 @@ export default function LeaveBalanceSection() {
 
 const styles = StyleSheet.create({
   container: {
+    marginBottom: 20,
+  },
+  cardWrapper: {
     paddingHorizontal: Colors.spacing,
-    marginBottom: 24,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  cardContainer: {
-    backgroundColor: Colors.cardBackground,
+  unifiedCard: {
+    backgroundColor: '#FFF',
     borderRadius: 20,
-    padding: 20,
-    ...Colors.shadows.medium,
-  },
-  balanceGrid: {
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
   },
-  balanceItem: {
+  balanceSection: {
     flex: 1,
     alignItems: 'center',
-  },
-  iconBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  balanceLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  balanceValue: {
-    fontSize: 36,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  subLabel: {
-    fontSize: 12,
-    color: Colors.secondaryText,
-    fontWeight: '500',
+    gap: 2,
   },
   divider: {
     width: 1,
-    height: 80,
-    backgroundColor: Colors.border,
-    marginHorizontal: 16,
+    height: 40,
+    backgroundColor: '#F1F5F9',
   },
-  holidayButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.primaryLight + '50', // Very light tint
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.primary + '20',
-  },
-  holidayBtnContent: {
-    flex: 1,
-  },
-  holidayBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 2,
-  },
-  holidayBtnSubtext: {
-    fontSize: 12,
-    color: Colors.secondaryText,
-  },
-  arrowContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+  miniIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
+    marginBottom: 4,
+  },
+  value: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  holidaySection: {
+    flex: 1.2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 8,
+    gap: 8,
+  },
+  holidayTextContainer: {
+    gap: 0,
+  },
+  holidayTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  holidaySubtitle: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: '#94A3B8',
   },
 });

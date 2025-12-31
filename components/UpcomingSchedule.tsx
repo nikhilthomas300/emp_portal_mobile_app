@@ -1,68 +1,69 @@
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar, Clock } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { Calendar, Clock, Video } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import SectionHeader from './SectionHeader';
 
 export default function UpcomingSchedule() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Next Meeting</Text>
+      <SectionHeader 
+        title="Upcoming Meeting" 
+        icon={Video}
+        iconColor="#4338CA"
+        showSeeAll={true}
+        onSeeAll={() => router.push('/meetings')}
+      />
+
+      <View style={styles.cardWrapper}>
+        <LinearGradient
+          colors={[Colors.primary, Colors.primary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
+        >
+          {/* Meeting Info */}
+          <View style={styles.content}>
+            <View style={styles.row}>
+              <View style={styles.textContainer}>
+                <Text style={styles.title} numberOfLines={2}>Project AI with Cybersecurity with Pavan - Weekly Updates</Text>
+                <Text style={styles.subtitle}>Host: Nikhil Thomas</Text>
+              </View>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.footer}>
+              <View style={styles.timeInfo}>
+                <Calendar size={14} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.timeText}>Today, 10:00 AM</Text>
+              </View>
+              <View style={styles.timeInfo}>
+                <Clock size={14} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.timeText}>30 min</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Decoration Circles */}
+          <View style={styles.circle1} />
+          <View style={styles.circle2} />
+        </LinearGradient>
       </View>
-
-      <LinearGradient
-        colors={[Colors.primary, Colors.primary]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.card}
-      >
-        {/* Meeting Info */}
-        <View style={styles.content}>
-          <View style={styles.row}>
-            <View style={styles.textContainer}>
-              <Text style={styles.title} numberOfLines={2}>Project AI with Cybersecurity with Pavan - Weekly Updates</Text>
-              <Text style={styles.subtitle}>Host: Nikhil Thomas</Text>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.footer}>
-            <View style={styles.timeInfo}>
-              <Calendar size={14} color="rgba(255,255,255,0.8)" />
-              <Text style={styles.timeText}>Today, 10:00 AM</Text>
-            </View>
-            <View style={styles.timeInfo}>
-              <Clock size={14} color="rgba(255,255,255,0.8)" />
-              <Text style={styles.timeText}>30 min</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Decoration Circles */}
-        <View style={styles.circle1} />
-        <View style={styles.circle2} />
-      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    marginBottom: 20,
+  },
+  cardWrapper: {
     paddingHorizontal: Colors.spacing,
-    marginBottom: 24,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
   },
   seeAllBtn: {
     backgroundColor: Colors.primaryLight,

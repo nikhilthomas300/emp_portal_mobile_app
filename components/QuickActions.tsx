@@ -1,9 +1,11 @@
 import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import { Briefcase, FileText, Home, QrCode } from 'lucide-react-native';
+import { Briefcase, FileText, Home, QrCode, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QRCodeModal from './QRCodeModal';
+import SectionHeader from './SectionHeader';
 
 const actions = [
   { id: 0, title: 'Digital Identity', icon: QrCode, color: Colors.primary, action: 'qr' },
@@ -21,40 +23,50 @@ export default function QuickActions() {
     }
   };
 
+  const renderItem = (action: typeof actions[0]) => {
+    const content = (
+      <>
+        <LinearGradient
+          colors={[action.color + '20', action.color + '10']}
+          style={styles.iconCircle}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <action.icon size={14} color={action.color} strokeWidth={2.5} />
+        </LinearGradient>
+        <Text style={styles.itemText}>{action.title}</Text>
+      </>
+    );
+
+    return action.link ? (
+      <Link key={action.id} href={action.link as any} asChild>
+        <TouchableOpacity style={styles.chip} activeOpacity={0.7}>
+          {content}
+        </TouchableOpacity>
+      </Link>
+    ) : (
+      <TouchableOpacity 
+        key={action.id} 
+        style={styles.chip}
+        onPress={() => handleActionPress(action)}
+        activeOpacity={0.7}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <SectionHeader 
+        title="Quick Actions" 
+        icon={Zap}
+        iconColor="#F59E0B"
+      />
+      
+      <View style={styles.chipsContainer}>
+        {actions.map((action) => renderItem(action))}
       </View>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {actions.map((action) => (
-          action.link ? (
-            <Link key={action.id} href={action.link as any} asChild>
-              <TouchableOpacity style={styles.chip}>
-                <View style={[styles.iconBox, { backgroundColor: action.color + '15' }]}>
-                  <action.icon size={20} color={action.color} />
-                </View>
-                <Text style={styles.chipText}>{action.title}</Text>
-              </TouchableOpacity>
-            </Link>
-          ) : (
-            <TouchableOpacity 
-              key={action.id} 
-              style={styles.chip}
-              onPress={() => handleActionPress(action)}
-            >
-              <View style={[styles.iconBox, { backgroundColor: action.color + '15' }]}>
-                <action.icon size={20} color={action.color} />
-              </View>
-              <Text style={styles.chipText}>{action.title}</Text>
-            </TouchableOpacity>
-          )
-        ))}
-      </ScrollView>
 
       <QRCodeModal visible={qrModalVisible} onClose={() => setQrModalVisible(false)} />
     </View>
@@ -63,68 +75,41 @@ export default function QuickActions() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 8,
+    marginTop: -8,
   },
-  headerRow: {
+  chipsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    flexWrap: 'wrap',
     paddingHorizontal: Colors.spacing,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  seeAllBtn: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 14,
-  },
-  seeAll: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  scrollContent: {
-    paddingHorizontal: Colors.spacing,
-    gap: 12,
-    paddingBottom: 5
+    gap: 10,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardBackground,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 30,
-    gap: 10,
-    ...Colors.shadows.small,
+    backgroundColor: '#FFF',
+    paddingVertical: 6,
+    paddingLeft: 4,
+    paddingRight: 12,
+    borderRadius: 50,
+    gap: 6,
     borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  actionItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginBottom: 4,
+    borderColor: '#E5E7EB',
+    alignSelf: 'flex-start',
     ...Colors.shadows.small,
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  iconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  chipText: {
-    fontSize: 14,
+  itemText: {
+    fontSize: 12,
     fontWeight: '600',
     color: Colors.text,
   },
 });
+
+

@@ -1,5 +1,4 @@
 import BannerCarousel from '@/components/BannerCarousel';
-import EventsList from '@/components/EventsList';
 import Header from '@/components/Header';
 import LeaveBalanceSection from '@/components/LeaveBalanceSection';
 import Loader from '@/components/Loader';
@@ -10,6 +9,7 @@ import TeamSection from '@/components/TeamSection';
 import UpcomingSchedule from '@/components/UpcomingSchedule';
 import Colors from '@/constants/Colors';
 import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Search } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
@@ -60,14 +60,14 @@ export default function HomeScreen() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: Platform.OS === 'ios' ? 75 : 70,
+          paddingBottom: 20, // Reduced padding
           paddingTop: 8,
-          elevation: 8,
+          elevation: 0,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
         }
       });
     }
@@ -108,15 +108,26 @@ export default function HomeScreen() {
         )}
         
         <Animated.View entering={FadeInDown.delay(100).duration(500).springify()}>
-          {/* Search Bar */}
-          <TouchableOpacity 
-            style={styles.searchBar}
-            activeOpacity={0.8}
-            onPress={() => setSearchVisible(true)}
-          >
-            <Search size={20} color={Colors.secondaryText} />
-            <Text style={styles.searchPlaceholder}>Search Widgets...</Text>
-          </TouchableOpacity>
+          {/* Enhanced Search Bar */}
+          <View style={styles.searchContainer}>
+            <LinearGradient
+              colors={['#4338CA', '#7C3AED', '#DB2777']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.searchGradientBorder}
+            >
+              <TouchableOpacity 
+                style={styles.searchBar}
+                activeOpacity={0.8}
+                onPress={() => setSearchVisible(true)}
+              >
+                <View style={styles.searchIconContainer}>
+                  <Search size={18} color={Colors.primary} strokeWidth={2.5} />
+                </View>
+                <Text style={styles.searchPlaceholder}>Search widgets, actions...</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
         </Animated.View>
         
         <Animated.View entering={FadeInDown.delay(200).duration(500).springify()}>
@@ -143,9 +154,7 @@ export default function HomeScreen() {
           <LeaveBalanceSection />
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(800).duration(500).springify()}>
-          <EventsList />
-        </Animated.View>
+
         
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -162,24 +171,38 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
-    gap: 0, // Removed gap to let components handle their own spacing
+    gap: 0,
+  },
+  searchContainer: {
+    paddingHorizontal: Colors.spacing,
+    marginBottom: 20,
+  },
+  searchGradientBorder: {
+    borderRadius: 14,
+    padding: 1.5,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    marginHorizontal: Colors.spacing,
-    marginTop: 0,
-    marginBottom: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
     gap: 12,
-    ...Colors.shadows.small,
+  },
+  searchIconContainer: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   searchPlaceholder: {
     flex: 1,
     fontSize: 15,
     color: Colors.secondaryText,
+    fontWeight: '500',
   },
 });
+

@@ -1,7 +1,7 @@
 import Colors from '@/constants/Colors';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Activity, Box, Clock, CreditCard, DollarSign, FileText, Truck, User, X } from 'lucide-react-native';
+import { Activity, Box, Clock, CreditCard, DollarSign, FileText, Grid3X3, Truck, User, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
@@ -12,8 +12,10 @@ import Animated, {
   SlideOutDown
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SectionHeader from './SectionHeader';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const PILL_WIDTH = (SCREEN_WIDTH - (Colors.spacing * 2) - 8) / 2; // 2 per row with gap
 
 const widgets = [
   { id: 1, title: 'My Attendance', icon: Clock, color: '#4338CA' },
@@ -49,7 +51,7 @@ export default function MeSection() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
-          height: Platform.OS === 'ios' ? 88 : 64,
+          height: Platform.OS === 'ios' ? 75 : 70,
           paddingBottom: Platform.OS === 'ios' ? 28 : 8,
           paddingTop: 8,
           elevation: 8,
@@ -77,32 +79,30 @@ export default function MeSection() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>My Widgets</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.seeAllBtn}>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
-      </View>
+      <SectionHeader 
+        title="My Widgets" 
+        icon={Grid3X3}
+        iconColor="#7C3AED"
+        showSeeAll
+        onSeeAll={() => setModalVisible(true)}
+      />
       
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {widgets.slice(0, 5).map((widget) => (
-          <TouchableOpacity key={widget.id} style={styles.card}>
+      {/* Pills Grid - Wrapping Layout */}
+      <View style={styles.pillsContainer}>
+        {widgets.slice(0, 6).map((widget) => (
+          <TouchableOpacity key={widget.id} style={styles.pill} activeOpacity={0.7}>
             <LinearGradient
-              colors={[widget.color + '20', widget.color + '08']}
-              style={styles.iconBox}
+              colors={[widget.color + '20', widget.color + '10']}
+              style={styles.pillIcon}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <widget.icon size={20} color={widget.color} strokeWidth={2.5} />
+              <widget.icon size={16} color={widget.color} strokeWidth={2.5} />
             </LinearGradient>
-            <Text style={styles.title} numberOfLines={2}>{widget.title}</Text>
+            <Text style={styles.pillText} numberOfLines={2}>{widget.title}</Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
       {/* Bottom Sheet Modal */}
       <Modal
@@ -188,59 +188,42 @@ export default function MeSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  headerRow: {
+  // Pills Grid Layout - 2 per row
+  pillsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    paddingHorizontal: Colors.spacing,
+    gap: 8,
+  },
+  pill: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    paddingHorizontal: Colors.spacing,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
-  },
-  seeAllBtn: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 14,
-  },
-  seeAll: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  scrollContent: {
-    paddingHorizontal: Colors.spacing,
-    gap: 12,
-  },
-  card: {
-    width: 120,
     backgroundColor: Colors.cardBackground,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
+    gap: 10,
+    width: PILL_WIDTH,
+    // Polished Look
     ...Colors.shadows.small,
-    borderWidth: 0.5,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderWidth: 1,
+    borderColor: '#F3F4F6', // Subtle border
   },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  pillIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
   },
-  title: {
-    fontSize: 12,
+  pillText: {
+    fontSize: 13, // Slightly larger for readability
     fontWeight: '600',
     color: Colors.text,
-    textAlign: 'center',
-    lineHeight: 16,
+    flex: 1,
+    lineHeight: 18, // Clean line height
   },
   // Modal Styles
   modalBackground: {
