@@ -1,27 +1,79 @@
 import Colors from '@/constants/Colors';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Activity, Box, Clock, DollarSign, FileText, Truck, X } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Activity, Box, Clock, CreditCard, DollarSign, FileText, Truck, User, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeOut,
+  SlideInUp,
+  SlideOutDown
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const widgets = [
-  { id: 1, title: 'My Attendance', icon: Clock, color: Colors.primary },
-  { id: 2, title: 'My Transport', icon: FileText, color: Colors.accent },
-  { id: 3, title: 'Salary Payment Status', icon: DollarSign, color: Colors.success },
-  { id: 4, title: 'My Assets', icon: Box, color: Colors.warning },
-    { id: 5, title: 'My Letters', icon: Box, color: Colors.warning },
-      { id: 6, title: 'My Profile', icon: Box, color: Colors.warning },
-        { id: 7, title: 'Flex', icon: Box, color: Colors.warning },
+  { id: 1, title: 'My Attendance', icon: Clock, color: '#4338CA' },
+  { id: 2, title: 'My Transport', icon: Truck, color: '#DB2777' },
+  { id: 3, title: 'Salary Status', icon: DollarSign, color: '#059669' },
+  { id: 4, title: 'My Assets', icon: Box, color: '#D97706' },
+  { id: 5, title: 'My Letters', icon: FileText, color: '#7C3AED' },
+  { id: 6, title: 'My Profile', icon: User, color: '#0891B2' },
+  { id: 7, title: 'Flex Benefits', icon: Activity, color: '#EA580C' },
 ];
 
 const allWidgets = [
   ...widgets,
-  { id: 8, title: 'Flex', icon: Activity, color: '#8B5CF6' },
+  { id: 8, title: 'Expenses', icon: CreditCard, color: '#8B5CF6' },
   { id: 9, title: 'Transport', icon: Truck, color: '#EC4899' },
 ];
 
 export default function MeSection() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+
+  // Hide tab bar when modal is open
+  useEffect(() => {
+    if (modalVisible) {
+      navigation.setOptions({
+        tabBarStyle: { display: 'none' }
+      });
+    } else {
+      navigation.setOptions({
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        }
+      });
+    }
+  }, [modalVisible, navigation]);
+
+  useEffect(() => {
+    if (modalVisible) {
+      setShowContent(true);
+    }
+  }, [modalVisible]);
+
+  const handleClose = () => {
+    setShowContent(false);
+    setTimeout(() => setModalVisible(false), 250);
+  };
+
+  const sheetHeight = SCREEN_HEIGHT * 0.70;
 
   return (
     <View style={styles.container}>
@@ -37,7 +89,7 @@ export default function MeSection() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {widgets.map((widget) => (
+        {widgets.slice(0, 5).map((widget) => (
           <TouchableOpacity key={widget.id} style={styles.card}>
             <LinearGradient
               colors={[widget.color + '20', widget.color + '08']}
@@ -52,37 +104,82 @@ export default function MeSection() {
         ))}
       </ScrollView>
 
-      {/* Modal */}
+      {/* Bottom Sheet Modal */}
       <Modal
-        animationType="slide"
-        transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        transparent={true}
+        animationType="none"
+        onRequestClose={handleClose}
+        statusBarTranslucent={true}
+        navigationBarTranslucent={true}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>All Widgets</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <X size={24} color={Colors.text} />
-              </TouchableOpacity>
-            </View>
-            <ScrollView contentContainerStyle={styles.modalGrid}>
-              {allWidgets.map((widget) => (
-                <TouchableOpacity key={widget.id} style={styles.modalCard}>
-                  <LinearGradient
-                    colors={[widget.color + '20', widget.color + '08']}
-                    style={styles.modalIconBox}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <widget.icon size={20} color={widget.color} strokeWidth={2.5} />
-                  </LinearGradient>
-                  <Text style={styles.modalCardTitle}>{widget.title}</Text>
+        {/* Full screen container with overlay color */}
+        <View style={styles.modalBackground}>
+          {/* Pressable overlay area (top part) */}
+          {showContent && (
+            <Animated.View 
+              entering={FadeIn.duration(250)} 
+              exiting={FadeOut.duration(200)}
+              style={styles.overlayPressable}
+            >
+              <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+            </Animated.View>
+          )}
+
+          {/* Bottom Sheet */}
+          {showContent && (
+            <Animated.View 
+              entering={SlideInUp.duration(350).easing(Easing.out(Easing.quad))}
+              exiting={SlideOutDown.duration(200)}
+              style={[styles.bottomSheet, { height: sheetHeight }]}
+            >
+              {/* Handle Bar */}
+              <View style={styles.handleContainer}>
+                <View style={styles.handleBar} />
+              </View>
+
+              {/* Header */}
+              <View style={styles.sheetHeader}>
+                <Text style={styles.sheetTitle}>My Widgets</Text>
+                <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                  <X size={20} color={Colors.secondaryText} strokeWidth={2} />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+              </View>
+
+              {/* Content */}
+              <ScrollView 
+                contentContainerStyle={styles.sheetGrid}
+                showsVerticalScrollIndicator={false}
+              >
+                {allWidgets.map((widget) => (
+                  <TouchableOpacity key={widget.id} style={styles.sheetCard} activeOpacity={0.7}>
+                    <LinearGradient
+                      colors={[widget.color + '15', widget.color + '05']}
+                      style={styles.sheetIconBg}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <widget.icon size={24} color={widget.color} strokeWidth={1.8} />
+                    </LinearGradient>
+                    <Text style={styles.sheetCardTitle} numberOfLines={2}>{widget.title}</Text>
+                  </TouchableOpacity>
+                ))}
+                {/* Scroll padding */}
+                <View style={{ height: 40 }} />
+              </ScrollView>
+              
+              {/* ABSOLUTE FOOTER - Forces white background at the very bottom */}
+              <View style={{ 
+                position: 'absolute', 
+                bottom: -200, 
+                left: 0, 
+                right: 0, 
+                height: 200 + (insets.bottom || 24), 
+                backgroundColor: '#FFFFFF',
+                zIndex: -1 
+              }} />
+            </Animated.View>
+          )}
         </View>
       </Modal>
     </View>
@@ -146,58 +243,85 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   // Modal Styles
-  modalOverlay: {
+  modalBackground: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
-    height: '90%',
+  overlayPressable: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  bottomSheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    // Removed overflow: hidden to allow the footer to extend outside if needed, 
+    // but we are positioning it inside.
+  },
+  handleContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+  handleBar: {
+    width: 36,
+    height: 4,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 2,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  sheetTitle: {
+    fontSize: 17,
+    fontWeight: '600',
     color: Colors.text,
   },
-  modalGrid: {
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sheetGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    paddingBottom: 40,
+    padding: 16,
   },
-  modalCard: {
-    width: '30.5%',
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 16,
-    padding: 14,
+  sheetCard: {
+    width: '31%',
     alignItems: 'center',
-    ...Colors.shadows.small,
-    borderWidth: 0.5,
-    borderColor: 'rgba(0,0,0,0.03)',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    margin: '1.16%',
+    backgroundColor: '#FAFAFA',
+    borderRadius: 16,
   },
-  modalIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  sheetIconBg: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
   },
-  modalCardTitle: {
-    fontSize: 12,
+  sheetCardTitle: {
+    fontSize: 13,
     fontWeight: '600',
     color: Colors.text,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 17,
   },
 });

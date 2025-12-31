@@ -2,13 +2,14 @@ import BannerCarousel from '@/components/BannerCarousel';
 import EventsList from '@/components/EventsList';
 import Header from '@/components/Header';
 import LeaveBalanceSection from '@/components/LeaveBalanceSection';
+import Loader from '@/components/Loader';
 import MeSection from '@/components/MeSection';
 import QuickActions from '@/components/QuickActions';
 import SearchModal from '@/components/SearchModal';
 import TeamSection from '@/components/TeamSection';
 import UpcomingSchedule from '@/components/UpcomingSchedule';
 import Colors from '@/constants/Colors';
-import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
 import { Search } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
@@ -44,6 +45,44 @@ export default function HomeScreen() {
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   }, []);
+
+  const [loading, setLoading] = React.useState(true);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (loading) {
+      navigation.setOptions({
+        tabBarStyle: { display: 'none' }
+      });
+    } else {
+      navigation.setOptions({
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        }
+      });
+    }
+  }, [loading, navigation]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <View style={styles.container}>

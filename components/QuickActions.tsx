@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
-import { Briefcase, FileText, Home, MoreHorizontal, QrCode } from 'lucide-react-native';
+import { Briefcase, FileText, Home, QrCode } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QRCodeModal from './QRCodeModal';
@@ -10,7 +10,6 @@ const actions = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, color: Colors.accent, link: '/apply-leave' },
   { id: 2, title: 'Apply WFH', icon: Home, color: Colors.primary, link: '/apply-wfh' },
   { id: 3, title: 'My Letters', icon: FileText, color: Colors.warning, link: '/(tabs)/index' },
-  { id: 4, title: 'More', icon: MoreHorizontal, color: Colors.secondary, link: '/(tabs)/index' },
 ];
 
 export default function QuickActions() {

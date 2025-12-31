@@ -1,14 +1,10 @@
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar as CalendarIcon, X } from 'lucide-react-native';
+import { Stack } from 'expo-router';
+import { Calendar as CalendarIcon } from 'lucide-react-native';
 import React from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-interface HolidayCalendarModalProps {
-  visible: boolean;
-  onClose: () => void;
-}
 
 const holidays = [
   { id: 1, date: '26 Jan', day: 'Friday', name: 'Republic Day', type: 'Public' },
@@ -19,62 +15,65 @@ const holidays = [
   { id: 6, date: '25 Dec', day: 'Wednesday', name: 'Christmas', type: 'Public' },
   { id: 7, date: '14 Apr', day: 'Sunday', name: 'Ambedkar Jayanti', type: 'Public' },
   { id: 8, date: '01 May', day: 'Wednesday', name: 'May Day', type: 'Optional' },
+  { id: 9, date: '13 Sep', day: 'Friday', name: 'Onam', type: 'Optional' },
+  { id: 10, date: '07 Sep', day: 'Saturday', name: 'Ganesh Chaturthi', type: 'Optional' },
 ];
 
-export default function HolidayCalendarModal({ visible, onClose }: HolidayCalendarModalProps) {
+export default function HolidaysScreen() {
   const insets = useSafeAreaInsets();
+  
+  const publicHolidays = holidays.filter(h => h.type === 'Public').length;
+  const optionalHolidays = holidays.filter(h => h.type === 'Optional').length;
+  const totalHolidays = holidays.length;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <View style={[styles.modalContainer, { paddingBottom: insets.bottom + 20 }]}>
-          {/* Handle bar */}
-          <View style={styles.handleBar} />
-
-          <View style={styles.header}>
-            <View style={styles.titleContainer}>
-              <LinearGradient
-                colors={[Colors.primary + '20', Colors.primary + '08']}
-                style={styles.titleIcon}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <CalendarIcon size={20} color={Colors.primary} strokeWidth={2} />
-              </LinearGradient>
-              <View>
-                <Text style={styles.title}>Holiday Calendar</Text>
-                <Text style={styles.subtitle}>2024 - 2025</Text>
-              </View>
-            </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={20} color={Colors.text} strokeWidth={2} />
-            </TouchableOpacity>
+    <>
+      <Stack.Screen 
+        options={{
+          headerTitle: 'Holiday Calendar',
+          headerShown: true,
+          headerBackTitle: 'Home',
+          headerStyle: { backgroundColor: '#FFFFFF' },
+          headerShadowVisible: false,
+          headerTintColor: Colors.text,
+        }} 
+      />
+      <View style={styles.container}>
+        <ScrollView 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 20 }]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.compactHeader}>
+            <LinearGradient
+              colors={[Colors.primary + '15', Colors.primary + '05']}
+              style={styles.yearBadge}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <CalendarIcon size={16} color={Colors.primary} strokeWidth={2.5} />
+              <Text style={styles.yearText}>Year 2024 - 2025</Text>
+            </LinearGradient>
           </View>
 
           {/* Stats Summary */}
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statNumber}>{totalHolidays}</Text>
               <Text style={styles.statLabel}>Total</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: Colors.primary }]}>8</Text>
+              <Text style={[styles.statNumber, { color: Colors.primary }]}>{publicHolidays}</Text>
               <Text style={styles.statLabel}>Public</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: Colors.warning }]}>4</Text>
+              <Text style={[styles.statNumber, { color: Colors.warning }]}>{optionalHolidays}</Text>
               <Text style={styles.statLabel}>Optional</Text>
             </View>
           </View>
 
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.listContainer}>
             {holidays.map((holiday, index) => (
               <TouchableOpacity 
                 key={holiday.id} 
@@ -116,79 +115,49 @@ export default function HolidayCalendarModal({ visible, onClose }: HolidayCalend
                 </View>
               </TouchableOpacity>
             ))}
-          </ScrollView>
-        </View>
+          </View>
+        </ScrollView>
       </View>
-    </Modal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: '#FAFAFA',
   },
-  modalContainer: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingTop: 12,
-    maxHeight: '90%',
+  scrollContent: {
+    padding: 20,
   },
-  handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  header: {
-    flexDirection: 'row',
+  compactHeader: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
     marginBottom: 20,
+    marginTop: 0,
   },
-  titleContainer: {
+  yearBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 100,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.primary + '20',
   },
-  titleIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
+  yearText: {
+    fontSize: 14,
     fontWeight: '700',
-    color: Colors.text,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: Colors.secondaryText,
-    marginTop: 2,
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: Colors.primary,
   },
   statsRow: {
     flexDirection: 'row',
-    marginHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 20,
     paddingHorizontal: 20,
-    backgroundColor: Colors.background,
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     marginBottom: 20,
+    ...Colors.shadows.small,
   },
   statItem: {
     flex: 1,
@@ -198,69 +167,72 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
     color: Colors.secondaryText,
-    fontWeight: '500',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   statDivider: {
     width: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: '#F3F4F6',
     marginHorizontal: 10,
   },
-  content: {
-    paddingHorizontal: 20,
+  listContainer: {
+    gap: 12,
   },
   holidayItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    marginBottom: 10,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: '#F3F4F6',
+    ...Colors.shadows.small,
   },
   dateBox: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 52,
-    height: 52,
+    width: 56,
+    height: 56,
     borderRadius: 14,
-    marginRight: 14,
+    marginRight: 16,
   },
   dateText: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
   },
   monthText: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
-    marginTop: 1,
+    marginTop: 2,
   },
   details: {
     flex: 1,
   },
   holidayName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   dayText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.secondaryText,
+    fontWeight: '500',
   },
   tag: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   tagText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

@@ -1,23 +1,16 @@
 import Colors from '@/constants/Colors';
+import { useRouter } from 'expo-router';
 import { Calendar, ChevronRight } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import HolidayCalendarModal from './HolidayCalendarModal';
 
 export default function LeaveBalanceSection() {
-  const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>Leave Balance</Text>
-        <TouchableOpacity 
-          style={styles.linkButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.linkText}>Holidays</Text>
-          <ChevronRight size={16} color={Colors.primary} strokeWidth={2.5} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.cardContainer}>
@@ -42,12 +35,22 @@ export default function LeaveBalanceSection() {
             <Text style={styles.subLabel}>days available</Text>
           </View>
         </View>
-      </View>
 
-      <HolidayCalendarModal 
-        visible={modalVisible} 
-        onClose={() => setModalVisible(false)} 
-      />
+        {/* New Holiday Calendar Button */}
+        <TouchableOpacity 
+          style={styles.holidayButton}
+          onPress={() => router.push('/holidays')}
+          activeOpacity={0.7}
+        >
+          <View style={styles.holidayBtnContent}>
+            <Text style={styles.holidayBtnText}>View Holiday Calendar</Text>
+            <Text style={styles.holidayBtnSubtext}>See all public & optional holidays</Text>
+          </View>
+          <View style={styles.arrowContainer}>
+            <ChevronRight size={20} color={Colors.primary} strokeWidth={2.5} />
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -68,20 +71,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
   },
-  linkButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: Colors.primaryLight,
-  },
-  linkText: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '700',
-  },
   cardContainer: {
     backgroundColor: Colors.cardBackground,
     borderRadius: 20,
@@ -91,6 +80,7 @@ const styles = StyleSheet.create({
   balanceGrid: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 24,
   },
   balanceItem: {
     flex: 1,
@@ -126,5 +116,38 @@ const styles = StyleSheet.create({
     height: 80,
     backgroundColor: Colors.border,
     marginHorizontal: 16,
+  },
+  holidayButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.primaryLight + '50', // Very light tint
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.primary + '20',
+  },
+  holidayBtnContent: {
+    flex: 1,
+  },
+  holidayBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  holidayBtnSubtext: {
+    fontSize: 12,
+    color: Colors.secondaryText,
+  },
+  arrowContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
   },
 });
