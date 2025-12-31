@@ -101,7 +101,7 @@ export default function AppStoreScreen() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
-          height: Platform.OS === 'ios' ? 88 : 64,
+          height: Platform.OS === 'ios' ? 75 : 70,
           paddingBottom: Platform.OS === 'ios' ? 28 : 8,
           paddingTop: 8,
           elevation: 8,
