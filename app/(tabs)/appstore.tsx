@@ -1,7 +1,8 @@
 import Colors from '@/constants/Colors';
+import { useNavigation } from 'expo-router';
 // Force reload
-import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import {
+  ArrowLeft,
   BarChart,
   BookOpen,
   Box,
@@ -19,6 +20,7 @@ import {
   MessageCircle,
   Monitor,
   Plane,
+  RotateCw,
   Search,
   Server,
   Shield,
@@ -28,9 +30,10 @@ import {
   Users,
   Video
 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 
 const { width } = Dimensions.get('window');
 // 3 Columns Layout
@@ -75,21 +78,73 @@ export default function AppStoreScreen() {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
 
+
   const filteredApps = APPS.filter(app => 
     app.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAppOpen = async (url: string) => {
-    try {
-      await openBrowserAsync(url, {
-        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-        controlsColor: Colors.primary, 
-        toolbarColor: '#FFFFFF',
+  const [activeUrl, setActiveUrl] = useState('');
+  const webViewRef = useRef<WebView>(null);
+  const navigation = useNavigation();
+  const tabHidden = useRef(false);
+
+  useEffect(() => {
+    if (activeUrl) {
+      navigation.setOptions({
+        tabBarStyle: { display: 'none' }
       });
-    } catch (error) {
-      console.error("Failed to open browser:", error);
+      tabHidden.current = true;
+    } else if (tabHidden.current) {
+      // Restore the full tab bar styles to match _layout.tsx
+      navigation.setOptions({
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        }
+      });
+      tabHidden.current = false;
     }
+  }, [activeUrl, navigation]);
+
+  const handleAppOpen = (url: string) => {
+    setActiveUrl(url);
   };
+
+  const handleClose = () => {
+    setActiveUrl('');
+  };
+
+  if (activeUrl) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#FFFFFF' }]}>
+          <View style={styles.browserHeader}>
+              <TouchableOpacity onPress={handleClose} style={styles.headerButton}>
+                  <ArrowLeft size={20} color={Colors.primary} />
+                  <Text style={styles.headerButtonText}>Back to AppStore</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity onPress={() => webViewRef.current?.reload()} style={styles.headerButton}>
+                  <RotateCw size={20} color={Colors.primary} />
+              </TouchableOpacity>
+          </View>
+          <WebView 
+              ref={webViewRef}
+              source={{ uri: activeUrl }} 
+              style={styles.webview} 
+              startInLoadingState
+          />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -125,7 +180,7 @@ export default function AppStoreScreen() {
                     <TouchableOpacity 
                       key={app.id} 
                       style={styles.appCard}
-                      onPress={() => handleAppOpen('https://www.cricbuzz.com')}
+                      onPress={() => handleAppOpen('https://www.mphasis.com/home.html')}
                     >
                         <View style={[styles.iconContainer, { backgroundColor: app.bg }]}>
                            {React.createElement(app.icon as any, { size: 28, color: app.color, strokeWidth: 2 })}
@@ -137,6 +192,8 @@ export default function AppStoreScreen() {
             </View>
           )}
       </ScrollView>
+
+
     </View>
   );
 }
@@ -182,7 +239,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SIDE_PADDING, 
     paddingTop: 8,
-    paddingBottom: 110,
+    paddingBottom: 100,
   },
   gridContainer: {
     flexDirection: 'row',
@@ -223,8 +280,31 @@ const styles = StyleSheet.create({
       alignItems: 'center',
   },
   emptyText: {
-      color: '#9CA3AF',
       fontSize: 16,
       fontWeight: '500',
+  },
+  browserHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: '#E5E7EB',
+      backgroundColor: '#fff',
+  },
+  headerButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      padding: 4,
+  },
+  headerButtonText: {
+      color: Colors.primary,
+      fontSize: 16,
+      fontWeight: '600',
+  },
+  webview: {
+      flex: 1,
   }
 });
