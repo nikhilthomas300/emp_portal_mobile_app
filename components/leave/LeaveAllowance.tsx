@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.card,
-    borderRadius: Colors.radius,
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 16,
     paddingVertical: 16,
     ...Colors.shadows.small,
   },
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   borderRight: {
     borderRightWidth: 1,
-    borderRightColor: Colors.border,
+    borderRightColor: '#E2E8F0',
   },
   count: {
     fontSize: 20,

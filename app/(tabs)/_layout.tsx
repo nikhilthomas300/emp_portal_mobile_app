@@ -1,97 +1,117 @@
 import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
-import { Bot, Grid, Home, Search } from 'lucide-react-native';
+import { Bot, Grid, Home, Newspaper, Search } from 'lucide-react-native';
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
-        // @ts-ignore
-        unmountOnBlur: true,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
-          height: Platform.OS === 'ios' ? 75 : 70,
-          paddingBottom: 20, // Reduced padding
+          borderTopWidth: 0,
+          height: Platform.OS === 'ios' ? 85 : 65,
+          paddingBottom: Platform.OS === 'ios' ? 30 : 8,
           paddingTop: 8,
-          elevation: 0, 
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
+          elevation: 12,
+          shadowColor: '#6366F1',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 12,
         },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: '#64748B', 
         tabBarLabelStyle: {
-          fontSize: 12, 
+          fontSize: 11,
           fontWeight: '600',
-          marginTop: 2,
         },
+        headerShown: false,
+        animation: 'fade',
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <Home size={24} color={color} strokeWidth={2.5} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Home size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="news"
         options={{
-          title: 'Search',
-          tabBarIcon: ({ color }) => <Search size={24} color={color} strokeWidth={2.5} />,
+          title: 'News',
+          tabBarIcon: ({ color, focused }) => (
+            <Newspaper size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
           title: 'Ask Newton',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={{
-               backgroundColor: focused ? '#EEF2FF' : 'transparent',
-               paddingHorizontal: 16,
-               paddingVertical: 6,
-               borderRadius: 20,
-               alignItems: 'center',
-               justifyContent: 'center',
-               marginBottom: 4, // Lift the icon
-            }}>
-              <Bot size={24} color={color} strokeWidth={2.5} />
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.centerButtonWrapper}>
+              <LinearGradient
+                colors={['#4338CA', '#6366F1', '#818CF8']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.centerButton}
+              >
+                <Bot size={24} color="#FFFFFF" strokeWidth={2.5} />
+              </LinearGradient>
             </View>
           ),
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '700',
+            marginTop: 4,
+            color: Colors.primary,
+          },
         }}
       />
       <Tabs.Screen
         name="appstore"
         options={{
-          title: 'App Store',
-          tabBarIcon: ({ color }) => <Grid size={24} color={color} />,
+          title: 'Apps',
+          tabBarIcon: ({ color, focused }) => (
+            <Grid size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="directory"
+        name="search"
         options={{
-          href: null,
+          title: 'Search',
+          tabBarIcon: ({ color, focused }) => (
+            <Search size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
         }}
       />
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          href: null,
-        }}
-      />
-
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  centerButtonWrapper: {
+    position: 'relative',
+    top: -8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#4338CA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+});

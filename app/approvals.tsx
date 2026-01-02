@@ -1,647 +1,265 @@
-import PageHeader from '@/components/PageHeader';
-import StatusModal, { ModalType } from '@/components/StatusModal';
+import { ModalType, StatusModal } from '@/components/common';
+import { PageHeader } from '@/components/navigation';
 import Colors from '@/constants/Colors';
 import { Stack } from 'expo-router';
-import { Calendar, Search } from 'lucide-react-native';
+import { Briefcase, Check, CreditCard, Home, MessageSquare, Search, X } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const CATEGORIES = ['All', 'Leave', 'WFH', 'Expense', 'Shift', 'Overtime'];
-
-// Helper to get initials
-const getInitials = (name: string) => {
-  const names = name.split(' ');
-  if (names.length >= 2) {
-    return `${names[0][0]}${names[1][0]}`.toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-};
+const CATEGORIES = ['All', 'Leave', 'WFH', 'Expense'];
 
 const MOCK_DATA = [
-    { 
-      id: '1', 
-      category: 'WFH',
-      name: 'John Doe', 
-      role: 'Senior Developer',
-      startDate: 'Jan 15',
-      endDate: 'Jan 17',
-      duration: '3 Days',
-      type: 'Full Day',
-      reason: 'Personal work at home. Will be available on Slack.',
-      appliedDate: 'Today',
-      amount: null
-    },
-    { 
-      id: '2', 
-      category: 'WFH',
-      name: 'Jane Smith', 
-      role: 'Product Designer',
-      startDate: 'Jan 20',
-      endDate: 'Jan 20',
-      duration: '1 Day',
-      type: 'Half Day',
-      reason: 'Medical appointment.',
-      appliedDate: 'Yesterday',
-      amount: null
-    },
-    { 
-      id: '3', 
-      category: 'Leave',
-      name: 'Mike Ross', 
-      role: 'Legal Advisor',
-      startDate: 'Jan 22',
-      endDate: 'Jan 24',
-      duration: '3 Days',
-      type: 'Sick Leave',
-      reason: 'Suffering from high fever and cold.',
-      appliedDate: 'Today',
-      amount: null
-    },
-    { 
-      id: '4', 
-      category: 'Leave',
-      name: 'Rachel Green', 
-      role: 'Marketing Head',
-      startDate: 'Feb 01',
-      endDate: 'Feb 05',
-      duration: '5 Days',
-      type: 'Earned Leave',
-      reason: 'Annual family vacation trip.',
-      appliedDate: '2d ago',
-      amount: null
-    },
-    { 
-        id: '5', 
-        category: 'Expense',
-        name: 'Robert Fox', 
-        role: 'DevOps Engineer',
-        startDate: 'Jan 10',
-        endDate: 'Jan 10',
-        duration: null,
-        type: 'Travel Reimbursement',
-        reason: 'Client meeting travel expenses (Cab + Meals).',
-        appliedDate: '3d ago',
-        amount: '$45.00'
-    },
+  { id: '1', category: 'WFH', name: 'John Doe', role: 'Senior Developer', type: 'Work From Home', dates: 'Jan 15 - 17', days: '3 days', reason: 'Personal work from home.', applied: 'Today' },
+  { id: '2', category: 'Leave', name: 'Mike Ross', role: 'Legal Advisor', type: 'Sick Leave', dates: 'Jan 22 - 24', days: '3 days', reason: 'Suffering from fever.', applied: 'Today' },
+  { id: '3', category: 'Expense', name: 'Robert Fox', role: 'DevOps Lead', type: 'Travel Expense', dates: 'Jan 10', days: '', reason: 'Client meeting travel.', applied: '2d ago', amount: '$245' },
 ];
 
+const getColor = (cat: string) => ({ Leave: '#6366F1', WFH: '#10B981', Expense: '#F59E0B' }[cat] || Colors.primary);
+const getIcon = (cat: string) => ({ Leave: Briefcase, WFH: Home, Expense: CreditCard }[cat] || Briefcase);
+const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2);
+
 export default function ApprovalsScreen() {
+  const insets = useSafeAreaInsets();
   const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Action Modal State
-  const [modalVisible, setModalVisible] = useState(false);
-  const [actionType, setActionType] = useState<'Approve' | 'Reject' | null>(null);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [search, setSearch] = useState('');
+  const [actionModal, setActionModal] = useState<{ visible: boolean; type: 'Approve' | 'Reject'; item: any } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [statusModal, setStatusModal] = useState({ visible: false, type: 'success' as ModalType, title: '', description: '' });
 
-  // Status Modal State
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [statusModalConfig, setStatusModalConfig] = useState({
-    type: 'info' as ModalType,
-    title: '',
-    description: ''
-  });
+  const filteredData = MOCK_DATA.filter(d =>
+    (activeCategory === 'All' || d.category === activeCategory) &&
+    (d.name.toLowerCase().includes(search.toLowerCase()) || d.type.toLowerCase().includes(search.toLowerCase()))
+  );
 
-  const initiateAction = (item: any, type: 'Approve' | 'Reject') => {
-    setSelectedItem(item);
-    setActionType(type);
-    setRejectReason(''); 
-    setModalVisible(true);
-  };
-
-  const handleConfirm = () => {
-    if (actionType === 'Reject' && !rejectReason.trim()) {
-      setStatusModalConfig({
-        type: 'error',
-        title: 'Reason Required',
-        description: 'Please enter a reason for rejection to proceed.'
-      });
-      setStatusModalVisible(true);
+  const handleAction = () => {
+    if (actionModal?.type === 'Reject' && !rejectReason.trim()) {
+      setStatusModal({ visible: true, type: 'error', title: 'Required', description: 'Enter rejection reason.' });
       return;
     }
-
-    setModalVisible(false); // Close Action Modal
-    
-    // Simulate API delay then show success
+    setActionModal(null);
     setTimeout(() => {
-        const isApprove = actionType === 'Approve';
-        setStatusModalConfig({
-            type: isApprove ? 'success' : 'success', // Both are "successful actions" even if one is a rejection
-            title: isApprove ? 'Request Approved' : 'Request Rejected',
-            description: isApprove 
-                ? `You have successfully approved the request for ${selectedItem?.name}.`
-                : `You have successfully rejected the request for ${selectedItem?.name}.`
-        });
-        setStatusModalVisible(true);
-    }, 400);
+      setStatusModal({
+        visible: true,
+        type: 'success',
+        title: actionModal?.type === 'Approve' ? 'Approved' : 'Rejected',
+        description: `${actionModal?.item?.name}'s request has been ${actionModal?.type?.toLowerCase()}ed.`
+      });
+    }, 200);
   };
 
-  const getFilteredData = () => {
-    let data = MOCK_DATA;
-    if (activeCategory !== 'All') {
-        data = data.filter(item => item.category === activeCategory);
-    }
-    if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        data = data.filter(item => 
-          item.name.toLowerCase().includes(query) ||
-          item.reason.toLowerCase().includes(query)
-        );
-    }
-    return data;
+  const renderCard = ({ item }: { item: typeof MOCK_DATA[0] }) => {
+    const color = getColor(item.category);
+    const Icon = getIcon(item.category);
+
+    return (
+      <View style={styles.card}>
+        {/* Header Row */}
+        <View style={styles.cardHeader}>
+          <View style={[styles.avatar, { backgroundColor: color + '15' }]}>
+            <Text style={[styles.avatarText, { color }]}>{getInitials(item.name)}</Text>
+          </View>
+          <View style={styles.headerInfo}>
+            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.role}>{item.role}</Text>
+          </View>
+          <View style={[styles.badge, { backgroundColor: color + '15' }]}>
+            <Icon size={12} color={color} />
+            <Text style={[styles.badgeText, { color }]}>{item.category}</Text>
+          </View>
+        </View>
+
+        {/* Details Row */}
+        <View style={styles.detailsRow}>
+          <View style={styles.detailCol}>
+            <Text style={styles.detailLabel}>Type</Text>
+            <Text style={styles.detailValue}>{item.type}</Text>
+          </View>
+          <View style={styles.detailCol}>
+            <Text style={styles.detailLabel}>Duration</Text>
+            <Text style={styles.detailValue}>{item.dates}{item.days ? ` (${item.days})` : ''}</Text>
+          </View>
+          {item.amount && (
+            <View style={styles.detailCol}>
+              <Text style={styles.detailLabel}>Amount</Text>
+              <Text style={[styles.detailValue, { color: '#10B981', fontWeight: '700' }]}>{item.amount}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Reason */}
+        <View style={styles.reasonRow}>
+          <MessageSquare size={14} color="#64748B" />
+          <Text style={styles.reason} numberOfLines={2}>{item.reason}</Text>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.cardFooter}>
+          <Text style={styles.appliedText}>Applied {item.applied}</Text>
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.rejectBtn} onPress={() => setActionModal({ visible: true, type: 'Reject', item })}>
+              <X size={14} color="#EF4444" strokeWidth={2.5} />
+              <Text style={styles.rejectBtnText}>Reject</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.approveBtn} onPress={() => setActionModal({ visible: true, type: 'Approve', item })}>
+              <Check size={14} color="#FFF" strokeWidth={2.5} />
+              <Text style={styles.approveBtnText}>Approve</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
   };
-
-  const renderCard = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      
-      {/* 1. Header with Initials Avatar */}
-      <View style={styles.cardHeader}>
-         <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>{getInitials(item.name)}</Text>
-         </View>
-         <View style={styles.headerMeta}>
-             <View style={styles.rowBetween}>
-                <Text style={styles.userName}>{item.name}</Text>
-                <Text style={styles.dateLabel}>{item.appliedDate}</Text>
-             </View>
-             <Text style={styles.userRole}>{item.role}</Text>
-         </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      {/* 2. Structured Details */}
-      <View style={styles.detailsContainer}>
-         <View style={styles.detailRow}>
-            <View style={styles.labelCol}>
-                <Text style={styles.label}>Category</Text>
-            </View>
-            <View style={styles.valCol}>
-                <View style={styles.pill}>
-                    <Text style={styles.pillText}>{item.category} • {item.type}</Text>
-                </View>
-            </View>
-         </View>
-
-         <View style={styles.detailRow}>
-            <View style={styles.labelCol}>
-                <Text style={styles.label}>Date</Text>
-            </View>
-            <View style={styles.valCol}>
-                <View style={styles.dateValRow}>
-                    <Calendar size={13} color="#4B5563" style={{ marginRight: 5 }} />
-                    <Text style={styles.valText}>{item.startDate} - {item.endDate}</Text>
-                    {item.duration && (
-                         <Text style={styles.subText}> ({item.duration})</Text>
-                    )}
-                </View>
-            </View>
-         </View>
-
-         {item.amount && (
-            <View style={styles.detailRow}>
-                <View style={styles.labelCol}>
-                    <Text style={styles.label}>Amount</Text>
-                </View>
-                <View style={styles.valCol}>
-                    <Text style={styles.amountText}>{item.amount}</Text>
-                </View>
-            </View>
-         )}
-
-         {/* Reason Section */}
-         <View style={styles.reasonBox}>
-            <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
-         </View>
-      </View>
-
-      {/* 3. Footer Actions */}
-      <View style={styles.footer}>
-         <TouchableOpacity 
-            style={[styles.btn, styles.rejectBtn]}
-            onPress={() => initiateAction(item, 'Reject')}
-         >
-            <Text style={styles.rejectBtnText}>Reject</Text>
-         </TouchableOpacity>
-         
-         <TouchableOpacity 
-            style={[styles.btn, styles.approveBtn]}
-            onPress={() => initiateAction(item, 'Approve')}
-         >
-            <Text style={styles.approveBtnText}>Approve</Text>
-         </TouchableOpacity>
-      </View>
-
-    </View>
-  );
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <PageHeader title="Approvals" />
-      
-      {/* Top Controls */}
-      <View style={styles.controlsSection}>
-         {/* Search */}
-         <View style={styles.searchBar}>
-            <Search size={18} color="#9CA3AF" />
-            <TextInput 
-                style={styles.searchInput}
-                placeholder="Search..."
-                placeholderTextColor="#9CA3AF"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
-         </View>
 
-         {/* Category Tabs */}
-         <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabsScroll}
-         >
-            {CATEGORIES.map(cat => {
-                const isActive = activeCategory === cat;
-                return (
-                    <TouchableOpacity 
-                        key={cat}
-                        style={[styles.tabItem, isActive && styles.activeTabItem]}
-                        onPress={() => setActiveCategory(cat)}
-                    >
-                        <Text style={[styles.tabText, isActive && styles.activeTabText]}>{cat}</Text>
-                    </TouchableOpacity>
-                );
-            })}
-         </ScrollView>
+      {/* Sticky Search & Categories */}
+      <View style={styles.stickyHeader}>
+        {/* Search */}
+        <View style={styles.searchContainer}>
+          <Search size={18} color="#94A3B8" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search approvals..."
+            placeholderTextColor="#94A3B8"
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+
+        {/* Category Pills - Horizontal Simple */}
+        <View style={styles.categoryRow}>
+          {CATEGORIES.map(cat => {
+            const isActive = activeCategory === cat;
+            return (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.categoryPill, isActive && styles.categoryPillActive]}
+                onPress={() => setActiveCategory(cat)}
+              >
+                <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>{cat}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
-      <FlatList 
-        data={getFilteredData()}
+      <FlatList
+        data={filteredData}
         renderItem={renderCard}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No items to show</Text>
-            </View>
-        }
+        ListEmptyComponent={<View style={styles.empty}><Text style={styles.emptyText}>No pending approvals</Text></View>}
       />
 
-       {/* Action Modal */}
-       <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.modalOverlay}
-        >
+      {/* Action Modal */}
+      <Modal visible={!!actionModal?.visible} transparent animationType="fade" onRequestClose={() => setActionModal(null)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
-                {actionType === 'Approve' ? 'Confirm Approval' : 'Reject Request'}
-            </Text>
-            <Text style={styles.modalMsg}>
-                {actionType === 'Approve' 
-                 ? `Are you sure you want to approve this request for ${selectedItem?.name}?` 
-                 : `Please provide a reason to reject ${selectedItem?.name}.`}
+            <View style={[styles.modalIcon, { backgroundColor: actionModal?.type === 'Approve' ? '#10B98115' : '#EF444415' }]}>
+              {actionModal?.type === 'Approve' ? <Check size={28} color="#10B981" /> : <X size={28} color="#EF4444" />}
+            </View>
+            <Text style={styles.modalTitle}>{actionModal?.type} Request</Text>
+            <Text style={styles.modalSubtitle}>
+              {actionModal?.type === 'Approve'
+                ? `Approve ${actionModal?.item?.name}'s ${actionModal?.item?.type?.toLowerCase()}?`
+                : `Please provide a reason for rejection.`}
             </Text>
 
-            {actionType === 'Reject' && (
-                <TextInput 
-                    style={styles.reasonInput}
-                    placeholder="Reason..."
-                    value={rejectReason}
-                    onChangeText={setRejectReason}
-                    multiline
-                />
+            {actionModal?.type === 'Reject' && (
+              <TextInput
+                style={styles.rejectInput}
+                placeholder="Rejection reason..."
+                placeholderTextColor="#94A3B8"
+                value={rejectReason}
+                onChangeText={setRejectReason}
+                multiline
+              />
             )}
 
             <View style={styles.modalActions}>
-                <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setModalVisible(false)}>
-                    <Text style={styles.modalBtnCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={[
-                        styles.modalBtnConfirm, 
-                        // Dynamically set background color based on action
-                        actionType === 'Reject' ? { backgroundColor: Colors.danger } : { backgroundColor: Colors.success }
-                    ]} 
-                    onPress={handleConfirm}
-                >
-                    <Text style={styles.modalBtnConfirmText}>
-                        {actionType === 'Approve' ? 'Confirm' : 'Reject'}
-                    </Text>
-                </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setActionModal(null)}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmBtn, actionModal?.type === 'Reject' && { backgroundColor: '#EF4444' }]}
+                onPress={handleAction}
+              >
+                <Text style={styles.confirmBtnText}>{actionModal?.type}</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Status Modal */}
-      <StatusModal 
-        visible={statusModalVisible}
-        onClose={() => setStatusModalVisible(false)}
-        type={statusModalConfig.type}
-        title={statusModalConfig.title}
-        description={statusModalConfig.description}
+      <StatusModal
+        visible={statusModal.visible}
+        onClose={() => setStatusModal({ ...statusModal, visible: false })}
+        type={statusModal.type}
+        title={statusModal.title}
+        description={statusModal.description}
       />
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F3F4F6', // Neutral light gray background
-  },
-  controlsSection: {
-    backgroundColor: '#FFF',
-    paddingTop: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    marginHorizontal: 16,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 12,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#111827',
-  },
-  tabsScroll: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 8,
-  },
-  tabItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  activeTabItem: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  tabText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#6B7280',
-  },
-  activeTabText: {
-    color: '#FFF',
-    fontWeight: '600',
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  emptyContainer: {
-    marginTop: 60,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#9CA3AF',
-    fontSize: 15,
-  },
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
 
-  /* Enterprise Card */
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    ...Colors.shadows?.small,
-  },
-  
-  /* Header */
-  cardHeader: {
-    flexDirection: 'row',
-    padding: 14,
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginRight: 12,
-  },
-  avatarText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4B5563',
-  },
-  headerMeta: {
-    flex: 1,
-  },
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-  userName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  dateLabel: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-  userRole: {
-    fontSize: 13,
-    color: '#6B7280',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#F3F4F6',
-    marginHorizontal: 14,
-  },
+  stickyHeader: { backgroundColor: '#FFF', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F5F9', paddingHorizontal: 14, paddingVertical: Platform.OS === 'ios' ? 12 : 8, borderRadius: 12, gap: 10, marginBottom: 12 },
+  searchInput: { flex: 1, fontSize: 15, color: '#1E293B' },
 
-  /* Details Body */
-  detailsContainer: {
-    padding: 14,
-    gap: 10,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  labelCol: {
-    width: 65,
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    fontWeight: '500',
-  },
-  valCol: {
-    flex: 1,
-  },
-  pill: {
-    backgroundColor: '#F9FAFB',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#F3F4F6',
-  },
-  pillText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4B5563',
-  },
-  dateValRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  valText: {
-    fontSize: 13,
-    color: '#374151',
-    fontWeight: '500',
-  },
-  subText: {
-    fontSize: 13,
-    color: '#6B7280',
-  }, 
-  amountText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#10B981',
-  },
-  reasonBox: {
-    marginTop: 4,
-    backgroundColor: '#F9FAFB',
-    padding: 10,
-    borderRadius: 8,
-  },
-  reasonText: {
-    fontSize: 13,
-    color: '#4B5563',
-    lineHeight: 18,
-  },
+  categoryRow: { flexDirection: 'row', gap: 8 },
+  categoryPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F1F5F9' },
+  categoryPillActive: { backgroundColor: '#1E293B' },
+  categoryText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
+  categoryTextActive: { color: '#FFF' },
 
-  /* Footer */
-  footer: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    padding: 12,
-    gap: 12,
-  },
-  btn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rejectBtn: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: Colors.danger, // Red Border
-  },
-  approveBtn: {
-    backgroundColor: Colors.success, // Green Background
-  },
-  rejectBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.danger, // Red Text
-  },
-  approveBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFF', // White Text
-  },
+  listContent: { padding: 16, paddingBottom: 40 },
+  empty: { alignItems: 'center', paddingVertical: 60 },
+  emptyText: { fontSize: 15, color: '#94A3B8' },
 
-  /* Modal */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 24,
-    ...Colors.shadows?.medium,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  modalMsg: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  reasonInput: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    padding: 12,
-    height: 80,
-    textAlignVertical: 'top',
-    marginBottom: 20,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  modalBtnCancel: {
-    flex: 1,
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  modalBtnConfirm: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    backgroundColor: Colors.success, // Default Confirm is Green
-  },
-  modalBtnConfirmText: {
-    color: '#FFF',
-    fontWeight: '600',
-  },
-  modalBtnCancelText: {
-    color: '#4B5563',
-    fontWeight: '600',
-  },
+  card: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#E2E8F0' },
+
+  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  avatar: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  avatarText: { fontSize: 15, fontWeight: '700' },
+  headerInfo: { flex: 1, marginLeft: 12 },
+  name: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
+  role: { fontSize: 12, color: '#64748B', marginTop: 2 },
+  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
+  badgeText: { fontSize: 11, fontWeight: '700' },
+
+  detailsRow: { flexDirection: 'row', marginBottom: 12, gap: 16 },
+  detailCol: {},
+  detailLabel: { fontSize: 11, color: '#94A3B8', marginBottom: 2 },
+  detailValue: { fontSize: 13, fontWeight: '600', color: '#374151' },
+
+  reasonRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#F8FAFC', padding: 10, borderRadius: 8, marginBottom: 14 },
+  reason: { flex: 1, fontSize: 13, color: '#64748B', lineHeight: 18 },
+
+  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F1F5F9' },
+  appliedText: { fontSize: 11, color: '#94A3B8' },
+  actions: { flexDirection: 'row', gap: 8 },
+  rejectBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA' },
+  rejectBtnText: { fontSize: 13, fontWeight: '600', color: '#EF4444' },
+  approveBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#10B981' },
+  approveBtnText: { fontSize: 13, fontWeight: '600', color: '#FFF' },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
+  modalCard: { backgroundColor: '#FFF', borderRadius: 20, padding: 24, alignItems: 'center' },
+  modalIcon: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B', marginBottom: 8 },
+  modalSubtitle: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 20, marginBottom: 16 },
+  rejectInput: { width: '100%', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 12, padding: 14, height: 80, textAlignVertical: 'top', marginBottom: 16, fontSize: 14 },
+  modalActions: { flexDirection: 'row', gap: 12, width: '100%' },
+  cancelBtn: { flex: 1, backgroundColor: '#F1F5F9', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+  cancelBtnText: { fontSize: 15, fontWeight: '600', color: '#64748B' },
+  confirmBtn: { flex: 1, backgroundColor: '#10B981', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+  confirmBtnText: { fontSize: 15, fontWeight: '700', color: '#FFF' },
 });

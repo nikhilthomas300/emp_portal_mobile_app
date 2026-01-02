@@ -1,542 +1,359 @@
-import PageHeader from '@/components/PageHeader';
-import StatusModal, { ModalType } from '@/components/StatusModal';
+import { ModalType, StatusModal } from '@/components/common';
+import { PageHeader } from '@/components/navigation';
 import Colors from '@/constants/Colors';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, router } from 'expo-router';
-import { Calendar, ChevronDown } from 'lucide-react-native';
+import { Building, Calendar, ChevronDown, GraduationCap, Home, MapPin, MessageSquare, Plane } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const WSS_HISTORY = [
-  { id: '1', date: 'Oct 15, 2024', type: 'WFH - Short Term', reason: 'Plumber check', status: 'Approved' },
-  { id: '2', date: 'Nov 02, 2024', type: 'Client Location', reason: 'Client Meeting', status: 'Rejected' },
+const WSS_TYPES = [
+  { id: 1, name: 'Work From Home', short: 'WFH', icon: Home, color: '#6366F1' },
+  { id: 2, name: 'Client Location', short: 'Client', icon: Building, color: '#10B981' },
+  { id: 3, name: 'Training', short: 'Training', icon: GraduationCap, color: '#F59E0B' },
+  { id: 4, name: 'Travelling', short: 'Travel', icon: Plane, color: '#EC4899' },
 ];
 
-const WSS_TYPES = ['Work From Home', 'Work From Client Location', 'In Training'];
-const WFH_TERMS = ['Short Term', 'Long Term'];
+const INDIA_STATES = ['Karnataka', 'Maharashtra', 'Tamil Nadu', 'Delhi', 'Telangana', 'Gujarat'];
+const LOCATIONS: { [key: string]: string[] } = {
+  'Karnataka': ['Bangalore', 'Mysore', 'Mangalore'],
+  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
+  'Delhi': ['New Delhi', 'Noida', 'Gurgaon'],
+  'Telangana': ['Hyderabad', 'Warangal'],
+  'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara'],
+};
 
-export default function ApplyWSSScreen() {
-  const [activeTab, setActiveTab] = useState<'New' | 'History'>('New');
+const HISTORY = [
+  { id: '1', type: 'Work From Home', date: 'Oct 15 - 17, 2025', days: '3 days', status: 'Approved', comment: 'Need to work from home for personal reasons' },
+  { id: '2', type: 'Client Location', date: 'Nov 02, 2025', days: '1 day', status: 'Rejected', comment: 'Client meeting at their Bangalore office - rejected due to conflict' },
+];
 
-  const [date, setDate] = useState(new Date());
+export default function ApplyWFHScreen() {
+  const insets = useSafeAreaInsets();
+  const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
+  const [selectedType, setSelectedType] = useState(WSS_TYPES[0]);
+  const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  
-  // WSS Fields
-  const [wssType, setWssType] = useState(WSS_TYPES[0]);
-  const [wfhTerm, setWfhTerm] = useState(WFH_TERMS[0]); 
-  
   const [reason, setReason] = useState('');
-  
-  const [showWssType, setShowWssType] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
+  const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-
-  // Status Modal State
+  
+  // WFH specific
+  const [wfhDuration, setWfhDuration] = useState<'Short Term' | 'Long Term'>('Short Term');
+  
+  // Client Location specific
+  const [country, setCountry] = useState<'India' | 'Other'>('India');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [showStateDropdown, setShowStateDropdown] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalConfig, setModalConfig] = useState({
-    type: 'info' as ModalType,
-    title: '',
-    description: '',
-    action: undefined as (() => void) | undefined
-  });
+  const [modalConfig, setModalConfig] = useState({ type: 'info' as ModalType, title: '', description: '' });
+
+  const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  const getStatusColor = (status: string) => status === 'Approved' ? '#10B981' : status === 'Rejected' ? '#EF4444' : '#F59E0B';
 
   const handleSubmit = () => {
     if (!reason.trim()) {
-      setModalConfig({
-        type: 'error',
-        title: 'Reason Required',
-        description: 'Please enter a valid reason for your WSS request.',
-        action: undefined
-      });
+      setModalConfig({ type: 'error', title: 'Required', description: 'Please enter a reason.' });
       setModalVisible(true);
       return;
     }
-
-    // Simulate API submission
-    setModalConfig({
-        type: 'success',
-        title: 'Request Submitted',
-        description: 'Your WSS request has been submitted successfully.',
-        action: () => {
-           setModalVisible(false);
-           router.back();
-        }
-    });
+    if (selectedType.id === 2 && country === 'India' && (!selectedState || !selectedLocation)) {
+      setModalConfig({ type: 'error', title: 'Required', description: 'Please select state and location.' });
+      setModalVisible(true);
+      return;
+    }
+    setModalConfig({ type: 'success', title: 'Submitted', description: 'WSS request sent successfully.' });
     setModalVisible(true);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const handleTypeChange = (type: typeof WSS_TYPES[0]) => {
+    setSelectedType(type);
+    setWfhDuration('Short Term');
+    setCountry('India');
+    setSelectedState('');
+    setSelectedLocation('');
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Approved': return Colors.success;
-      case 'Rejected': return Colors.danger;
-      default: return '#F59E0B'; 
-    }
-  };
-
-  const renderHistoryTable = () => (
-     <View style={styles.tableContainer}>
-       <View style={styles.tableHeader}>
-         <Text style={[styles.columnHeader, { flex: 2 }]}>Date</Text>
-         <Text style={[styles.columnHeader, { flex: 2 }]}>Type</Text>
-         <Text style={[styles.columnHeader, { flex: 1.2, textAlign: 'right' }]}>Status</Text>
-       </View>
-       <FlatList
-         data={WSS_HISTORY}
-         keyExtractor={item => item.id}
-         scrollEnabled={false}
-         renderItem={({ item }) => (
-           <View style={styles.tableRow}>
-             <View style={{ flex: 2 }}>
-                 <Text style={styles.cellTitle}>{item.date}</Text>
-                 <Text style={styles.cellSubtitle} numberOfLines={1}>{item.reason}</Text>
-             </View>
-             <Text style={[styles.cellText, { flex: 2 }]}>{item.type}</Text>
-             <View style={{ flex: 1.2, alignItems: 'flex-end' }}>
-                 <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-                     <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
-                 </View>
-             </View>
-           </View>
-         )}
-       />
-     </View>
-  );
-
-  const renderDropdown = (
-      visible: boolean, 
-      setVisible: (v: boolean) => void, 
-      current: string, 
-      options: string[], 
-      onSelect: (v: string) => void,
-      label: string
-  ) => (
-      <View style={[styles.inputGroup, { zIndex: visible ? 100 : 1 }]}>
-         <Text style={styles.label}>{label} <Text style={{color: Colors.danger}}>*</Text></Text>
-         <TouchableOpacity style={styles.selectInput} onPress={() => setVisible(!visible)}>
-             <Text style={styles.inputText}>{current}</Text>
-             <ChevronDown size={20} color={Colors.secondaryText} />
-         </TouchableOpacity>
-         
-         {visible && (
-             <View style={styles.dropdownList}>
-                 {options.map(opt => (
-                     <TouchableOpacity 
-                        key={opt} 
-                        style={styles.dropdownItem} 
-                        onPress={() => { onSelect(opt); setVisible(false); }}
-                     >
-                         <Text style={styles.dropdownItemText}>{opt}</Text>
-                     </TouchableOpacity>
-                 ))}
-             </View>
-         )}
-      </View>
-  );
-
-  const renderForm = () => (
-    <View style={styles.formContainer}>
-        
-        {/* WSS Type Dropdown */}
-        {renderDropdown(showWssType, setShowWssType, wssType, WSS_TYPES, setWssType, 'WSS Type')}
-
-        {/* WFH Sub-Type: Term Selection (Only if WFH) */}
-        {wssType === 'Work From Home' && (
-             <View style={styles.inputGroup}>
-                 <Text style={styles.label}>WFH Term</Text>
-                 <View style={styles.radioGroup}>
-                    {WFH_TERMS.map(term => (
-                        <TouchableOpacity 
-                            key={term} 
-                            style={styles.radioBtn} 
-                            onPress={() => setWfhTerm(term)}
-                        >
-                             <View style={[styles.radioCircle, wfhTerm === term && styles.radioCircleSelected]}>
-                                 {wfhTerm === term && <View style={styles.radioDot} />}
-                             </View>
-                             <Text style={styles.radioLabel}>{term}</Text>
-                        </TouchableOpacity>
-                    ))}
-                 </View>
-             </View>
-        )}
-
-        {/* Start Date */}
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Start Date <Text style={{color: Colors.danger}}>*</Text></Text>
-            <TouchableOpacity style={styles.selectInput} onPress={() => setShowPicker(true)}>
-                <View style={{flexDirection: 'row', gap: 8, alignItems: 'center'}}>
-                    <Calendar size={18} color={Colors.primary} />
-                    <Text style={styles.inputText}>{formatDate(date)}</Text>
-                </View>
-            </TouchableOpacity>
-        </View>
-
-        {/* End Date (Added as requested) */}
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>End Date <Text style={{color: Colors.danger}}>*</Text></Text>
-            <TouchableOpacity style={styles.selectInput} onPress={() => setShowEndPicker(true)}>
-                <View style={{flexDirection: 'row', gap: 8, alignItems: 'center'}}>
-                    <Calendar size={18} color={Colors.primary} />
-                    <Text style={styles.inputText}>{formatDate(endDate)}</Text>
-                </View>
-            </TouchableOpacity>
-        </View>
-
-        {/* Reason */}
-        <View style={[styles.inputGroup, { marginBottom: 80 }]}>
-            <Text style={styles.label}>Reason <Text style={{color: Colors.danger}}>*</Text></Text>
-            <TextInput
-            style={styles.textArea}
-            placeholder="Enter reason..."
-            placeholderTextColor={Colors.secondaryText}
-            multiline
-            numberOfLines={4}
-            value={reason}
-            onChangeText={setReason}
-            textAlignVertical="top"
-            />
-        </View>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <PageHeader title="WSS" />
-      
+      <PageHeader title="Apply WSS" />
+
       {/* Tabs */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-            style={[styles.tab, activeTab === 'New' && styles.activeTab]} 
-            onPress={() => setActiveTab('New')}
-        >
-            <Text style={[styles.tabText, activeTab === 'New' && styles.activeTabText]}>New Request</Text>
+        <TouchableOpacity style={[styles.tab, activeTab === 'new' && styles.tabActive]} onPress={() => setActiveTab('new')}>
+          <Text style={[styles.tabText, activeTab === 'new' && styles.tabTextActive]}>New Request</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-            style={[styles.tab, activeTab === 'History' && styles.activeTab]} 
-            onPress={() => setActiveTab('History')}
-        >
-             <Text style={[styles.tabText, activeTab === 'History' && styles.activeTabText]}>My Requests</Text>
+        <TouchableOpacity style={[styles.tab, activeTab === 'history' && styles.tabActive]} onPress={() => setActiveTab('history')}>
+          <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>History</Text>
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {activeTab === 'New' ? renderForm() : renderHistoryTable()}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+          {activeTab === 'new' ? (
+            <>
+              {/* Work Type Selection */}
+              <Text style={styles.label}>Work Type</Text>
+              <View style={styles.typeGrid}>
+                {WSS_TYPES.map(type => (
+                  <TouchableOpacity
+                    key={type.id}
+                    style={[styles.typeCard, selectedType.id === type.id && { borderColor: type.color, backgroundColor: type.color + '10' }]}
+                    onPress={() => handleTypeChange(type)}
+                  >
+                    <View style={[styles.typeIcon, { backgroundColor: type.color + '20' }]}>
+                      <type.icon size={18} color={type.color} />
+                    </View>
+                    <Text style={styles.typeName}>{type.short}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* WFH Duration - Only for Work From Home */}
+              {selectedType.id === 1 && (
+                <>
+                  <Text style={styles.label}>Duration Type</Text>
+                  <View style={styles.optionRow}>
+                    {(['Short Term', 'Long Term'] as const).map(opt => (
+                      <TouchableOpacity
+                        key={opt}
+                        style={[styles.optionBtn, wfhDuration === opt && styles.optionBtnActive]}
+                        onPress={() => setWfhDuration(opt)}
+                      >
+                        <Text style={[styles.optionText, wfhDuration === opt && styles.optionTextActive]}>{opt}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+
+              {/* Client Location Options */}
+              {selectedType.id === 2 && (
+                <>
+                  <Text style={styles.label}>Country</Text>
+                  <View style={styles.optionRow}>
+                    {(['India', 'Other'] as const).map(opt => (
+                      <TouchableOpacity
+                        key={opt}
+                        style={[styles.optionBtn, country === opt && styles.optionBtnActive]}
+                        onPress={() => { setCountry(opt); setSelectedState(''); setSelectedLocation(''); }}
+                      >
+                        <Text style={[styles.optionText, country === opt && styles.optionTextActive]}>
+                          {opt === 'Other' ? 'Other than India' : opt}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {country === 'India' && (
+                    <>
+                      <Text style={styles.label}>State</Text>
+                      <TouchableOpacity style={styles.dropdown} onPress={() => setShowStateDropdown(!showStateDropdown)}>
+                        <MapPin size={16} color="#64748B" />
+                        <Text style={selectedState ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                          {selectedState || 'Select State'}
+                        </Text>
+                        <ChevronDown size={18} color="#64748B" />
+                      </TouchableOpacity>
+                      {showStateDropdown && (
+                        <View style={styles.dropdownList}>
+                          {INDIA_STATES.map(state => (
+                            <TouchableOpacity
+                              key={state}
+                              style={styles.dropdownItem}
+                              onPress={() => { setSelectedState(state); setSelectedLocation(''); setShowStateDropdown(false); }}
+                            >
+                              <Text style={styles.dropdownItemText}>{state}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
+
+                      {selectedState && (
+                        <>
+                          <Text style={styles.label}>Location</Text>
+                          <TouchableOpacity style={styles.dropdown} onPress={() => setShowLocationDropdown(!showLocationDropdown)}>
+                            <MapPin size={16} color="#64748B" />
+                            <Text style={selectedLocation ? styles.dropdownValue : styles.dropdownPlaceholder}>
+                              {selectedLocation || 'Select Location'}
+                            </Text>
+                            <ChevronDown size={18} color="#64748B" />
+                          </TouchableOpacity>
+                          {showLocationDropdown && (
+                            <View style={styles.dropdownList}>
+                              {LOCATIONS[selectedState]?.map(loc => (
+                                <TouchableOpacity
+                                  key={loc}
+                                  style={styles.dropdownItem}
+                                  onPress={() => { setSelectedLocation(loc); setShowLocationDropdown(false); }}
+                                >
+                                  <Text style={styles.dropdownItemText}>{loc}</Text>
+                                </TouchableOpacity>
+                              ))}
+                            </View>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Dates */}
+              <View style={styles.row}>
+                <View style={styles.col}>
+                  <Text style={styles.label}>From</Text>
+                  <TouchableOpacity style={styles.dateBtn} onPress={() => setShowStartPicker(true)}>
+                    <Calendar size={16} color={Colors.primary} />
+                    <Text style={styles.dateText}>{formatDate(startDate)}</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.col}>
+                  <Text style={styles.label}>To</Text>
+                  <TouchableOpacity style={styles.dateBtn} onPress={() => setShowEndPicker(true)}>
+                    <Calendar size={16} color={Colors.primary} />
+                    <Text style={styles.dateText}>{formatDate(endDate)}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Reason */}
+              <Text style={styles.label}>Reason</Text>
+              <TextInput
+                style={styles.textArea}
+                placeholder="Enter reason..."
+                placeholderTextColor="#94A3B8"
+                multiline
+                value={reason}
+                onChangeText={setReason}
+              />
+            </>
+          ) : (
+            <>
+              {HISTORY.map(item => (
+                <View key={item.id} style={styles.historyCard}>
+                  <View style={styles.historyHeader}>
+                    <View>
+                      <Text style={styles.historyType}>{item.type}</Text>
+                      <Text style={styles.historyDate}>{item.date} • {item.days}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '15' }]}>
+                      <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>{item.status}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.commentRow}>
+                    <MessageSquare size={14} color="#64748B" />
+                    <Text style={styles.commentText} numberOfLines={2}>{item.comment}</Text>
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Footer Submit Button - Always Visible */}
-      {activeTab === 'New' && (
-          <View style={styles.footer}>
-            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-                <Text style={styles.submitBtnText}>Submit WSS</Text>
-            </TouchableOpacity>
-          </View>
+      {/* Fixed Submit Button */}
+      {activeTab === 'new' && (
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+            <LinearGradient colors={['#4338CA', '#6366F1']} style={styles.gradient}>
+              <Text style={styles.submitText}>Submit Request</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       )}
 
-      {/* Date Picker (IOS Modal / Android Inline) */}
-       {Platform.OS === 'ios' ? (
-          <Modal visible={showPicker} transparent animationType="fade">
-             <View style={styles.modalOverlay}>
-                <View style={styles.pickerWrapper}>
-                    <DateTimePicker value={date} mode="date" display="inline" onChange={(_, d) => {
-                         if(d) setDate(d);
-                         setShowPicker(false);
-                    }} />
-                     <TouchableOpacity style={styles.closePicker} onPress={() => setShowPicker(false)}>
-                        <Text style={styles.closePickerText}>Close</Text>
-                    </TouchableOpacity>
-                </View>
-             </View>
-          </Modal>
-        ) : (
-          showPicker && <DateTimePicker value={date} mode="date" onChange={(_, d) => { setShowPicker(false); if(d) setDate(d); }} />
-       )}
+      {/* Date Pickers */}
+      {showStartPicker && (Platform.OS === 'ios' ? (
+        <Modal transparent animationType="fade">
+          <TouchableOpacity style={styles.overlay} onPress={() => setShowStartPicker(false)}>
+            <View style={styles.pickerCard}>
+              <DateTimePicker value={startDate} mode="date" display="inline" onChange={(_, d) => d && setStartDate(d)} />
+              <TouchableOpacity style={styles.pickerDone} onPress={() => setShowStartPicker(false)}>
+                <Text style={styles.pickerDoneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      ) : <DateTimePicker value={startDate} mode="date" onChange={(_, d) => { setShowStartPicker(false); d && setStartDate(d); }} />)}
 
-       {Platform.OS === 'ios' ? (
-          <Modal visible={showEndPicker} transparent animationType="fade">
-             <View style={styles.modalOverlay}>
-                <View style={styles.pickerWrapper}>
-                    <DateTimePicker value={endDate} mode="date" display="inline" onChange={(_, d) => {
-                         if(d) setEndDate(d);
-                         setShowEndPicker(false);
-                    }} />
-                     <TouchableOpacity style={styles.closePicker} onPress={() => setShowEndPicker(false)}>
-                        <Text style={styles.closePickerText}>Close</Text>
-                    </TouchableOpacity>
-                </View>
-             </View>
-          </Modal>
-        ) : (
-          showEndPicker && <DateTimePicker value={endDate} mode="date" onChange={(_, d) => { setShowEndPicker(false); if(d) setEndDate(d); }} />
-       )}
+      {showEndPicker && (Platform.OS === 'ios' ? (
+        <Modal transparent animationType="fade">
+          <TouchableOpacity style={styles.overlay} onPress={() => setShowEndPicker(false)}>
+            <View style={styles.pickerCard}>
+              <DateTimePicker value={endDate} mode="date" display="inline" onChange={(_, d) => d && setEndDate(d)} />
+              <TouchableOpacity style={styles.pickerDone} onPress={() => setShowEndPicker(false)}>
+                <Text style={styles.pickerDoneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      ) : <DateTimePicker value={endDate} mode="date" onChange={(_, d) => { setShowEndPicker(false); d && setEndDate(d); }} />)}
 
-       <StatusModal 
-        visible={modalVisible}
-        onClose={() => {
-            if (modalConfig.action) {
-                modalConfig.action();
-            } else {
-                setModalVisible(false);
-            }
-        }}
-        type={modalConfig.type}
-        title={modalConfig.title}
-        description={modalConfig.description}
-        primaryButtonText={modalConfig.type === 'success' ? 'Done' : 'Okay'}
-      />
+      <StatusModal visible={modalVisible} onClose={() => { setModalVisible(false); if (modalConfig.type === 'success') router.back(); }} type={modalConfig.type} title={modalConfig.title} description={modalConfig.description} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  content: {
-    padding: 16,
-  },
-  
-  /* Tabs */
-  tabContainer: {
-    flexDirection: 'row',
-    margin: 16,
-    marginBottom: 8,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 8,
-    padding: 2,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 6,  
-  },
-  activeTab: {
-    backgroundColor: '#FFF',
-    ...Colors.shadows?.small,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  activeTabText: {
-    color: Colors.text,
-  },
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  content: { padding: 16, paddingBottom: 120 },
 
-  /* Form */
-  formContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    ...Colors.shadows?.small,
-    paddingBottom: 20,
-  },
-  inputGroup: {
-    marginBottom: 20,
-    zIndex: 1,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  selectInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-  },
-  inputText: {
-    fontSize: 15,
-    color: Colors.text,
-    fontWeight: '500',
-  },
-  dropdownList: {
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginTop: 4,
-    ...Colors.shadows?.medium,
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    zIndex: 100,
-  },
-  dropdownItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  dropdownItemText: {
-    fontSize: 14,
-    color: Colors.text,
-  },
+  tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginVertical: 12, backgroundColor: '#E2E8F0', borderRadius: 12, padding: 4 },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
+  tabActive: { backgroundColor: '#FFF' },
+  tabText: { fontSize: 14, fontWeight: '600', color: '#64748B' },
+  tabTextActive: { color: Colors.primary, fontWeight: '700' },
 
-  /* Radio Buttons */
-  radioGroup: {
-      flexDirection: 'row',
-      gap: 20,
-      marginTop: 4,
-  },
-  radioBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      paddingVertical: 6,
-  },
-  radioCircle: {
-      width: 18,
-      height: 18,
-      borderRadius: 9,
-      borderWidth: 2,
-      borderColor: '#D1D5DB',
-      justifyContent: 'center',
-      alignItems: 'center',
-  },
-  radioCircleSelected: {
-      borderColor: Colors.primary,
-  },
-  radioDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      backgroundColor: Colors.primary,
-  },
-  radioLabel: {
-      fontSize: 14,
-      color: '#4B5563',
-  },
-  
-  textArea: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    color: Colors.text,
-    minHeight: 120,
-  },
+  label: { fontSize: 13, fontWeight: '600', color: '#374151', marginBottom: 8, marginTop: 16 },
+  typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  typeCard: { width: '48%', flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: '#FFF', borderRadius: 12, borderWidth: 2, borderColor: '#E2E8F0', gap: 10 },
+  typeIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  typeName: { fontSize: 13, fontWeight: '600', color: '#374151' },
 
-  /* Footer */
-  footer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: '#FFF',
-      padding: 16,
-      paddingBottom: Platform.OS === 'ios' ? 34 : 16, // Safe area for iOS X+
-      borderTopWidth: 1,
-      borderTopColor: '#E5E7EB',
-      ...Colors.shadows?.medium,
-      zIndex: 10,
-  },
-  submitBtn: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  submitBtnText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 16,
-  },
+  optionRow: { flexDirection: 'row', gap: 10 },
+  optionBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 10, backgroundColor: '#E2E8F0' },
+  optionBtnActive: { backgroundColor: Colors.primary },
+  optionText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
+  optionTextActive: { color: '#FFF' },
 
-  /* Table */
-  tableContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    overflow: 'hidden',
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  columnHeader: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#6B7280',
-    textTransform: 'uppercase',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    alignItems: 'center',
-  },
-  cellTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  cellSubtitle: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
-  cellText: {
-    fontSize: 14,
-    color: '#4B5563',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
+  dropdown: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFF', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0' },
+  dropdownValue: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1E293B' },
+  dropdownPlaceholder: { flex: 1, fontSize: 14, color: '#94A3B8' },
+  dropdownList: { backgroundColor: '#FFF', borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0', marginTop: 4, overflow: 'hidden' },
+  dropdownItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  dropdownItemText: { fontSize: 14, color: '#1E293B' },
 
-  /* Modal */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  pickerWrapper: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 16,
-  },
-  closePicker: {
-    alignItems: 'center',
-    paddingVertical: 10,
-    marginTop: 10,
-  },
-  closePickerText: {
-    color: Colors.primary,
-    fontWeight: '600',
-  },
+  row: { flexDirection: 'row', gap: 12 },
+  col: { flex: 1 },
+  dateBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFF', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0' },
+  dateText: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
+
+  textArea: { backgroundColor: '#FFF', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#E2E8F0', height: 80, textAlignVertical: 'top', fontSize: 14, color: '#1E293B' },
+
+  historyCard: { backgroundColor: '#FFF', padding: 16, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: '#E2E8F0' },
+  historyHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
+  historyType: { fontSize: 15, fontWeight: '700', color: '#1E293B' },
+  historyDate: { fontSize: 13, color: '#64748B', marginTop: 2 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
+  statusText: { fontSize: 11, fontWeight: '700' },
+  commentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#F8FAFC', padding: 10, borderRadius: 8 },
+  commentText: { flex: 1, fontSize: 13, color: '#64748B', lineHeight: 18 },
+
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFF', paddingHorizontal: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#E2E8F0' },
+  submitBtn: { borderRadius: 14, overflow: 'hidden' },
+  gradient: { paddingVertical: 16, alignItems: 'center' },
+  submitText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 20 },
+  pickerCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 16 },
+  pickerDone: { backgroundColor: Colors.primary, padding: 14, borderRadius: 12, alignItems: 'center', marginTop: 12 },
+  pickerDoneText: { color: '#FFF', fontWeight: '700' },
 });

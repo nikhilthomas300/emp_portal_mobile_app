@@ -50,8 +50,20 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          animation: 'fade_from_bottom',
+          animationDuration: 200,
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none' }} />
+        <Stack.Screen name="apply-leave" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="apply-wfh" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="approvals" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="holidays" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="profile" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="news" options={{ animation: 'slide_from_right' }} />
       </Stack>
     </ThemeProvider>
   );

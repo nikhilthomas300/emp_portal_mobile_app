@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/navigation';
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
@@ -27,98 +28,89 @@ export default function HolidaysScreen() {
   const totalHolidays = holidays.length;
 
   return (
-    <>
-      <Stack.Screen 
-        options={{
-          headerTitle: 'Holiday Calendar',
-          headerShown: true,
-          headerBackTitle: 'Home',
-          headerStyle: { backgroundColor: '#FFFFFF' },
-          headerShadowVisible: false,
-          headerTintColor: Colors.text,
-        }} 
-      />
-      <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 20 }]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.compactHeader}>
-            <LinearGradient
-              colors={[Colors.primary + '15', Colors.primary + '05']}
-              style={styles.yearBadge}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <PageHeader title="Holiday Calendar" />
+      
+      <ScrollView 
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 20 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.compactHeader}>
+          <LinearGradient
+            colors={[Colors.primary + '15', Colors.primary + '05']}
+            style={styles.yearBadge}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <CalendarIcon size={16} color={Colors.primary} strokeWidth={2.5} />
+            <Text style={styles.yearText}>Year 2024 - 2025</Text>
+          </LinearGradient>
+        </View>
+
+        {/* Stats Summary */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{totalHolidays}</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statNumber, { color: Colors.primary }]}>{publicHolidays}</Text>
+            <Text style={styles.statLabel}>Public</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statNumber, { color: Colors.warning }]}>{optionalHolidays}</Text>
+            <Text style={styles.statLabel}>Optional</Text>
+          </View>
+        </View>
+
+        <View style={styles.listContainer}>
+          {holidays.map((holiday, index) => (
+            <TouchableOpacity 
+              key={holiday.id} 
+              style={[
+                styles.holidayItem,
+                index === holidays.length - 1 && { marginBottom: 0 }
+              ]}
+              activeOpacity={0.7}
             >
-              <CalendarIcon size={16} color={Colors.primary} strokeWidth={2.5} />
-              <Text style={styles.yearText}>Year 2024 - 2025</Text>
-            </LinearGradient>
-          </View>
-
-          {/* Stats Summary */}
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{totalHolidays}</Text>
-              <Text style={styles.statLabel}>Total</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: Colors.primary }]}>{publicHolidays}</Text>
-              <Text style={styles.statLabel}>Public</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: Colors.warning }]}>{optionalHolidays}</Text>
-              <Text style={styles.statLabel}>Optional</Text>
-            </View>
-          </View>
-
-          <View style={styles.listContainer}>
-            {holidays.map((holiday, index) => (
-              <TouchableOpacity 
-                key={holiday.id} 
-                style={[
-                  styles.holidayItem,
-                  index === holidays.length - 1 && { marginBottom: 0 }
-                ]}
-                activeOpacity={0.7}
+              <LinearGradient
+                colors={holiday.type === 'Public' 
+                  ? [Colors.primary + '15', Colors.primary + '05']
+                  : ['#FFF7ED', '#FFF4E5']}
+                style={styles.dateBox}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
-                <LinearGradient
-                  colors={holiday.type === 'Public' 
-                    ? [Colors.primary + '15', Colors.primary + '05']
-                    : ['#FFF7ED', '#FFF4E5']}
-                  style={styles.dateBox}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={[
-                    styles.dateText,
-                    { color: holiday.type === 'Public' ? Colors.primary : '#EA580C' }
-                  ]}>{holiday.date.split(' ')[0]}</Text>
-                  <Text style={[
-                    styles.monthText,
-                    { color: holiday.type === 'Public' ? Colors.primary : '#EA580C' }
-                  ]}>{holiday.date.split(' ')[1]}</Text>
-                </LinearGradient>
-                <View style={styles.details}>
-                  <Text style={styles.holidayName}>{holiday.name}</Text>
-                  <Text style={styles.dayText}>{holiday.day}</Text>
-                </View>
-                <View style={[
-                  styles.tag, 
-                  { backgroundColor: holiday.type === 'Public' ? Colors.primaryLight : '#FEF3C7' }
-                ]}>
-                  <Text style={[
-                    styles.tagText,
-                    { color: holiday.type === 'Public' ? Colors.primary : '#D97706' }
-                  ]}>{holiday.type}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    </>
+                <Text style={[
+                  styles.dateText,
+                  { color: holiday.type === 'Public' ? Colors.primary : '#EA580C' }
+                ]}>{holiday.date.split(' ')[0]}</Text>
+                <Text style={[
+                  styles.monthText,
+                  { color: holiday.type === 'Public' ? Colors.primary : '#EA580C' }
+                ]}>{holiday.date.split(' ')[1]}</Text>
+              </LinearGradient>
+              <View style={styles.details}>
+                <Text style={styles.holidayName}>{holiday.name}</Text>
+                <Text style={styles.dayText}>{holiday.day}</Text>
+              </View>
+              <View style={[
+                styles.tag, 
+                { backgroundColor: holiday.type === 'Public' ? Colors.primaryLight : '#FEF3C7' }
+              ]}>
+                <Text style={[
+                  styles.tagText,
+                  { color: holiday.type === 'Public' ? Colors.primary : '#D97706' }
+                ]}>{holiday.type}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
