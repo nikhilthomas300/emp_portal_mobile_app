@@ -1,31 +1,51 @@
+import Colors from '@/constants/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Users } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Users, X } from 'lucide-react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { Dimensions, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const HORIZONTAL_PADDING = 16;
+const GAP = 10;
+const CARD_WIDTH = (SCREEN_WIDTH - (HORIZONTAL_PADDING * 2) - (GAP * 2)) / 3;
+
 const quickActions = [
-  { id: 1, title: 'Apply Leave', icon: Briefcase, color: '#6366F1', route: '/apply-leave' },
-  { id: 2, title: 'WFH Request', icon: Home, color: '#10B981', route: '/apply-wfh' },
-  { id: 3, title: 'My Letters', icon: FileText, color: '#F59E0B', route: null },
-  { id: 4, title: 'Approvals', icon: Calendar, color: '#EC4899', route: '/approvals' },
-  { id: 5, title: 'Directory', icon: Users, color: '#0EA5E9', route: '/directory' },
-  { id: 6, title: 'App Store', icon: Grid, color: '#8B5CF6', route: '/(tabs)/appstore' },
+  { id: 1, title: 'Apply Leave', icon: Briefcase, route: '/apply-leave' },
+  { id: 2, title: 'WFH Request', icon: Home, route: '/apply-wfh' },
+  { id: 3, title: 'My Letters', icon: FileText, route: null },
+  { id: 4, title: 'Approvals', icon: Calendar, route: '/approvals' },
+  { id: 5, title: 'Directory', icon: Users, route: '/directory' },
+  { id: 6, title: 'App Store', icon: Grid, route: '/(tabs)/appstore' },
 ];
 
-const recentSearches = ['Payslip November', 'Holiday Calendar', 'Team Directory', 'Leave Balance'];
+const recentSearches = ['Payslip', 'Holidays', 'Directory', 'Leave'];
 
 export default function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
+  const scrollRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }, [])
+  );
 
   const handlePress = (route: string | null) => {
     if (route) {
       // @ts-ignore
       router.push(route);
     }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    inputRef.current?.focus();
   };
 
   const filteredActions = quickActions.filter(w => 
@@ -39,26 +59,33 @@ export default function SearchScreen() {
         colors={['#1E40AF', '#3B82F6', '#60A5FA']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
+        style={[styles.gradientHeader, { paddingTop: insets.top + 8 }]}
       >
         <Text style={styles.headerTitle}>Search</Text>
-        <Text style={styles.headerSubtitle}>Find apps, widgets & more</Text>
         
-        {/* Search Bar inside gradient */}
-        <View style={styles.searchBar}>
-          <Search size={20} color="#64748B" />
+        {/* Enhanced Search Bar */}
+        <View style={styles.searchBarContainer}>
+          <View style={styles.searchIconWrapper}>
+            <Search size={16} color="#6366F1" strokeWidth={2.5} />
+          </View>
           <TextInput
+            ref={inputRef}
             style={styles.searchInput}
-            placeholder="Search for Apps and Widgets..."
+            placeholder="Search apps, widgets..."
             placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            autoFocus={false}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+              <X size={14} color="#94A3B8" strokeWidth={2.5} />
+            </TouchableOpacity>
+          )}
         </View>
       </LinearGradient>
 
       <ScrollView 
+        ref={scrollRef}
         style={styles.content} 
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -67,11 +94,16 @@ export default function SearchScreen() {
         {/* Recent Searches */}
         {searchQuery.length === 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Searches</Text>
+            <Text style={styles.sectionTitle}>Recent</Text>
             <View style={styles.recentContainer}>
               {recentSearches.map((term, index) => (
-                <TouchableOpacity key={index} style={styles.recentPill} activeOpacity={0.7}>
-                  <Clock size={14} color="#64748B" />
+                <TouchableOpacity 
+                  key={index} 
+                  style={styles.recentPill} 
+                  activeOpacity={0.7}
+                  onPress={() => setSearchQuery(term)}
+                >
+                  <Clock size={11} color="#6366F1" strokeWidth={2} />
                   <Text style={styles.recentText}>{term}</Text>
                 </TouchableOpacity>
               ))}
@@ -92,24 +124,18 @@ export default function SearchScreen() {
                 onPress={() => handlePress(action.route)}
                 activeOpacity={0.7}
               >
-                <LinearGradient
-                  colors={[action.color + '20', action.color + '10']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.actionIcon}
-                >
-                  <action.icon size={22} color={action.color} strokeWidth={2} />
-                </LinearGradient>
-                <Text style={styles.actionTitle}>{action.title}</Text>
+                <View style={styles.actionIcon}>
+                  <action.icon size={22} color={Colors.primary} strokeWidth={1.8} />
+                </View>
+                <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {filteredActions.length === 0 && (
             <View style={styles.emptyState}>
-              <Search size={40} color="#CBD5E1" />
+              <Search size={36} color="#CBD5E1" />
               <Text style={styles.emptyText}>No results found</Text>
-              <Text style={styles.emptySubtext}>Try a different search term</Text>
             </View>
           )}
         </View>
@@ -122,87 +148,132 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   
   gradientHeader: { 
-    paddingHorizontal: 16, 
-    paddingBottom: 20,
+    paddingHorizontal: HORIZONTAL_PADDING, 
+    paddingBottom: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-  headerTitle: { fontSize: 28, fontWeight: '800', color: '#FFF', marginBottom: 4 },
-  headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 16 },
+  headerTitle: { 
+    fontSize: 20, 
+    fontWeight: '700', 
+    color: '#FFF', 
+    marginBottom: 10,
+    letterSpacing: -0.3,
+  },
 
-  searchBar: { 
+  // Enhanced Search Bar
+  searchBarContainer: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     backgroundColor: '#FFF', 
-    paddingHorizontal: 16, 
-    paddingVertical: Platform.OS === 'ios' ? 14 : 12, 
-    borderRadius: 14, 
-    gap: 12,
-    shadowColor: '#000',
+    paddingHorizontal: 4, 
+    paddingVertical: Platform.OS === 'ios' ? 4 : 2, 
+    borderRadius: 10, 
+    gap: 0,
+    shadowColor: '#1E40AF',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  searchInput: { flex: 1, fontSize: 16, color: '#1E293B', fontWeight: '500' },
+  searchIconWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchInput: { 
+    flex: 1, 
+    fontSize: 14, 
+    color: '#1E293B', 
+    fontWeight: '500',
+    letterSpacing: -0.2,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 6,
+  },
+  clearButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
 
-  content: { flex: 1, padding: 16 },
+  content: { flex: 1, padding: HORIZONTAL_PADDING },
   
-  section: { marginBottom: 24 },
+  section: { marginBottom: 20 },
   sectionTitle: { 
-    fontSize: 13, 
+    fontSize: 11, 
     fontWeight: '700', 
     color: '#64748B', 
-    marginBottom: 12, 
+    marginBottom: 10, 
     textTransform: 'uppercase', 
-    letterSpacing: 0.5 
+    letterSpacing: 0.8 
   },
   
-  recentContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  recentContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   recentPill: { 
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14, 
-    paddingVertical: 10, 
+    gap: 5,
+    paddingHorizontal: 10, 
+    paddingVertical: 6, 
+    backgroundColor: '#EEF2FF', 
+    borderRadius: 14, 
+    borderWidth: 1, 
+    borderColor: '#C7D2FE',
+  },
+  recentText: { 
+    fontSize: 12, 
+    color: '#4338CA', 
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
+
+  actionsGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: GAP,
+  },
+  actionCard: { 
+    width: CARD_WIDTH, 
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     backgroundColor: '#FFF', 
-    borderRadius: 12, 
+    borderRadius: 14, 
+    alignItems: 'center',
     borderWidth: 1, 
     borderColor: '#E2E8F0',
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  recentText: { fontSize: 13, color: '#374151', fontWeight: '500' },
-
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  actionCard: { 
-    width: '48%', 
-    backgroundColor: '#FFF', 
-    borderRadius: 16, 
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1, 
-    borderColor: '#F1F5F9',
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
   },
   actionIcon: { 
-    width: 52, 
-    height: 52, 
-    borderRadius: 14, 
+    width: 44, 
+    height: 44, 
+    borderRadius: 12, 
+    backgroundColor: '#EFF6FF',
     justifyContent: 'center', 
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  actionTitle: { fontSize: 14, fontWeight: '600', color: '#1E293B', textAlign: 'center' },
+  actionTitle: { 
+    fontSize: 13, 
+    fontWeight: '500', 
+    color: '#1E293B', 
+    textAlign: 'center',
+    lineHeight: 17,
+    letterSpacing: -0.2,
+    minHeight: 34,
+  },
 
-  emptyState: { paddingVertical: 60, alignItems: 'center' },
-  emptyText: { fontSize: 16, fontWeight: '600', color: '#94A3B8', marginTop: 16 },
-  emptySubtext: { fontSize: 13, color: '#CBD5E1', marginTop: 4 },
+  emptyState: { paddingVertical: 50, alignItems: 'center' },
+  emptyText: { 
+    fontSize: 14, 
+    fontWeight: '500', 
+    color: '#94A3B8', 
+    marginTop: 12,
+    letterSpacing: -0.2,
+  },
 });

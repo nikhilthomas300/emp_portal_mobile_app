@@ -24,7 +24,7 @@ export default function QRCodeModal({ visible, onClose }: QRCodeModalProps) {
 
           {/* Header */}
           <LinearGradient
-            colors={['#4338CA', '#6366F1', '#818CF8']}
+            colors={['#1E40AF', '#3B82F6', '#60A5FA']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.header}
@@ -252,9 +252,12 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: Colors.primary + '10',
-    borderWidth: 1,
-    borderColor: Colors.primary + '30',
+    backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  actionText: { fontSize: 14, fontWeight: '600', color: Colors.primary },
+  actionText: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
 });

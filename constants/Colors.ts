@@ -1,10 +1,10 @@
-const tintColorLight = '#4E5FBF'; // Indigo
+const tintColorLight = '#2563EB'; // Blue
 const tintColorDark = '#fff';
 
 export default {
-  primary: '#4338ca', // Deep Indigo
-  primaryLight: '#e0e7ff', // Very Light Indigo
-  secondary: '#6366f1', // Indigo
+  primary: '#2563EB', // Blue 600
+  primaryLight: '#EFF6FF', // Blue 50
+  secondary: '#3B82F6', // Blue 500
   accent: '#f472b6', // Pink
   success: '#10b981', // Emerald
   warning: '#f59e0b', // Amber
@@ -16,7 +16,7 @@ export default {
   border: '#e5e7eb', // Gray 200
   tint: tintColorLight,
   tabIconDefault: '#9ca3af', // Gray 400
-  tabIconSelected: '#4338ca', // Deep Indigo
+  tabIconSelected: '#2563EB', // Blue 600
   spacing: 20,
   radius: 20,
   shadows: {

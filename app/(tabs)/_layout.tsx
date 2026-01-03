@@ -3,7 +3,84 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
 import { Bot, Grid, Home, Newspaper, Search } from 'lucide-react-native';
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, interpolate, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+
+function BreathingButton({ focused }: { focused: boolean }) {
+  const scale = useSharedValue(1);
+  const ringScale = useSharedValue(1);
+  const breatheScale = useSharedValue(1);
+
+  React.useEffect(() => {
+    // Always animate breathing when not focused
+    if (!focused) {
+      breatheScale.value = withRepeat(
+        withTiming(1.05, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+    } else {
+      breatheScale.value = withTiming(1);
+    }
+    
+    if (focused) {
+      scale.value = withRepeat(
+        withTiming(1.08, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+      ringScale.value = withRepeat(
+        withTiming(1.4, { duration: 1500, easing: Easing.out(Easing.ease) }),
+        -1,
+        false
+      );
+    } else {
+      scale.value = withTiming(1);
+      ringScale.value = withTiming(1);
+    }
+  }, [focused]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: focused ? scale.value : breatheScale.value }],
+  }));
+
+  const ringStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ringScale.value }],
+    opacity: interpolate(ringScale.value, [1, 1.4], [0.4, 0]),
+  }));
+
+  return (
+    <View style={styles.centerButtonWrapper}>
+      {focused && (
+        <Animated.View
+            style={[
+              {
+                position: 'absolute',
+                top: -18,
+                width: 50,
+                height: 50,
+                borderRadius: 16,
+                backgroundColor: '#3B82F6',
+                zIndex: -1,
+              },
+              ringStyle,
+            ]}
+        />
+      )}
+      <Animated.View style={[animatedStyle, { position: 'absolute', top: -18 }]}>
+        <LinearGradient
+            colors={focused ? ['#1E40AF', '#3B82F6', '#60A5FA'] : ['#EFF6FF', '#DBEAFE', '#E0E7FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.centerButton, !focused && styles.centerButtonInactive]}
+        >
+            <Bot size={24} color={focused ? "#FFFFFF" : '#6366F1'} strokeWidth={2} />
+        </LinearGradient>
+      </Animated.View>
+      <Text style={[styles.centerButtonLabel, { color: focused ? Colors.primary : '#6366F1' }]} numberOfLines={1}>Ask Newton</Text>
+    </View>
+  );
+}
 
 export default function TabLayout() {
   return (
@@ -14,8 +91,8 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 0,
-          height: Platform.OS === 'ios' ? 85 : 65,
-          paddingBottom: Platform.OS === 'ios' ? 30 : 8,
+          height: Platform.OS === 'ios' ? 75 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 12,
           paddingTop: 8,
           elevation: 12,
           shadowColor: '#6366F1',
@@ -53,24 +130,10 @@ export default function TabLayout() {
         name="chat"
         options={{
           title: 'Ask Newton',
+          tabBarLabel: () => null, // Hide default label to control alignment manually
           tabBarIcon: ({ focused }) => (
-            <View style={styles.centerButtonWrapper}>
-              <LinearGradient
-                colors={['#4338CA', '#6366F1', '#818CF8']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.centerButton}
-              >
-                <Bot size={24} color="#FFFFFF" strokeWidth={2.5} />
-              </LinearGradient>
-            </View>
+            <BreathingButton focused={focused} />
           ),
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: '700',
-            marginTop: 4,
-            color: Colors.primary,
-          },
         }}
       />
       <Tabs.Screen
@@ -97,10 +160,10 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   centerButtonWrapper: {
-    position: 'relative',
-    top: -8,
     alignItems: 'center',
     justifyContent: 'center',
+    width: 70,
+    height: 50,
   },
   centerButton: {
     width: 50,
@@ -108,10 +171,22 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#4338CA',
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 8,
+  },
+  centerButtonInactive: {
+      borderWidth: 1.5,
+      borderColor: '#C7D2FE',
+      shadowOpacity: 0.15,
+      elevation: 3,
+  },
+  centerButtonLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 40,
+    textAlign: 'center',
   },
 });

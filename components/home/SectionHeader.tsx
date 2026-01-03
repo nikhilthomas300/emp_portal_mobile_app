@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: Colors.text,
     letterSpacing: -0.3,

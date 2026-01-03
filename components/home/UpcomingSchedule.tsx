@@ -14,14 +14,14 @@ export default function UpcomingSchedule() {
       <SectionHeader 
         title="Upcoming Meeting" 
         icon={Video}
-        iconColor="#4338CA"
+        iconColor="#2563EB"
         showSeeAll={true}
         onSeeAll={() => router.push('/meetings')}
       />
 
       <View style={styles.cardWrapper}>
         <LinearGradient
-          colors={[Colors.primary, Colors.primary]}
+          colors={['#3B82F6', '#2563EB']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.card}

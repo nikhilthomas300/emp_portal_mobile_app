@@ -9,7 +9,7 @@ import { Link, useRouter } from 'expo-router';
 import { AlignLeft, ClipboardCheck, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
-import Animated, { Extrapolate, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { Extrapolate, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 if (Platform.OS === 'android') {
@@ -61,9 +61,13 @@ export default function HomeScreen() {
     };
   });
 
+  // Scroll to top when screen gains focus
   useFocusEffect(
     useCallback(() => {
-      // Logic if needed on focus
+      // Scroll to top with animation
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      // Also reset the scroll shared value
+      scrollY.value = withTiming(0, { duration: 300 });
     }, [])
   );
 
@@ -103,7 +107,7 @@ export default function HomeScreen() {
             <View style={styles.headerTopRow}>
                 <View style={styles.leftSection}>
                     <TouchableOpacity style={styles.menuButton} onPress={() => setDrawerVisible(true)}>
-                        <AlignLeft size={22} color="#FFF" />
+                        <AlignLeft size={22} color="#FFF" strokeWidth={2.5} />
                     </TouchableOpacity>
                     <View>
                         <Text style={styles.greeting}>Good Morning,</Text>
@@ -114,7 +118,7 @@ export default function HomeScreen() {
                 <View style={styles.rightSection}>
                     <Link href="/approvals" asChild>
                         <TouchableOpacity style={styles.iconButton}>
-                            <ClipboardCheck size={22} color="#FFF" />
+                            <ClipboardCheck size={20} color="#FFF" strokeWidth={2.5} />
                             <View style={styles.badge} />
                         </TouchableOpacity>
                     </Link>
@@ -231,13 +235,18 @@ const styles = StyleSheet.create({
       gap: 12,
   },
   menuButton: {
-      padding: 10,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      borderRadius: 12,
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      borderRadius: 14,
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.35)',
   },
   greeting: {
       fontSize: 13,
-      color: 'rgba(255,255,255,0.8)',
+      color: 'rgba(255,255,255,0.85)',
       fontWeight: '500',
       marginBottom: 0,
   },
@@ -253,15 +262,20 @@ const styles = StyleSheet.create({
       gap: 10,
   },
   iconButton: {
-      padding: 10,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      borderRadius: 12,
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      borderRadius: 14,
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.35)',
       position: 'relative',
   },
   badge: {
       position: 'absolute',
-      top: 8,
-      right: 8,
+      top: 10,
+      right: 10,
       width: 8,
       height: 8,
       borderRadius: 4,
@@ -272,12 +286,12 @@ const styles = StyleSheet.create({
   avatarContainer: {
       width: 44,
       height: 44,
-      borderRadius: 14,
-      backgroundColor: 'rgba(255,255,255,0.25)',
       justifyContent: 'center',
       alignItems: 'center',
-      borderWidth: 2,
-      borderColor: 'rgba(255,255,255,0.5)',
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      borderRadius: 14,
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.35)',
   },
   avatarText: {
       fontSize: 15,

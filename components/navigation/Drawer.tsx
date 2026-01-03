@@ -1,24 +1,24 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import {
-  Bell,
-  Briefcase,
-  Calendar,
-  ChevronRight,
-  FileText,
-  Grid,
-  HelpCircle,
-  Home,
-  LogOut,
-  MessageSquare,
-  Newspaper,
-  QrCode,
-  Settings,
-  Sparkles,
-  Users,
+    Bell,
+    Briefcase,
+    Calendar,
+    ChevronRight,
+    FileText,
+    Grid,
+    Home,
+    LogOut,
+    MessageSquare,
+    Newspaper,
+    QrCode,
+    Settings,
+    Sparkles,
+    Users,
+    X,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCodeModal from './QRCodeModal';
 
@@ -28,22 +28,21 @@ interface DrawerProps {
 }
 
 const quickLinks = [
-  { id: 1, title: 'Digital ID', icon: QrCode, color: '#6366F1', bg: '#EEF2FF', action: 'qr' },
-  { id: 2, title: 'Leave', icon: Briefcase, color: '#EC4899', bg: '#FCE7F3', route: '/apply-leave' },
-  { id: 3, title: 'WFH', icon: Home, color: '#10B981', bg: '#D1FAE5', route: '/apply-wfh' },
-  { id: 4, title: 'Letters', icon: FileText, color: '#F59E0B', bg: '#FEF3C7', route: '/(tabs)/index' },
+  { id: 1, title: 'Digital ID', icon: QrCode, color: '#6366F1', action: 'qr' },
+  { id: 2, title: 'Leave', icon: Briefcase, color: '#6366F1', route: '/apply-leave' },
+  { id: 3, title: 'WFH', icon: Home, color: '#6366F1', route: '/apply-wfh' },
+  { id: 4, title: 'Letters', icon: FileText, color: '#6366F1', route: '/(tabs)/index' },
 ];
 
 const menuItems = [
   { id: 1, title: 'Home', icon: Home, route: '/(tabs)/index', color: '#6366F1' },
-  { id: 2, title: 'News', icon: Newspaper, route: '/(tabs)/news', color: '#3B82F6' },
-  { id: 3, title: 'App Store', icon: Grid, route: '/(tabs)/appstore', color: '#10B981' },
-  { id: 4, title: 'Ask Newton', icon: MessageSquare, route: '/(tabs)/chat', color: '#8B5CF6' },
-  { id: 5, title: 'Approvals', icon: Bell, route: '/approvals', color: '#EF4444' },
-  { id: 6, title: 'Calendar', icon: Calendar, route: '/holidays', color: '#0EA5E9' },
-  { id: 7, title: 'Directory', icon: Users, route: '/directory', color: '#EC4899' },
-  { id: 8, title: 'Settings', icon: Settings, route: '/(tabs)/index', color: '#64748B' },
-  { id: 9, title: 'Help', icon: HelpCircle, route: '/(tabs)/index', color: '#94A3B8' },
+  { id: 2, title: 'News', icon: Newspaper, route: '/(tabs)/news', color: '#6366F1' },
+  { id: 3, title: 'App Store', icon: Grid, route: '/(tabs)/appstore', color: '#6366F1' },
+  { id: 4, title: 'Ask Newton', icon: MessageSquare, route: '/(tabs)/chat', color: '#6366F1' },
+  { id: 5, title: 'Approvals', icon: Bell, route: '/approvals', color: '#6366F1' },
+  { id: 6, title: 'Calendar', icon: Calendar, route: '/holidays', color: '#6366F1' },
+  { id: 7, title: 'Directory', icon: Users, route: '/directory', color: '#6366F1' },
+  { id: 8, title: 'Settings', icon: Settings, route: '/(tabs)/index', color: '#6366F1' },
 ];
 
 export default function Drawer({ visible, onClose }: DrawerProps) {
@@ -58,26 +57,31 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
     }
   };
 
-  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
-
   return (
     <>
       <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose} statusBarTranslucent={true}>
         <View style={styles.overlay}>
           <View style={styles.drawer}>
-            {/* Blue Gradient Header */}
+            {/* Blue Gradient Header with Close Button */}
             <LinearGradient
               colors={['#1E40AF', '#3B82F6', '#60A5FA']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={[styles.header, { paddingTop: insets.top + 16 }]}
+              style={[styles.header, { paddingTop: insets.top + 12 }]}
             >
-              <View style={styles.logoIcon}>
-                <Sparkles size={24} color="#FFF" strokeWidth={2} />
-              </View>
-              <View>
-                <Text style={styles.appName}>Company Hub</Text>
-                <Text style={styles.tagline}>Enterprise Portal</Text>
+              <View style={styles.headerTop}>
+                <View style={styles.headerInfo}>
+                  <View style={styles.logoIcon}>
+                    <Sparkles size={22} color="#FFF" strokeWidth={2} />
+                  </View>
+                  <View>
+                    <Text style={styles.appName}>Company Hub</Text>
+                    <Text style={styles.tagline}>Enterprise Portal</Text>
+                  </View>
+                </View>
+                <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                  <X size={20} color="#FFF" strokeWidth={2} />
+                </TouchableOpacity>
               </View>
             </LinearGradient>
 
@@ -87,7 +91,7 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
                 item.route ? (
                   <Link key={item.id} href={item.route as any} asChild>
                     <TouchableOpacity style={styles.quickItem} onPress={onClose}>
-                      <View style={[styles.quickIcon, { backgroundColor: item.bg }]}>
+                      <View style={styles.quickIcon}>
                         <item.icon size={20} color={item.color} strokeWidth={1.8} />
                       </View>
                       <Text style={styles.quickText}>{item.title}</Text>
@@ -95,7 +99,7 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
                   </Link>
                 ) : (
                   <TouchableOpacity key={item.id} style={styles.quickItem} onPress={() => handleQuickLinkPress(item)}>
-                    <View style={[styles.quickIcon, { backgroundColor: item.bg }]}>
+                    <View style={styles.quickIcon}>
                       <item.icon size={20} color={item.color} strokeWidth={1.8} />
                     </View>
                     <Text style={styles.quickText}>{item.title}</Text>
@@ -109,18 +113,18 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
               {menuItems.map((item) => (
                 <Link key={item.id} href={item.route as any} asChild>
                   <TouchableOpacity style={styles.menuItem} onPress={onClose} activeOpacity={0.7}>
-                    <View style={[styles.menuIconBg, { backgroundColor: item.color + '15' }]}>
+                    <View style={styles.menuIconBg}>
                       <item.icon size={18} color={item.color} strokeWidth={1.8} />
                     </View>
                     <Text style={styles.menuText}>{item.title}</Text>
-                    <ChevronRight size={18} color="#CBD5E1" />
+                    <ChevronRight size={16} color="#CBD5E1" />
                   </TouchableOpacity>
                 </Link>
               ))}
             </ScrollView>
 
             {/* Footer */}
-            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
               <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.8}>
                 <LogOut size={18} color="#EF4444" />
                 <Text style={styles.logoutText}>Sign Out</Text>
@@ -143,66 +147,86 @@ const styles = StyleSheet.create({
   backdrop: { flex: 1 },
   
   header: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 14, 
-    paddingHorizontal: 20, 
-    paddingBottom: 20,
+    paddingHorizontal: 16, 
+    paddingBottom: 16,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   logoIcon: { 
-    width: 48, 
-    height: 48, 
-    borderRadius: 14, 
+    width: 44, 
+    height: 44, 
+    borderRadius: 12, 
     backgroundColor: 'rgba(255,255,255,0.2)', 
     justifyContent: 'center', 
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)',
   },
-  appName: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
-  tagline: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  appName: { fontSize: 18, fontWeight: '700', color: '#FFFFFF' },
+  tagline: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 1 },
 
   quickSection: { 
     flexDirection: 'row', 
-    paddingHorizontal: 16, 
-    paddingVertical: 16, 
+    paddingHorizontal: 12, 
+    paddingVertical: 14, 
     backgroundColor: '#F8FAFC',
     borderBottomWidth: 1, 
     borderBottomColor: '#E2E8F0',
   },
-  quickItem: { flex: 1, alignItems: 'center', gap: 8 },
+  quickItem: { flex: 1, alignItems: 'center', gap: 6 },
   quickIcon: { 
-    width: 48, 
-    height: 48, 
-    borderRadius: 14, 
+    width: 44, 
+    height: 44, 
+    borderRadius: 12, 
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     justifyContent: 'center', 
     alignItems: 'center',
   },
-  quickText: { fontSize: 12, fontWeight: '600', color: '#374151' },
+  quickText: { fontSize: 11, fontWeight: '600', color: '#374151' },
 
   menuScroll: { flex: 1 },
-  menuContent: { paddingHorizontal: 12, paddingVertical: 12 },
+  menuContent: { paddingHorizontal: 12, paddingVertical: 8 },
   menuItem: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    gap: 14, 
-    paddingVertical: 14, 
-    paddingHorizontal: 12, 
-    borderRadius: 12,
-    marginBottom: 2,
+    gap: 12, 
+    paddingVertical: 10, 
+    paddingHorizontal: 10, 
+    borderRadius: 10,
   },
   menuIconBg: {
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     borderRadius: 10,
+    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  menuText: { flex: 1, fontSize: 15, fontWeight: '600', color: '#374151' },
+  menuText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#374151' },
 
   footer: { 
     paddingHorizontal: 16, 
-    paddingTop: 16, 
+    paddingTop: 12, 
     borderTopWidth: 1, 
     borderTopColor: '#E2E8F0',
   },
@@ -210,12 +234,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'center', 
-    gap: 10, 
-    paddingVertical: 14, 
-    borderRadius: 12, 
+    gap: 8, 
+    paddingVertical: 12, 
+    borderRadius: 10, 
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
   },
-  logoutText: { fontSize: 15, fontWeight: '600', color: '#EF4444' },
+  logoutText: { fontSize: 14, fontWeight: '600', color: '#EF4444' },
 });

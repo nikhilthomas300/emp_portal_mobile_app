@@ -1,5 +1,4 @@
 import Colors from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { Briefcase, FileText, Home, QrCode, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -8,10 +7,10 @@ import { QRCodeModal } from '../navigation';
 import SectionHeader from './SectionHeader';
 
 const actions = [
-  { id: 0, title: 'Digital Identity', icon: QrCode, color: Colors.primary, action: 'qr' },
-  { id: 1, title: 'Apply Leave', icon: Briefcase, color: Colors.accent, link: '/apply-leave' },
-  { id: 2, title: 'Apply Work From Home', icon: Home, color: Colors.primary, link: '/apply-wfh' },
-  { id: 3, title: 'My Letters', icon: FileText, color: Colors.warning, link: '/(tabs)/index' },
+  { id: 0, title: 'Digital ID', icon: QrCode, action: 'qr' },
+  { id: 1, title: 'Apply Leave', icon: Briefcase, link: '/apply-leave' },
+  { id: 2, title: 'WFH', icon: Home, link: '/apply-wfh' },
+  { id: 3, title: 'Letters', icon: FileText, link: '/(tabs)/index' },
 ];
 
 export default function QuickActions() {
@@ -25,29 +24,23 @@ export default function QuickActions() {
 
   const renderItem = (action: typeof actions[0]) => {
     const content = (
-      <>
-        <LinearGradient
-          colors={[action.color + '20', action.color + '10']}
-          style={styles.iconCircle}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <action.icon size={14} color={action.color} strokeWidth={2.5} />
-        </LinearGradient>
-        <Text style={styles.itemText}>{action.title}</Text>
-      </>
+      <View style={styles.pill}>
+        <View style={styles.iconWrapper}>
+          <action.icon size={14} color={Colors.primary} strokeWidth={2} />
+        </View>
+        <Text style={styles.pillText}>{action.title}</Text>
+      </View>
     );
 
     return action.link ? (
       <Link key={action.id} href={action.link as any} asChild>
-        <TouchableOpacity style={styles.chip} activeOpacity={0.7}>
+        <TouchableOpacity activeOpacity={0.7}>
           {content}
         </TouchableOpacity>
       </Link>
     ) : (
       <TouchableOpacity 
         key={action.id} 
-        style={styles.chip}
         onPress={() => handleActionPress(action)}
         activeOpacity={0.7}
       >
@@ -64,7 +57,7 @@ export default function QuickActions() {
         iconColor="#F59E0B"
       />
       
-      <View style={styles.chipsContainer}>
+      <View style={styles.pillsRow}>
         {actions.map((action) => renderItem(action))}
       </View>
 
@@ -75,41 +68,38 @@ export default function QuickActions() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 8,
+    marginBottom: 12,
     marginTop: -8,
   },
-  chipsContainer: {
+  pillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Colors.spacing,
-    gap: 10,
+    gap: 8,
   },
-  chip: {
+  pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    paddingVertical: 6,
-    paddingLeft: 4,
-    paddingRight: 12,
-    borderRadius: 12,
-    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingLeft: 8,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    alignSelf: 'flex-start',
-    ...Colors.shadows.small,
+    gap: 6,
   },
-  iconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  iconWrapper: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  itemText: {
-    fontSize: 12,
+  pillText: {
+    fontSize: 13,
     fontWeight: '600',
-    color: Colors.text,
+    color: '#374151',
   },
 });
-
-
