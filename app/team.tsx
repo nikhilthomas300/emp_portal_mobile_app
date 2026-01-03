@@ -3,17 +3,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from 'expo-router';
 import { ArrowLeft, CalendarOff, CheckCircle, FileText, Share2, UserCheck, Users } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 16;
-const GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - (HORIZONTAL_PADDING * 2) - (GAP * 2)) / 3;
 
 const teamWidgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
-  { id: 2, title: 'Team Attendance', icon: Users, link: null },
+  { id: 2, title: 'Team Attendance Status', icon: Users, link: null },
   { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
   { id: 4, title: 'Shared Assets', icon: Share2, link: null },
   { id: 5, title: 'Team Letters', icon: FileText, link: null },
@@ -30,16 +25,22 @@ export default function TeamScreen() {
         <View style={styles.iconContainer}>
           <widget.icon size={24} color={Colors.primary} strokeWidth={1.8} />
         </View>
-        <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+        </View>
       </TouchableOpacity>
     );
 
-    return widget.link ? (
-      <Link key={widget.id} href={widget.link as any} asChild>
-        {cardContent}
-      </Link>
-    ) : (
-      <View key={widget.id}>{cardContent}</View>
+    return (
+      <View key={widget.id} style={styles.cardWrapper}>
+        {widget.link ? (
+          <Link href={widget.link as any} asChild>
+            {cardContent}
+          </Link>
+        ) : (
+          cardContent
+        )}
+      </View>
     );
   };
 
@@ -115,23 +116,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: HORIZONTAL_PADDING,
+    padding: 16,
     paddingBottom: 40,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: GAP,
+    marginHorizontal: -4,
+  },
+  cardWrapper: {
+    width: '33.33%',
+    padding: 4,
   },
   card: {
-    width: CARD_WIDTH,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    height: 110,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 12,
   },
   iconContainer: {
     width: 48,
@@ -140,15 +146,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+  },
+  titleContainer: {
+    height: 34,
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingHorizontal: 2,
   },
   cardTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
     color: '#1E293B',
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 16,
     letterSpacing: -0.2,
-    minHeight: 34,
   },
 });

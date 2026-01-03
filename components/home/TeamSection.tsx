@@ -1,22 +1,16 @@
 import Colors from '@/constants/Colors';
 import { Link, useRouter } from 'expo-router';
-import { CalendarOff, CheckCircle, FileText, Share2, UserCheck, Users } from 'lucide-react-native';
+import { CalendarOff, CheckCircle, FileText, Share2, Users } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 20;
-const GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - (HORIZONTAL_PADDING * 2) - (GAP * 2)) / 3;
-
 const widgets = [
-  { id: 1, title: 'Approvals', icon: CheckCircle, link: '/approvals' },
-  { id: 2, title: 'Attendance', icon: Users, link: null },
-  { id: 3, title: 'Leaves', icon: CalendarOff, link: null },
-  { id: 4, title: 'Assets', icon: Share2, link: null },
-  { id: 5, title: 'Letters', icon: FileText, link: null },
-  { id: 6, title: 'Directory', icon: UserCheck, link: null },
+  { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
+  { id: 2, title: 'Team Attendance Status', icon: Users, link: null },
+  { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
+  { id: 4, title: 'Team Shared Assets', icon: Share2, link: null },
+  { id: 5, title: 'Team Letters', icon: FileText, link: null },
 ];
 
 export default function TeamSection() {
@@ -35,16 +29,22 @@ export default function TeamSection() {
         <View style={styles.iconContainer}>
           <widget.icon size={22} color={Colors.primary} strokeWidth={1.8} />
         </View>
-        <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+        </View>
       </TouchableOpacity>
     );
 
-    return widget.link ? (
-      <Link key={widget.id} href={widget.link as any} asChild>
-        {cardElement}
-      </Link>
-    ) : (
-      <View key={widget.id}>{cardElement}</View>
+    return (
+      <View key={widget.id} style={styles.cardWrapper}>
+        {widget.link ? (
+          <Link href={widget.link as any} asChild>
+            {cardElement}
+          </Link>
+        ) : (
+          cardElement
+        )}
+      </View>
     );
   };
 
@@ -67,23 +67,28 @@ export default function TeamSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: HORIZONTAL_PADDING,
-    gap: GAP,
+    paddingHorizontal: 16,
+    marginHorizontal: -4,
+  },
+  cardWrapper: {
+    width: '33.33%',
+    padding: 4,
   },
   card: {
-    width: CARD_WIDTH,
-    paddingVertical: 14,
-    paddingHorizontal: 6,
+    height: 105,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 12,
   },
   iconContainer: {
     width: 44,
@@ -92,14 +97,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+  },
+  titleContainer: {
+    height: 34,
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingHorizontal: 2,
   },
   cardTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
     color: '#1E293B',
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 16,
     letterSpacing: -0.2,
   },
 });

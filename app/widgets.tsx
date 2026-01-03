@@ -3,24 +3,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Activity, ArrowLeft, Box, Clock, CreditCard, DollarSign, FileText, Truck, User } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 16;
-const GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - (HORIZONTAL_PADDING * 2) - (GAP * 2)) / 3;
-
 const allWidgets = [
-  { id: 1, title: 'Attendance', icon: Clock },
-  { id: 2, title: 'Transport', icon: Truck },
-  { id: 3, title: 'Salary Status', icon: DollarSign },
+  { id: 1, title: 'My Attendance', icon: Clock },
+  { id: 2, title: 'My Transport', icon: Truck },
+  { id: 3, title: 'Salary Payment Status', icon: DollarSign },
   { id: 4, title: 'My Assets', icon: Box },
-  { id: 5, title: 'Letters', icon: FileText },
-  { id: 6, title: 'Profile', icon: User },
-  { id: 7, title: 'Flex Benefits', icon: Activity },
-  { id: 8, title: 'Expenses', icon: CreditCard },
-  { id: 9, title: 'Transport Booking', icon: Truck },
+  { id: 5, title: 'My Letters', icon: FileText },
+  { id: 6, title: 'My Profile', icon: User },
+  { id: 7, title: 'Flex', icon: Activity },
+  { id: 8, title: 'My Facility Access', icon: CreditCard },
+  { id: 9, title: 'PerformanceNext - Check In', icon: Truck },
+  { id: 10, title: 'My Visitors', icon: Truck },
+  { id: 11, title: 'Meal Card', icon: Truck },
 ];
 
 export default function WidgetsScreen() {
@@ -56,16 +53,16 @@ export default function WidgetsScreen() {
       >
         <View style={styles.grid}>
           {allWidgets.map((widget) => (
-            <TouchableOpacity 
-              key={widget.id}
-              style={styles.card} 
-              activeOpacity={0.7}
-            >
-              <View style={styles.iconContainer}>
-                <widget.icon size={24} color={Colors.primary} strokeWidth={1.8} />
-              </View>
-              <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
-            </TouchableOpacity>
+            <View key={widget.id} style={styles.cardWrapper}>
+              <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+                <View style={styles.iconContainer}>
+                  <widget.icon size={24} color={Colors.primary} strokeWidth={1.8} />
+                </View>
+                <View style={styles.titleContainer}>
+                  <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
       </ScrollView>
@@ -110,23 +107,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: HORIZONTAL_PADDING,
+    padding: 16,
     paddingBottom: 40,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: GAP,
+    marginHorizontal: -4,
+  },
+  cardWrapper: {
+    width: '33.33%',
+    padding: 4,
   },
   card: {
-    width: CARD_WIDTH,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    height: 110,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 12,
   },
   iconContainer: {
     width: 48,
@@ -135,15 +137,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+  },
+  titleContainer: {
+    height: 34,
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingHorizontal: 2,
   },
   cardTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
     color: '#1E293B',
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 16,
     letterSpacing: -0.2,
-    minHeight: 34,
   },
 });

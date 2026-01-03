@@ -20,9 +20,9 @@ const suggestedWidgets = [
 ];
 
 const recentSearches = [
-  'Payslip November',
-  'Holiday Calendar',
-  'Team Directory'
+  'Oracle HCM',
+  'Payroll',
+  'CareerOrbit'
 ];
 
 export function SearchContent({ onClose, style }: { onClose: () => void; style?: any }) {

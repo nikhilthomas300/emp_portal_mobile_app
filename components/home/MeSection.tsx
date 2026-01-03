@@ -2,21 +2,16 @@ import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { Box, Clock, DollarSign, FileText, Grid3X3, Truck, User } from 'lucide-react-native';
 import React from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 20;
-const GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - (HORIZONTAL_PADDING * 2) - (GAP * 2)) / 3;
-
 const widgets = [
-  { id: 1, title: 'Attendance', icon: Clock },
-  { id: 2, title: 'Transport', icon: Truck },
-  { id: 3, title: 'Salary', icon: DollarSign },
-  { id: 4, title: 'Assets', icon: Box },
-  { id: 5, title: 'Letters', icon: FileText },
-  { id: 6, title: 'Profile', icon: User },
+  { id: 1, title: 'My Attendance', icon: Clock },
+  { id: 2, title: 'My Transport', icon: Truck },
+  { id: 3, title: 'Salary Payment Status', icon: DollarSign },
+  { id: 4, title: 'My Assets', icon: Box },
+  { id: 5, title: 'My Letters', icon: FileText },
+  { id: 6, title: 'My Profile', icon: User },
 ];
 
 export default function MeSection() {
@@ -38,16 +33,19 @@ export default function MeSection() {
       
       <View style={styles.gridContainer}>
         {widgets.map((widget) => (
-          <TouchableOpacity 
-            key={widget.id} 
-            style={styles.card} 
-            activeOpacity={0.7}
-          >
-            <View style={styles.iconContainer}>
-              <widget.icon size={22} color={Colors.primary} strokeWidth={1.8} />
-            </View>
-            <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
-          </TouchableOpacity>
+          <View key={widget.id} style={styles.cardWrapper}>
+            <TouchableOpacity 
+              style={styles.card} 
+              activeOpacity={0.7}
+            >
+              <View style={styles.iconContainer}>
+                <widget.icon size={22} color={Colors.primary} strokeWidth={1.8} />
+              </View>
+              <View style={styles.titleContainer}>
+                <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </View>
@@ -56,23 +54,28 @@ export default function MeSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: HORIZONTAL_PADDING,
-    gap: GAP,
+    paddingHorizontal: 16,
+    marginHorizontal: -4,
+  },
+  cardWrapper: {
+    width: '33.33%',
+    padding: 4,
   },
   card: {
-    width: CARD_WIDTH,
-    paddingVertical: 14,
-    paddingHorizontal: 6,
+    height: 105,
     borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 12,
   },
   iconContainer: {
     width: 44,
@@ -81,14 +84,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+  },
+  titleContainer: {
+    height: 34,
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingHorizontal: 2,
   },
   cardTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
     color: '#1E293B',
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 16,
     letterSpacing: -0.2,
   },
 });

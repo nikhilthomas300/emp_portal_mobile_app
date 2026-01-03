@@ -4,13 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Users, X } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
-import { Dimensions, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HORIZONTAL_PADDING = 16;
-const GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - (HORIZONTAL_PADDING * 2) - (GAP * 2)) / 3;
 
 const quickActions = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, route: '/apply-leave' },
@@ -21,7 +16,7 @@ const quickActions = [
   { id: 6, title: 'App Store', icon: Grid, route: '/(tabs)/appstore' },
 ];
 
-const recentSearches = ['Payslip', 'Holidays', 'Directory', 'Leave'];
+const recentSearches = ['Oracle HCM', 'Payroll', 'CareerOrbit', 'Leave'];
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -118,17 +113,20 @@ export default function SearchScreen() {
           </Text>
           <View style={styles.actionsGrid}>
             {filteredActions.map((action) => (
-              <TouchableOpacity 
-                key={action.id}
-                style={styles.actionCard}
-                onPress={() => handlePress(action.route)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.actionIcon}>
-                  <action.icon size={22} color={Colors.primary} strokeWidth={1.8} />
-                </View>
-                <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
-              </TouchableOpacity>
+              <View key={action.id} style={styles.cardWrapper}>
+                <TouchableOpacity 
+                  style={styles.actionCard}
+                  onPress={() => handlePress(action.route)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.actionIcon}>
+                    <action.icon size={22} color={Colors.primary} strokeWidth={1.8} />
+                  </View>
+                  <View style={styles.titleContainer}>
+                    <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             ))}
           </View>
 
@@ -148,7 +146,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   
   gradientHeader: { 
-    paddingHorizontal: HORIZONTAL_PADDING, 
+    paddingHorizontal: 16, 
     paddingBottom: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -203,7 +201,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
 
-  content: { flex: 1, padding: HORIZONTAL_PADDING },
+  content: { flex: 1, padding: 16 },
   
   section: { marginBottom: 20 },
   sectionTitle: { 
@@ -237,17 +235,22 @@ const styles = StyleSheet.create({
   actionsGrid: { 
     flexDirection: 'row', 
     flexWrap: 'wrap', 
-    gap: GAP,
+    marginHorizontal: -4,
+  },
+  cardWrapper: {
+    width: '33.33%',
+    padding: 4,
   },
   actionCard: { 
-    width: CARD_WIDTH, 
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    backgroundColor: '#FFF', 
-    borderRadius: 14, 
+    height: 105,
+    borderRadius: 14,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF', 
     borderWidth: 1, 
     borderColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 12,
   },
   actionIcon: { 
     width: 44, 
@@ -256,16 +259,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     justifyContent: 'center', 
     alignItems: 'center',
-    marginBottom: 10,
+  },
+  titleContainer: {
+    height: 34,
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingHorizontal: 2,
   },
   actionTitle: { 
-    fontSize: 13, 
+    fontSize: 12, 
     fontWeight: '500', 
     color: '#1E293B', 
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 16,
     letterSpacing: -0.2,
-    minHeight: 34,
   },
 
   emptyState: { paddingVertical: 50, alignItems: 'center' },
