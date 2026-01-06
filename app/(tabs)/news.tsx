@@ -1,7 +1,7 @@
 import Colors from '@/constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bookmark, ChevronRight, Clock, Newspaper, Search } from 'lucide-react-native';
+import { Bookmark, ChevronRight, Clock, RefreshCw, Search } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { Extrapolate, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -144,14 +144,14 @@ export default function NewsTab() {
             end={{ x: 1, y: 1 }}
             style={[styles.gradient, { paddingTop: insets.top + 10 }]}
         >
-             <View style={styles.headerTop}>
+              <View style={styles.headerTop}>
               <View>
                 <Text style={styles.headerTitle}>Company News</Text>
                 <Text style={styles.headerSubtitle}>Stay updated with latest updates</Text>
               </View>
-              <View style={styles.newsIcon}>
-                <Newspaper size={24} color="#FFF" strokeWidth={1.5} />
-              </View>
+              <TouchableOpacity style={styles.refreshIcon} activeOpacity={0.7}>
+                <RefreshCw size={20} color="#FFF" strokeWidth={2} />
+              </TouchableOpacity>
             </View>
             
             {/* Search Bar inside gradient */}
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
   headerTitle: { fontSize: 24, fontWeight: '800', color: '#FFF' },
   headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
-  newsIcon: { 
+  refreshIcon: { 
     width: 44, 
     height: 44, 
     borderRadius: 14, 

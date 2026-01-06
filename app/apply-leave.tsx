@@ -61,8 +61,16 @@ export default function ApplyLeaveScreen() {
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={[styles.content, { paddingBottom: activeTab === 'new' ? 100 : 20 }]}
+          keyboardShouldPersistTaps="handled"
+        >
           {activeTab === 'new' ? (
             <>
               {/* Leave Type Selection */}
@@ -146,18 +154,18 @@ export default function ApplyLeaveScreen() {
             </>
           )}
         </ScrollView>
-      </KeyboardAvoidingView>
 
-      {/* Fixed Submit Button */}
-      {activeTab === 'new' && (
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-            <LinearGradient colors={['#4338CA', '#6366F1']} style={styles.gradient}>
-              <Text style={styles.submitText}>Submit Leave Request</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
+        {/* Fixed Submit Button - Inside KeyboardAvoidingView */}
+        {activeTab === 'new' && (
+          <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+              <LinearGradient colors={['#4338CA', '#6366F1']} style={styles.gradient}>
+                <Text style={styles.submitText}>Submit Leave Request</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
+      </KeyboardAvoidingView>
 
       {/* Date Pickers */}
       {showStartPicker && (Platform.OS === 'ios' ? (

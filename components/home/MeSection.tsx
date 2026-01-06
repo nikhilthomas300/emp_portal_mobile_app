@@ -1,16 +1,18 @@
 import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
-import { Activity, Box, Clock, FileText } from 'lucide-react-native';
+import { Activity, Box, Clock, CreditCard, FileText, User } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-// Only show top 4: My Attendance, My Assets, My Letters, Flex
+// Show 6 widgets: 3 per row
 const widgets = [
   { id: 1, title: 'My Attendance', icon: Clock },
   { id: 2, title: 'My Assets', icon: Box },
   { id: 3, title: 'My Letters', icon: FileText },
   { id: 4, title: 'Flex', icon: Activity },
+  { id: 5, title: 'My Profile', icon: User },
+  { id: 6, title: 'Facility Access', icon: CreditCard },
 ];
 
 export default function MeSection() {
@@ -31,7 +33,7 @@ export default function MeSection() {
             return (
               <TouchableOpacity key={widget.id} style={styles.card} activeOpacity={0.7}>
                 <View style={styles.iconContainer}>
-                  <IconComponent size={24} color={Colors.primary} strokeWidth={1.5} />
+                  <IconComponent size={22} color={Colors.primary} strokeWidth={1.6} />
                 </View>
                 <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
               </TouchableOpacity>
@@ -50,24 +52,26 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 18,
-    paddingHorizontal: 8,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
   },
   gridContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
   },
   card: {
+    width: '33.33%',
     alignItems: 'center',
-    width: 72,
+    paddingVertical: 10,
   },
   iconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
@@ -79,5 +83,6 @@ const styles = StyleSheet.create({
     color: '#334155',
     textAlign: 'center',
     lineHeight: 14,
+    paddingHorizontal: 4,
   },
 });

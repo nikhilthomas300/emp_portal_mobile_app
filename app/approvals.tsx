@@ -1,8 +1,9 @@
 import { ModalType, StatusModal } from '@/components/common';
 import { PageHeader } from '@/components/navigation';
 import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
-import { Briefcase, Check, CreditCard, Home, MessageSquare, Search, X } from 'lucide-react-native';
+import { Briefcase, Calendar, Check, Clock, CreditCard, Home, MessageCircle, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,100 +11,173 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const CATEGORIES = ['All', 'Leave', 'WFH', 'Expense'];
 
 const MOCK_DATA = [
-  { id: '1', category: 'WFH', name: 'John Doe', role: 'Senior Developer', type: 'Work From Home', dates: 'Jan 15 - 17', days: '3 days', reason: 'Personal work from home.', applied: 'Today' },
-  { id: '2', category: 'Leave', name: 'Mike Ross', role: 'Legal Advisor', type: 'Sick Leave', dates: 'Jan 22 - 24', days: '3 days', reason: 'Suffering from fever.', applied: 'Today' },
-  { id: '3', category: 'Expense', name: 'Robert Fox', role: 'DevOps Lead', type: 'Travel Expense', dates: 'Jan 10', days: '', reason: 'Client meeting travel.', applied: '2d ago', amount: '$245' },
+  { 
+    id: '1', 
+    category: 'WFH', 
+    name: 'John Doe', 
+    initials: 'JD', 
+    role: 'Senior Developer', 
+    type: 'Work From Home',
+    fromDate: 'Jan 15, 2025',
+    toDate: 'Jan 17, 2025',
+    days: '3 days', 
+    reason: 'Need to work from home due to personal commitments. Will be available online during regular working hours.',
+    applied: '2 hours ago' 
+  },
+  { 
+    id: '2', 
+    category: 'Leave', 
+    name: 'Mike Ross', 
+    initials: 'MR', 
+    role: 'Legal Advisor', 
+    type: 'Sick Leave',
+    fromDate: 'Jan 22, 2025',
+    toDate: 'Jan 24, 2025',
+    days: '3 days', 
+    reason: 'Suffering from fever and cold. Doctor has advised rest for 3 days.',
+    applied: '5 hours ago' 
+  },
+  { 
+    id: '3', 
+    category: 'Expense', 
+    name: 'Robert Fox', 
+    initials: 'RF', 
+    role: 'DevOps Lead', 
+    type: 'Travel Expense',
+    fromDate: 'Jan 10, 2025',
+    toDate: 'Jan 10, 2025',
+    amount: '$245', 
+    reason: 'Client meeting travel expenses including cab fare and lunch.',
+    applied: '1 day ago' 
+  },
+  { 
+    id: '4', 
+    category: 'Leave', 
+    name: 'Sarah Kim', 
+    initials: 'SK', 
+    role: 'UX Designer', 
+    type: 'Casual Leave',
+    fromDate: 'Jan 28, 2025',
+    toDate: 'Jan 30, 2025',
+    days: '3 days', 
+    reason: 'Attending a family wedding function out of town.',
+    applied: '2 days ago' 
+  },
 ];
 
-const getColor = (cat: string) => ({ Leave: '#6366F1', WFH: '#10B981', Expense: '#F59E0B' }[cat] || Colors.primary);
-const getIcon = (cat: string) => ({ Leave: Briefcase, WFH: Home, Expense: CreditCard }[cat] || Briefcase);
-const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2);
+const getCatColor = (c: string) => ({ Leave: '#8B5CF6', WFH: '#10B981', Expense: '#F59E0B' }[c] || '#3B82F6');
+const getCatIcon = (c: string) => ({ Leave: Briefcase, WFH: Home, Expense: CreditCard }[c] || Briefcase);
 
 export default function ApprovalsScreen() {
   const insets = useSafeAreaInsets();
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [search, setSearch] = useState('');
-  const [actionModal, setActionModal] = useState<{ visible: boolean; type: 'Approve' | 'Reject'; item: any } | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [statusModal, setStatusModal] = useState({ visible: false, type: 'success' as ModalType, title: '', description: '' });
+  const [active, setActive] = useState('All');
+  const [modal, setModal] = useState<{ type: 'Approve' | 'Reject'; item: any } | null>(null);
+  const [reason, setReason] = useState('');
+  const [status, setStatus] = useState({ visible: false, type: 'success' as ModalType, title: '', desc: '' });
 
-  const filteredData = MOCK_DATA.filter(d =>
-    (activeCategory === 'All' || d.category === activeCategory) &&
-    (d.name.toLowerCase().includes(search.toLowerCase()) || d.type.toLowerCase().includes(search.toLowerCase()))
-  );
-
-  const handleAction = () => {
-    if (actionModal?.type === 'Reject' && !rejectReason.trim()) {
-      setStatusModal({ visible: true, type: 'error', title: 'Required', description: 'Enter rejection reason.' });
-      return;
-    }
-    setActionModal(null);
-    setTimeout(() => {
-      setStatusModal({
-        visible: true,
-        type: 'success',
-        title: actionModal?.type === 'Approve' ? 'Approved' : 'Rejected',
-        description: `${actionModal?.item?.name}'s request has been ${actionModal?.type?.toLowerCase()}ed.`
-      });
-    }, 200);
+  const data = MOCK_DATA.filter(d => active === 'All' || d.category === active);
+  const counts = { 
+    Leave: MOCK_DATA.filter(d => d.category === 'Leave').length, 
+    WFH: MOCK_DATA.filter(d => d.category === 'WFH').length, 
+    Expense: MOCK_DATA.filter(d => d.category === 'Expense').length 
   };
 
-  const renderCard = ({ item }: { item: typeof MOCK_DATA[0] }) => {
-    const color = getColor(item.category);
-    const Icon = getIcon(item.category);
+  const handleAction = () => {
+    if (modal?.type === 'Reject' && !reason.trim()) {
+      setStatus({ visible: true, type: 'error', title: 'Required', desc: 'Please enter rejection reason.' });
+      return;
+    }
+    setModal(null);
+    setReason('');
+    setTimeout(() => setStatus({ 
+      visible: true, 
+      type: 'success', 
+      title: modal?.type === 'Approve' ? 'Approved!' : 'Rejected', 
+      desc: `${modal?.item?.name}'s ${modal?.item?.type} request has been ${modal?.type?.toLowerCase()}ed.` 
+    }), 150);
+  };
 
+  const Card = ({ item }: { item: typeof MOCK_DATA[0] }) => {
+    const color = getCatColor(item.category);
+    const Icon = getCatIcon(item.category);
+    
     return (
       <View style={styles.card}>
-        {/* Header Row */}
+        {/* Header */}
         <View style={styles.cardHeader}>
-          <View style={[styles.avatar, { backgroundColor: color + '15' }]}>
-            <Text style={[styles.avatarText, { color }]}>{getInitials(item.name)}</Text>
+          <View style={styles.headerLeft}>
+            <View style={[styles.avatar, { backgroundColor: color + '15' }]}>
+              <Text style={[styles.avatarText, { color }]}>{item.initials}</Text>
+            </View>
+            <View style={styles.headerInfo}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.role}>{item.role}</Text>
+            </View>
           </View>
-          <View style={styles.headerInfo}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.role}>{item.role}</Text>
-          </View>
-          <View style={[styles.badge, { backgroundColor: color + '15' }]}>
-            <Icon size={12} color={color} />
-            <Text style={[styles.badgeText, { color }]}>{item.category}</Text>
+          <View style={[styles.categoryBadge, { backgroundColor: color + '12' }]}>
+            <Icon size={12} color={color} strokeWidth={2} />
+            <Text style={[styles.categoryText, { color }]}>{item.category}</Text>
           </View>
         </View>
 
-        {/* Details Row */}
-        <View style={styles.detailsRow}>
-          <View style={styles.detailCol}>
-            <Text style={styles.detailLabel}>Type</Text>
-            <Text style={styles.detailValue}>{item.type}</Text>
+        {/* Request Type */}
+        <View style={styles.typeRow}>
+          <Text style={styles.typeLabel}>{item.type}</Text>
+          {item.amount && <Text style={styles.amount}>{item.amount}</Text>}
+        </View>
+
+        {/* Date Details */}
+        <View style={styles.detailsGrid}>
+          <View style={styles.detailItem}>
+            <Calendar size={14} color="#64748B" strokeWidth={1.8} />
+            <View>
+              <Text style={styles.detailLabel}>From</Text>
+              <Text style={styles.detailValue}>{item.fromDate}</Text>
+            </View>
           </View>
-          <View style={styles.detailCol}>
-            <Text style={styles.detailLabel}>Duration</Text>
-            <Text style={styles.detailValue}>{item.dates}{item.days ? ` (${item.days})` : ''}</Text>
+          <View style={styles.detailItem}>
+            <Calendar size={14} color="#64748B" strokeWidth={1.8} />
+            <View>
+              <Text style={styles.detailLabel}>To</Text>
+              <Text style={styles.detailValue}>{item.toDate}</Text>
+            </View>
           </View>
-          {item.amount && (
-            <View style={styles.detailCol}>
-              <Text style={styles.detailLabel}>Amount</Text>
-              <Text style={[styles.detailValue, { color: '#10B981', fontWeight: '700' }]}>{item.amount}</Text>
+          {item.days && (
+            <View style={styles.detailItem}>
+              <Clock size={14} color="#64748B" strokeWidth={1.8} />
+              <View>
+                <Text style={styles.detailLabel}>Duration</Text>
+                <Text style={styles.detailValue}>{item.days}</Text>
+              </View>
             </View>
           )}
         </View>
 
-        {/* Reason */}
-        <View style={styles.reasonRow}>
-          <MessageSquare size={14} color="#64748B" />
-          <Text style={styles.reason} numberOfLines={2}>{item.reason}</Text>
+        {/* Reason/Comment */}
+        <View style={styles.reasonBox}>
+          <MessageCircle size={14} color="#64748B" strokeWidth={1.8} />
+          <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
         </View>
 
         {/* Footer */}
         <View style={styles.cardFooter}>
-          <Text style={styles.appliedText}>Applied {item.applied}</Text>
+          <Text style={styles.appliedTime}>Applied {item.applied}</Text>
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.rejectBtn} onPress={() => setActionModal({ visible: true, type: 'Reject', item })}>
-              <X size={14} color="#EF4444" strokeWidth={2.5} />
-              <Text style={styles.rejectBtnText}>Reject</Text>
+            <TouchableOpacity 
+              style={styles.rejectBtn} 
+              onPress={() => setModal({ type: 'Reject', item })}
+              activeOpacity={0.7}
+            >
+              <X size={16} color="#DC2626" strokeWidth={2.5} />
+              <Text style={styles.rejectText}>Reject</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.approveBtn} onPress={() => setActionModal({ visible: true, type: 'Approve', item })}>
-              <Check size={14} color="#FFF" strokeWidth={2.5} />
-              <Text style={styles.approveBtnText}>Approve</Text>
+            <TouchableOpacity 
+              style={styles.approveBtn} 
+              onPress={() => setModal({ type: 'Approve', item })}
+              activeOpacity={0.7}
+            >
+              <Check size={16} color="#FFF" strokeWidth={2.5} />
+              <Text style={styles.approveText}>Approve</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -114,94 +188,96 @@ export default function ApprovalsScreen() {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <PageHeader title="Approvals" />
+      <PageHeader title="Pending Approvals" />
 
-      {/* Sticky Search & Categories */}
-      <View style={styles.stickyHeader}>
-        {/* Search */}
-        <View style={styles.searchContainer}>
-          <Search size={18} color="#94A3B8" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search approvals..."
-            placeholderTextColor="#94A3B8"
-            value={search}
-            onChangeText={setSearch}
-          />
-        </View>
+      {/* Category Tabs */}
+      <View style={styles.tabs}>
+        {CATEGORIES.map(c => (
+          <TouchableOpacity 
+            key={c} 
+            style={[styles.tab, active === c && styles.tabActive]} 
+            onPress={() => setActive(c)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.tabText, active === c && styles.tabTextActive]}>{c}</Text>
+            {c !== 'All' && (
+              <View style={[styles.tabBadge, active === c && styles.tabBadgeActive]}>
+                <Text style={[styles.tabBadgeText, active === c && styles.tabBadgeTextActive]}>
+                  {counts[c as keyof typeof counts]}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        {/* Category Pills - Horizontal Simple */}
-        <View style={styles.categoryRow}>
-          {CATEGORIES.map(cat => {
-            const isActive = activeCategory === cat;
-            return (
-              <TouchableOpacity
-                key={cat}
-                style={[styles.categoryPill, isActive && styles.categoryPillActive]}
-                onPress={() => setActiveCategory(cat)}
-              >
-                <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>{cat}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+      {/* Count */}
+      <View style={styles.countHeader}>
+        <Text style={styles.countText}>{data.length} Pending Requests</Text>
       </View>
 
       <FlatList
-        data={filteredData}
-        renderItem={renderCard}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
+        data={data}
+        renderItem={({ item }) => <Card item={item} />}
+        keyExtractor={i => i.id}
+        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<View style={styles.empty}><Text style={styles.emptyText}>No pending approvals</Text></View>}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Check size={48} color="#D1D5DB" strokeWidth={1.5} />
+            <Text style={styles.emptyTitle}>All caught up!</Text>
+            <Text style={styles.emptyText}>No pending approvals</Text>
+          </View>
+        }
       />
 
-      {/* Action Modal */}
-      <Modal visible={!!actionModal?.visible} transparent animationType="fade" onRequestClose={() => setActionModal(null)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
+      {/* Confirmation Modal */}
+      <Modal visible={!!modal} transparent animationType="fade" onRequestClose={() => setModal(null)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={[styles.modalIcon, { backgroundColor: actionModal?.type === 'Approve' ? '#10B98115' : '#EF444415' }]}>
-              {actionModal?.type === 'Approve' ? <Check size={28} color="#10B981" /> : <X size={28} color="#EF4444" />}
-            </View>
-            <Text style={styles.modalTitle}>{actionModal?.type} Request</Text>
-            <Text style={styles.modalSubtitle}>
-              {actionModal?.type === 'Approve'
-                ? `Approve ${actionModal?.item?.name}'s ${actionModal?.item?.type?.toLowerCase()}?`
-                : `Please provide a reason for rejection.`}
-            </Text>
+            <LinearGradient
+              colors={modal?.type === 'Approve' ? ['#059669', '#10B981'] : ['#DC2626', '#EF4444']}
+              style={styles.modalIconBox}
+            >
+              {modal?.type === 'Approve' ? <Check size={32} color="#FFF" strokeWidth={2.5} /> : <X size={32} color="#FFF" strokeWidth={2.5} />}
+            </LinearGradient>
+            
+            <Text style={styles.modalTitle}>{modal?.type} Request?</Text>
+            <Text style={styles.modalSubtitle}>{modal?.item?.name} • {modal?.item?.type}</Text>
+            <Text style={styles.modalDates}>{modal?.item?.fromDate} - {modal?.item?.toDate}</Text>
 
-            {actionModal?.type === 'Reject' && (
+            {modal?.type === 'Reject' && (
               <TextInput
-                style={styles.rejectInput}
-                placeholder="Rejection reason..."
-                placeholderTextColor="#94A3B8"
-                value={rejectReason}
-                onChangeText={setRejectReason}
+                style={styles.modalInput}
+                placeholder="Enter reason for rejection..."
+                placeholderTextColor="#9CA3AF"
+                value={reason}
+                onChangeText={setReason}
                 multiline
               />
             )}
 
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setActionModal(null)}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => { setModal(null); setReason(''); }}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.confirmBtn, actionModal?.type === 'Reject' && { backgroundColor: '#EF4444' }]}
+              <TouchableOpacity 
+                style={[styles.modalConfirmBtn, { backgroundColor: modal?.type === 'Approve' ? '#10B981' : '#EF4444' }]} 
                 onPress={handleAction}
               >
-                <Text style={styles.confirmBtnText}>{actionModal?.type}</Text>
+                <Text style={styles.modalConfirmText}>{modal?.type}</Text>
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
 
-      <StatusModal
-        visible={statusModal.visible}
-        onClose={() => setStatusModal({ ...statusModal, visible: false })}
-        type={statusModal.type}
-        title={statusModal.title}
-        description={statusModal.description}
+      <StatusModal 
+        visible={status.visible} 
+        onClose={() => setStatus({ ...status, visible: false })} 
+        type={status.type} 
+        title={status.title} 
+        description={status.desc} 
       />
     </View>
   );
@@ -210,56 +286,173 @@ export default function ApprovalsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
 
-  stickyHeader: { backgroundColor: '#FFF', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F1F5F9', paddingHorizontal: 14, paddingVertical: Platform.OS === 'ios' ? 12 : 8, borderRadius: 12, gap: 10, marginBottom: 12 },
-  searchInput: { flex: 1, fontSize: 15, color: '#1E293B' },
+  // Tabs
+  tabs: { 
+    flexDirection: 'row', 
+    paddingHorizontal: 16, 
+    paddingVertical: 12, 
+    gap: 8,
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  tab: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 14, 
+    paddingVertical: 8, 
+    borderRadius: 20, 
+    backgroundColor: '#F1F5F9',
+    gap: 6,
+  },
+  tabActive: { backgroundColor: Colors.primary },
+  tabText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
+  tabTextActive: { color: '#FFF' },
+  tabBadge: { 
+    minWidth: 18, 
+    height: 18, 
+    borderRadius: 9, 
+    backgroundColor: '#E2E8F0', 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  tabBadgeActive: { backgroundColor: 'rgba(255,255,255,0.3)' },
+  tabBadgeText: { fontSize: 11, fontWeight: '700', color: '#64748B' },
+  tabBadgeTextActive: { color: '#FFF' },
 
-  categoryRow: { flexDirection: 'row', gap: 8 },
-  categoryPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: '#F1F5F9' },
-  categoryPillActive: { backgroundColor: '#1E293B' },
-  categoryText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
-  categoryTextActive: { color: '#FFF' },
+  // Count Header
+  countHeader: { paddingHorizontal: 16, paddingVertical: 12 },
+  countText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
 
-  listContent: { padding: 16, paddingBottom: 40 },
-  empty: { alignItems: 'center', paddingVertical: 60 },
-  emptyText: { fontSize: 15, color: '#94A3B8' },
+  // List
+  list: { paddingHorizontal: 16 },
+  empty: { paddingVertical: 80, alignItems: 'center' },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#374151', marginTop: 16 },
+  emptyText: { fontSize: 14, color: '#9CA3AF', marginTop: 4 },
 
-  card: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#E2E8F0' },
+  // Card
+  card: { 
+    backgroundColor: '#FFF', 
+    borderRadius: 16, 
+    padding: 16, 
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
 
-  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
-  avatar: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  // Card Header
+  cardHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  avatar: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 12, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+  },
   avatarText: { fontSize: 15, fontWeight: '700' },
-  headerInfo: { flex: 1, marginLeft: 12 },
-  name: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
-  role: { fontSize: 12, color: '#64748B', marginTop: 2 },
-  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
-  badgeText: { fontSize: 11, fontWeight: '700' },
+  headerInfo: { marginLeft: 12, flex: 1 },
+  name: { fontSize: 16, fontWeight: '700', color: '#111827' },
+  role: { fontSize: 12, color: '#6B7280', marginTop: 1 },
+  categoryBadge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 10, 
+    paddingVertical: 5, 
+    borderRadius: 8, 
+    gap: 5,
+  },
+  categoryText: { fontSize: 11, fontWeight: '700' },
 
-  detailsRow: { flexDirection: 'row', marginBottom: 12, gap: 16 },
-  detailCol: {},
-  detailLabel: { fontSize: 11, color: '#94A3B8', marginBottom: 2 },
-  detailValue: { fontSize: 13, fontWeight: '600', color: '#374151' },
+  // Type Row
+  typeRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  typeLabel: { fontSize: 14, fontWeight: '600', color: '#374151' },
+  amount: { fontSize: 16, fontWeight: '700', color: '#059669' },
 
-  reasonRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: '#F8FAFC', padding: 10, borderRadius: 8, marginBottom: 14 },
-  reason: { flex: 1, fontSize: 13, color: '#64748B', lineHeight: 18 },
+  // Details Grid
+  detailsGrid: { flexDirection: 'row', gap: 16, marginBottom: 12 },
+  detailItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  detailLabel: { fontSize: 10, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.3 },
+  detailValue: { fontSize: 13, fontWeight: '600', color: '#374151', marginTop: 1 },
 
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F1F5F9' },
-  appliedText: { fontSize: 11, color: '#94A3B8' },
+  // Reason
+  reasonBox: { 
+    flexDirection: 'row', 
+    alignItems: 'flex-start', 
+    gap: 10, 
+    backgroundColor: '#F8FAFC', 
+    padding: 12, 
+    borderRadius: 10,
+    marginBottom: 14,
+  },
+  reasonText: { flex: 1, fontSize: 13, color: '#4B5563', lineHeight: 18 },
+
+  // Footer
+  cardFooter: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  appliedTime: { fontSize: 12, color: '#9CA3AF' },
   actions: { flexDirection: 'row', gap: 8 },
-  rejectBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA' },
-  rejectBtnText: { fontSize: 13, fontWeight: '600', color: '#EF4444' },
-  approveBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#10B981' },
-  approveBtnText: { fontSize: 13, fontWeight: '600', color: '#FFF' },
+  rejectBtn: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 14, 
+    height: 38, 
+    borderRadius: 10, 
+    backgroundColor: '#FEE2E2',
+    gap: 6,
+  },
+  rejectText: { fontSize: 13, fontWeight: '600', color: '#DC2626' },
+  approveBtn: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 14, 
+    height: 38, 
+    borderRadius: 10, 
+    backgroundColor: '#10B981',
+    gap: 6,
+  },
+  approveText: { fontSize: 13, fontWeight: '600', color: '#FFF' },
 
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
-  modalCard: { backgroundColor: '#FFF', borderRadius: 20, padding: 24, alignItems: 'center' },
-  modalIcon: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B', marginBottom: 8 },
-  modalSubtitle: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 20, marginBottom: 16 },
-  rejectInput: { width: '100%', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 12, padding: 14, height: 80, textAlignVertical: 'top', marginBottom: 16, fontSize: 14 },
-  modalActions: { flexDirection: 'row', gap: 12, width: '100%' },
-  cancelBtn: { flex: 1, backgroundColor: '#F1F5F9', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  cancelBtnText: { fontSize: 15, fontWeight: '600', color: '#64748B' },
-  confirmBtn: { flex: 1, backgroundColor: '#10B981', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  confirmBtnText: { fontSize: 15, fontWeight: '700', color: '#FFF' },
+  // Modal
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalCard: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, width: '100%', alignItems: 'center' },
+  modalIconBox: { width: 64, height: 64, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: '#111827', marginBottom: 4 },
+  modalSubtitle: { fontSize: 14, fontWeight: '600', color: '#374151' },
+  modalDates: { fontSize: 13, color: '#6B7280', marginBottom: 20 },
+  modalInput: { 
+    width: '100%', 
+    backgroundColor: '#F9FAFB', 
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    borderRadius: 12, 
+    padding: 14, 
+    height: 90, 
+    textAlignVertical: 'top', 
+    fontSize: 14, 
+    color: '#111827', 
+    marginBottom: 20,
+  },
+  modalButtons: { flexDirection: 'row', gap: 12, width: '100%' },
+  modalCancelBtn: { flex: 1, backgroundColor: '#F3F4F6', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+  modalCancelText: { fontSize: 15, fontWeight: '600', color: '#6B7280' },
+  modalConfirmBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+  modalConfirmText: { fontSize: 15, fontWeight: '700', color: '#FFF' },
 });

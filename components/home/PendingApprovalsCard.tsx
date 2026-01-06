@@ -1,14 +1,43 @@
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { Bell, ChevronRight } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+    Easing,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withTiming
+} from 'react-native-reanimated';
 
 interface PendingApprovalsCardProps {
   count?: number;
 }
 
 export default function PendingApprovalsCard({ count = 3 }: PendingApprovalsCardProps) {
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    // Bell shake animation
+    rotation.value = withRepeat(
+      withSequence(
+        withTiming(-10, { duration: 100, easing: Easing.ease }),
+        withTiming(10, { duration: 100, easing: Easing.ease }),
+        withTiming(-10, { duration: 100, easing: Easing.ease }),
+        withTiming(0, { duration: 100, easing: Easing.ease }),
+        withTiming(0, { duration: 2000 }) // Pause between shakes
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
   if (count === 0) return null;
 
   return (
@@ -16,7 +45,9 @@ export default function PendingApprovalsCard({ count = 3 }: PendingApprovalsCard
       <Link href="/approvals" asChild>
         <TouchableOpacity style={styles.card} activeOpacity={0.85}>
           <View style={styles.iconContainer}>
-            <Bell size={20} color={Colors.primary} strokeWidth={2} />
+            <Animated.View style={animatedStyle}>
+              <Bell size={20} color={Colors.primary} strokeWidth={2} />
+            </Animated.View>
           </View>
           
           <View style={styles.textContent}>

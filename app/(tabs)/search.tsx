@@ -2,7 +2,7 @@ import Colors from '@/constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Users, X } from 'lucide-react-native';
+import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Sparkles, TrendingUp, Users, X } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ const quickActions = [
 ];
 
 const recentSearches = ['Oracle HCM', 'Payroll', 'CareerOrbit', 'Leave'];
+const trendingSearches = ['Wellness', 'Training', 'Benefits'];
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -54,26 +55,25 @@ export default function SearchScreen() {
         colors={['#1E40AF', '#3B82F6', '#60A5FA']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientHeader, { paddingTop: insets.top + 8 }]}
+        style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
       >
         <Text style={styles.headerTitle}>Search</Text>
+        <Text style={styles.headerSubtitle}>Find apps, widgets and more</Text>
         
         {/* Enhanced Search Bar */}
         <View style={styles.searchBarContainer}>
-          <View style={styles.searchIconWrapper}>
-            <Search size={16} color="#6366F1" strokeWidth={2.5} />
-          </View>
+          <Search size={20} color="#64748B" strokeWidth={2} />
           <TextInput
             ref={inputRef}
             style={styles.searchInput}
-            placeholder="Search apps, widgets..."
+            placeholder="Search anything..."
             placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-              <X size={14} color="#94A3B8" strokeWidth={2.5} />
+              <X size={16} color="#64748B" strokeWidth={2.5} />
             </TouchableOpacity>
           )}
         </View>
@@ -82,58 +82,86 @@ export default function SearchScreen() {
       <ScrollView 
         ref={scrollRef}
         style={styles.content} 
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Recent Searches */}
+        {/* Recent & Trending Searches */}
         {searchQuery.length === 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent</Text>
-            <View style={styles.recentContainer}>
-              {recentSearches.map((term, index) => (
-                <TouchableOpacity 
-                  key={index} 
-                  style={styles.recentPill} 
-                  activeOpacity={0.7}
-                  onPress={() => setSearchQuery(term)}
-                >
-                  <Clock size={11} color="#6366F1" strokeWidth={2} />
-                  <Text style={styles.recentText}>{term}</Text>
-                </TouchableOpacity>
-              ))}
+          <>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Clock size={14} color="#64748B" strokeWidth={2} />
+                <Text style={styles.sectionTitle}>Recent</Text>
+              </View>
+              <View style={styles.pillsContainer}>
+                {recentSearches.map((term, index) => (
+                  <TouchableOpacity 
+                    key={index} 
+                    style={styles.pill} 
+                    activeOpacity={0.7}
+                    onPress={() => setSearchQuery(term)}
+                  >
+                    <Text style={styles.pillText}>{term}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <TrendingUp size={14} color="#64748B" strokeWidth={2} />
+                <Text style={styles.sectionTitle}>Trending</Text>
+              </View>
+              <View style={styles.pillsContainer}>
+                {trendingSearches.map((term, index) => (
+                  <TouchableOpacity 
+                    key={index} 
+                    style={[styles.pill, styles.trendingPill]} 
+                    activeOpacity={0.7}
+                    onPress={() => setSearchQuery(term)}
+                  >
+                    <Sparkles size={10} color="#F59E0B" strokeWidth={2} />
+                    <Text style={[styles.pillText, styles.trendingText]}>{term}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </>
         )}
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {searchQuery ? 'Results' : 'Quick Actions'}
-          </Text>
-          <View style={styles.actionsGrid}>
-            {filteredActions.map((action) => (
-              <View key={action.id} style={styles.cardWrapper}>
+          <View style={styles.sectionHeader}>
+            <Grid size={14} color="#64748B" strokeWidth={2} />
+            <Text style={styles.sectionTitle}>
+              {searchQuery ? 'Results' : 'Quick Actions'}
+            </Text>
+          </View>
+          
+          <View style={styles.actionsContainer}>
+            <View style={styles.actionsGrid}>
+              {filteredActions.map((action) => (
                 <TouchableOpacity 
+                  key={action.id}
                   style={styles.actionCard}
                   onPress={() => handlePress(action.route)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.actionIcon}>
-                    <action.icon size={22} color={Colors.primary} strokeWidth={1.8} />
+                    <action.icon size={22} color={Colors.primary} strokeWidth={1.6} />
                   </View>
-                  <View style={styles.titleContainer}>
-                    <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
-                  </View>
+                  <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
                 </TouchableOpacity>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
 
           {filteredActions.length === 0 && (
             <View style={styles.emptyState}>
-              <Search size={36} color="#CBD5E1" />
-              <Text style={styles.emptyText}>No results found</Text>
+              <Search size={40} color="#CBD5E1" strokeWidth={1.5} />
+              <Text style={styles.emptyTitle}>No results found</Text>
+              <Text style={styles.emptyText}>Try a different search term</Text>
             </View>
           )}
         </View>
@@ -143,53 +171,46 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   
   gradientHeader: { 
-    paddingHorizontal: 16, 
-    paddingBottom: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingHorizontal: 20, 
+    paddingBottom: 20,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
   },
   headerTitle: { 
-    fontSize: 20, 
-    fontWeight: '700', 
+    fontSize: 26, 
+    fontWeight: '800', 
     color: '#FFF', 
-    marginBottom: 10,
-    letterSpacing: -0.3,
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: { 
+    fontSize: 14, 
+    color: 'rgba(255,255,255,0.8)', 
+    marginTop: 2,
+    marginBottom: 16,
   },
 
-  // Enhanced Search Bar
   searchBarContainer: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     backgroundColor: '#FFF', 
-    paddingHorizontal: 4, 
-    paddingVertical: Platform.OS === 'ios' ? 4 : 2, 
-    borderRadius: 10, 
-    gap: 0,
-    shadowColor: '#1E40AF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  searchIconWrapper: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: '#EEF2FF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 16, 
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10, 
+    borderRadius: 16, 
+    gap: 12,
   },
   searchInput: { 
     flex: 1, 
-    fontSize: 14, 
+    fontSize: 16, 
     color: '#1E293B', 
     fontWeight: '500',
-    letterSpacing: -0.2,
-    paddingHorizontal: 10,
-    paddingVertical: Platform.OS === 'ios' ? 8 : 6,
   },
   clearButton: {
     width: 28,
@@ -198,89 +219,92 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 4,
   },
 
-  content: { flex: 1, padding: 16 },
+  content: { flex: 1, paddingTop: 20 },
   
-  section: { marginBottom: 20 },
+  section: { marginBottom: 24, paddingHorizontal: 20 },
+  sectionHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 6, 
+    marginBottom: 12 
+  },
   sectionTitle: { 
-    fontSize: 11, 
+    fontSize: 13, 
     fontWeight: '700', 
     color: '#64748B', 
-    marginBottom: 10, 
     textTransform: 'uppercase', 
-    letterSpacing: 0.8 
+    letterSpacing: 0.5 
   },
   
-  recentContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  recentPill: { 
+  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  pill: { 
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10, 
-    paddingVertical: 6, 
-    backgroundColor: '#EEF2FF', 
-    borderRadius: 14, 
-    borderWidth: 1, 
-    borderColor: '#C7D2FE',
+    gap: 6,
+    paddingHorizontal: 14, 
+    paddingVertical: 8, 
+    backgroundColor: '#F1F5F9', 
+    borderRadius: 20, 
   },
-  recentText: { 
-    fontSize: 12, 
-    color: '#4338CA', 
+  trendingPill: {
+    backgroundColor: '#FEF3C7',
+  },
+  pillText: { 
+    fontSize: 13, 
+    color: '#374151', 
     fontWeight: '600',
-    letterSpacing: -0.2,
+  },
+  trendingText: {
+    color: '#92400E',
   },
 
+  actionsContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+  },
   actionsGrid: { 
     flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    marginHorizontal: -4,
-  },
-  cardWrapper: {
-    width: '33.33%',
-    padding: 4,
+    flexWrap: 'wrap',
   },
   actionCard: { 
-    height: 105,
-    borderRadius: 14,
+    width: '33.33%',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFF', 
-    borderWidth: 1, 
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 6,
     paddingVertical: 12,
   },
   actionIcon: { 
-    width: 44, 
-    height: 44, 
-    borderRadius: 12, 
-    backgroundColor: '#EFF6FF',
+    width: 52, 
+    height: 52, 
+    borderRadius: 16, 
+    backgroundColor: '#DBEAFE',
     justifyContent: 'center', 
     alignItems: 'center',
-  },
-  titleContainer: {
-    height: 34,
-    justifyContent: 'center',
-    marginTop: 8,
-    paddingHorizontal: 2,
+    marginBottom: 8,
   },
   actionTitle: { 
-    fontSize: 12, 
-    fontWeight: '500', 
-    color: '#1E293B', 
+    fontSize: 11, 
+    fontWeight: '600', 
+    color: '#334155', 
     textAlign: 'center',
-    lineHeight: 16,
-    letterSpacing: -0.2,
+    lineHeight: 14,
+    paddingHorizontal: 4,
   },
 
   emptyState: { paddingVertical: 50, alignItems: 'center' },
+  emptyTitle: { 
+    fontSize: 16, 
+    fontWeight: '700', 
+    color: '#1E293B', 
+    marginTop: 16,
+  },
   emptyText: { 
-    fontSize: 14, 
-    fontWeight: '500', 
+    fontSize: 13, 
     color: '#94A3B8', 
-    marginTop: 12,
-    letterSpacing: -0.2,
+    marginTop: 4,
   },
 });

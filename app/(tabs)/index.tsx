@@ -26,8 +26,8 @@ if (Platform.OS === 'android') {
   }
 }
 
-const HEADER_HEIGHT_EXPANDED = 140;
-const HEADER_HEIGHT_COLLAPSED = 70;
+const HEADER_HEIGHT_EXPANDED = 120;
+const HEADER_HEIGHT_COLLAPSED = 56;
 
 export default function HomeScreen() {
   const scrollRef = useRef<Animated.ScrollView>(null);
@@ -95,7 +95,7 @@ export default function HomeScreen() {
             colors={['#1E40AF', '#3B82F6', '#60A5FA']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.gradient, { paddingTop: insets.top + 10 }]}
+            style={[styles.gradient, { paddingTop: insets.top + 6 }]}
         >
             {/* Top Row */}
             <View style={styles.headerTopRow}>
@@ -238,9 +238,9 @@ const styles = StyleSheet.create({
       gap: 12,
   },
   menuButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
+      width: 36,
+      height: 36,
+      borderRadius: 10,
       backgroundColor: 'rgba(255,255,255,0.15)',
       justifyContent: 'center',
       alignItems: 'center',
@@ -248,26 +248,26 @@ const styles = StyleSheet.create({
   rightSection: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 10,
+      gap: 8,
   },
   iconButton: {
-      width: 44,
-      height: 44,
+      width: 38,
+      height: 38,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'rgba(255,255,255,0.2)',
-      borderRadius: 14,
+      borderRadius: 12,
       borderWidth: 1,
       borderColor: 'rgba(255,255,255,0.3)',
       position: 'relative',
   },
   badge: {
       position: 'absolute',
-      top: 8,
-      right: 8,
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+      top: 6,
+      right: 6,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
       backgroundColor: '#EF4444',
       borderWidth: 2,
       borderColor: '#FFF',
@@ -287,17 +287,17 @@ const styles = StyleSheet.create({
   },
   searchWrapper: {
       width: '100%',
-      marginTop: 16,
+      marginTop: 10,
       overflow: 'hidden',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 15,
-    gap: 12,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,

@@ -1,16 +1,18 @@
 import Colors from '@/constants/Colors';
 import { Link, useRouter } from 'expo-router';
-import { CalendarOff, CheckCircle, Share2, Users } from 'lucide-react-native';
+import { CalendarOff, CheckCircle, FileText, Share2, UserCheck, Users } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-// Show top 4 team widgets on home
+// Show 6 team widgets: 3 per row
 const widgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
   { id: 2, title: 'Team Attendance', icon: Users, link: null },
   { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
   { id: 4, title: 'Shared Assets', icon: Share2, link: null },
+  { id: 5, title: 'Team Letters', icon: FileText, link: null },
+  { id: 6, title: 'Directory', icon: UserCheck, link: null },
 ];
 
 export default function TeamSection() {
@@ -22,7 +24,7 @@ export default function TeamSection() {
     const cardElement = (
       <View style={styles.card}>
         <View style={styles.iconContainer}>
-          <IconComponent size={24} color={Colors.primary} strokeWidth={1.5} />
+          <IconComponent size={22} color={Colors.primary} strokeWidth={1.6} />
         </View>
         <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
       </View>
@@ -30,12 +32,12 @@ export default function TeamSection() {
 
     return widget.link ? (
       <Link key={widget.id} href={widget.link as any} asChild>
-        <TouchableOpacity activeOpacity={0.7}>
+        <TouchableOpacity activeOpacity={0.7} style={styles.cardWrapper}>
           {cardElement}
         </TouchableOpacity>
       </Link>
     ) : (
-      <TouchableOpacity key={widget.id} activeOpacity={0.7}>
+      <TouchableOpacity key={widget.id} activeOpacity={0.7} style={styles.cardWrapper}>
         {cardElement}
       </TouchableOpacity>
     );
@@ -65,24 +67,28 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 18,
-    paddingHorizontal: 8,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
   },
   gridContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  cardWrapper: {
+    width: '33.33%',
   },
   card: {
     alignItems: 'center',
-    width: 72,
+    paddingVertical: 10,
   },
   iconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
@@ -94,5 +100,6 @@ const styles = StyleSheet.create({
     color: '#334155',
     textAlign: 'center',
     lineHeight: 14,
+    paddingHorizontal: 4,
   },
 });
