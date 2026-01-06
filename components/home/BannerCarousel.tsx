@@ -24,7 +24,7 @@ export default function BannerCarousel() {
         });
         return next;
       });
-    }, 5000);
+    }, 15000);
 
     return () => clearInterval(interval);
   }, []);

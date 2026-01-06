@@ -10,7 +10,7 @@ const teamWidgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
   { id: 2, title: 'Team Attendance Status', icon: Users, link: null },
   { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
-  { id: 4, title: 'Shared Assets', icon: Share2, link: null },
+  { id: 4, title: 'Team Shared Assets', icon: Share2, link: null },
   { id: 5, title: 'Team Letters', icon: FileText, link: null },
   { id: 6, title: 'Team Directory', icon: UserCheck, link: null },
 ];
@@ -23,11 +23,9 @@ export default function TeamScreen() {
     const cardContent = (
       <TouchableOpacity style={styles.card} activeOpacity={0.7}>
         <View style={styles.iconContainer}>
-          <widget.icon size={24} color={Colors.primary} strokeWidth={1.8} />
+          <widget.icon size={28} color={Colors.primary} strokeWidth={1.6} />
         </View>
-        <View style={styles.titleContainer}>
-          <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
-        </View>
+        <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
       </TouchableOpacity>
     );
 
@@ -51,12 +49,13 @@ export default function TeamScreen() {
         colors={['#1E40AF', '#3B82F6', '#60A5FA']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: insets.top + 10 }]}
+        style={[styles.header, { paddingTop: insets.top + 12 }]}
       >
         <View style={styles.headerContent}>
           <TouchableOpacity 
             onPress={() => router.back()} 
             style={styles.backButton}
+            activeOpacity={0.7}
           >
             <ArrowLeft size={22} color="#FFF" strokeWidth={2.5} />
           </TouchableOpacity>
@@ -82,13 +81,18 @@ export default function TeamScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 18,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
   },
   headerContent: {
     flexDirection: 'row',
@@ -96,21 +100,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#FFF',
     letterSpacing: -0.3,
   },
   placeholder: {
-    width: 40,
+    width: 44,
   },
   scrollView: {
     flex: 1,
@@ -122,43 +128,42 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -4,
+    marginHorizontal: -6,
   },
   cardWrapper: {
     width: '33.33%',
-    padding: 4,
+    padding: 6,
   },
   card: {
-    height: 110,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    paddingHorizontal: 6,
-    paddingVertical: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  titleContainer: {
-    height: 34,
-    justifyContent: 'center',
-    marginTop: 8,
-    paddingHorizontal: 2,
+    marginBottom: 10,
   },
   cardTitle: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#1E293B',
+    fontWeight: '600',
+    color: '#334155',
     textAlign: 'center',
     lineHeight: 16,
-    letterSpacing: -0.2,
+    minHeight: 32,
   },
 });

@@ -1,50 +1,43 @@
 import Colors from '@/constants/Colors';
 import { Link, useRouter } from 'expo-router';
-import { CalendarOff, CheckCircle, FileText, Share2, Users } from 'lucide-react-native';
+import { CalendarOff, CheckCircle, Share2, Users } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
+// Show top 4 team widgets on home
 const widgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
-  { id: 2, title: 'Team Attendance Status', icon: Users, link: null },
+  { id: 2, title: 'Team Attendance', icon: Users, link: null },
   { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
-  { id: 4, title: 'Team Shared Assets', icon: Share2, link: null },
-  { id: 5, title: 'Team Letters', icon: FileText, link: null },
+  { id: 4, title: 'Shared Assets', icon: Share2, link: null },
 ];
 
 export default function TeamSection() {
   const router = useRouter();
 
-  const handleSeeAll = () => {
-    router.push('/team');
-  };
-
   const renderCard = (widget: typeof widgets[0]) => {
+    const IconComponent = widget.icon;
+    
     const cardElement = (
-      <TouchableOpacity 
-        style={styles.card} 
-        activeOpacity={0.7}
-      >
+      <View style={styles.card}>
         <View style={styles.iconContainer}>
-          <widget.icon size={22} color={Colors.primary} strokeWidth={1.8} />
+          <IconComponent size={24} color={Colors.primary} strokeWidth={1.5} />
         </View>
-        <View style={styles.titleContainer}>
-          <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
-        </View>
-      </TouchableOpacity>
+        <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+      </View>
     );
 
-    return (
-      <View key={widget.id} style={styles.cardWrapper}>
-        {widget.link ? (
-          <Link href={widget.link as any} asChild>
-            {cardElement}
-          </Link>
-        ) : (
-          cardElement
-        )}
-      </View>
+    return widget.link ? (
+      <Link key={widget.id} href={widget.link as any} asChild>
+        <TouchableOpacity activeOpacity={0.7}>
+          {cardElement}
+        </TouchableOpacity>
+      </Link>
+    ) : (
+      <TouchableOpacity key={widget.id} activeOpacity={0.7}>
+        {cardElement}
+      </TouchableOpacity>
     );
   };
 
@@ -52,14 +45,14 @@ export default function TeamSection() {
     <View style={styles.container}>
       <SectionHeader 
         title="My Team" 
-        icon={Users}
-        iconColor="#4338CA"
         showSeeAll
-        onSeeAll={handleSeeAll}
+        onSeeAll={() => router.push('/team')}
       />
       
-      <View style={styles.gridContainer}>
-        {widgets.map((widget) => renderCard(widget))}
+      <View style={styles.cardContainer}>
+        <View style={styles.gridContainer}>
+          {widgets.map((widget) => renderCard(widget))}
+        </View>
       </View>
     </View>
   );
@@ -67,49 +60,39 @@ export default function TeamSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  cardContainer: {
+    marginHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 8,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   gridContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    marginHorizontal: -4,
-  },
-  cardWrapper: {
-    width: '33.33%',
-    padding: 4,
+    justifyContent: 'space-around',
   },
   card: {
-    height: 105,
-    borderRadius: 14,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 6,
-    paddingVertical: 12,
+    width: 72,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#EFF6FF',
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#DBEAFE',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  titleContainer: {
-    height: 34,
-    justifyContent: 'center',
-    marginTop: 8,
-    paddingHorizontal: 2,
+    marginBottom: 8,
   },
   cardTitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#1E293B',
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#334155',
     textAlign: 'center',
-    lineHeight: 16,
-    letterSpacing: -0.2,
+    lineHeight: 14,
   },
 });

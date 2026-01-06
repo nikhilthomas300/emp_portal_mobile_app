@@ -1,5 +1,4 @@
 import Colors from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, LucideIcon } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -15,36 +14,26 @@ interface SectionHeaderProps {
 
 export default function SectionHeader({ 
   title, 
-  icon: Icon, 
-  iconColor = Colors.primary,
+  icon: Icon,
+  iconColor,
   onSeeAll,
   showSeeAll = false,
-  seeAllText = 'See All'
+  seeAllText = 'View all'
 }: SectionHeaderProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        {Icon && (
-          <LinearGradient
-            colors={[iconColor + '25', iconColor + '10']}
-            style={styles.iconContainer}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Icon size={18} color={iconColor} strokeWidth={2.5} />
-          </LinearGradient>
-        )}
-        <Text style={styles.title}>{title}</Text>
-      </View>
+      <Text style={styles.title}>{title}</Text>
       
       {showSeeAll && (
         <TouchableOpacity 
           style={styles.seeAllBtn} 
           onPress={onSeeAll}
-          activeOpacity={0.7}
+          activeOpacity={0.6}
         >
           <Text style={styles.seeAllText}>{seeAllText}</Text>
-          <ChevronRight size={14} color={Colors.primary} strokeWidth={2.5} />
+          <View style={styles.chevronContainer}>
+            <ChevronRight size={14} color={Colors.primary} strokeWidth={2.5} />
+          </View>
         </TouchableOpacity>
       )}
     </View>
@@ -56,42 +45,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
     marginBottom: 14,
-    paddingHorizontal: Colors.spacing,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  iconContainer: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 18,
   },
   title: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: Colors.text,
-    letterSpacing: -0.3,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
   },
   seeAllBtn: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.primary + '15',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 4,
+    paddingVertical: 6,
+    paddingLeft: 10,
+    paddingRight: 6,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 20,
   },
   seeAllText: {
     fontSize: 12,
     color: Colors.primary,
     fontWeight: '600',
+  },
+  chevronContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#DBEAFE',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

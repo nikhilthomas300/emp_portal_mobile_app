@@ -1,9 +1,8 @@
-import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Calendar, Clock, Video } from 'lucide-react-native';
+import { Calendar, ChevronRight, Video } from 'lucide-react-native';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
 export default function UpcomingSchedule() {
@@ -12,48 +11,52 @@ export default function UpcomingSchedule() {
   return (
     <View style={styles.container}>
       <SectionHeader 
-        title="Upcoming Meeting" 
-        icon={Video}
-        iconColor="#2563EB"
+        title="Upcoming"
         showSeeAll={true}
         onSeeAll={() => router.push('/meetings')}
       />
 
-      <View style={styles.cardWrapper}>
+      <TouchableOpacity style={styles.cardWrapper} activeOpacity={0.95}>
         <LinearGradient
-          colors={['#3B82F6', '#2563EB']}
+          colors={['#1E40AF', '#3B82F6']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          {/* Meeting Info */}
-          <View style={styles.content}>
-            <View style={styles.row}>
-              <View style={styles.textContainer}>
-                <Text style={styles.title} numberOfLines={2}>Project AI with Cybersecurity with Pavan - Weekly Updates</Text>
-                <Text style={styles.subtitle}>Host: Nikhil Thomas</Text>
-              </View>
+          {/* Header */}
+          <View style={styles.cardHeader}>
+            <View style={styles.iconBadge}>
+              <Video size={18} color="#FFFFFF" strokeWidth={2.5} />
             </View>
+            <View style={styles.liveIndicator}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveText}>In 30 min</Text>
+            </View>
+          </View>
+          
+          {/* Content */}
+          <Text style={styles.title} numberOfLines={2}>
+            Project AI with Cybersecurity - Weekly Sync
+          </Text>
+          <Text style={styles.subtitle}>Host: Nikhil Thomas</Text>
 
-            <View style={styles.divider} />
-
-            <View style={styles.footer}>
-              <View style={styles.timeInfo}>
-                <Calendar size={14} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.timeText}>Today, 10:00 AM</Text>
-              </View>
-              <View style={styles.timeInfo}>
-                <Clock size={14} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.timeText}>30 min</Text>
-              </View>
+          {/* Footer */}
+          <View style={styles.footer}>
+            <View style={styles.timeInfo}>
+              <Calendar size={14} color="#FFFFFF" />
+              <Text style={styles.timeText}>Today, 10:00 AM</Text>
+            </View>
+            <View style={styles.joinBtn}>
+              <Text style={styles.joinText}>Join</Text>
+              <ChevronRight size={16} color="#3B82F6" strokeWidth={2.5} />
             </View>
           </View>
 
-          {/* Decoration Circles */}
+          {/* Decorative Elements */}
           <View style={styles.circle1} />
           <View style={styles.circle2} />
         </LinearGradient>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,90 +66,111 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardWrapper: {
-    paddingHorizontal: Colors.spacing,
-  },
-  seeAllBtn: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 14,
-  },
-  seeAll: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '600',
+    paddingHorizontal: 16,
   },
   card: {
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 24,
+    padding: 20,
     position: 'relative',
     overflow: 'hidden',
-    ...Colors.shadows.medium,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  content: {
-    zIndex: 2,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  row: {
+  iconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  liveIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
   },
-  textContainer: {
-    flex: 1,
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#22C55E',
+  },
+  liveText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   title: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#FFF',
-    marginBottom: 4,
+    color: '#FFFFFF',
+    marginBottom: 6,
     lineHeight: 24,
   },
   subtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.9)',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
     fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    marginBottom: 14,
+    marginBottom: 18,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   timeInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    gap: 8,
   },
   timeText: {
-    color: '#FFF',
-    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 14,
     fontWeight: '600',
+  },
+  joinBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 4,
+  },
+  joinText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#3B82F6',
   },
   circle1: {
     position: 'absolute',
-    top: -20,
-    right: -20,
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    top: -40,
+    right: -40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   circle2: {
     position: 'absolute',
-    bottom: -30,
-    left: -20,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    bottom: -50,
+    left: -30,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: 'rgba(255,255,255,0.05)',
   },
 });

@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, ChevronRight, Clock, Umbrella } from 'lucide-react-native';
+import { Briefcase, Calendar, ChevronRight, Clock } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SectionHeader } from '../home';
@@ -10,60 +10,46 @@ export default function LeaveBalanceSection() {
 
   return (
     <View style={styles.container}>
-      <SectionHeader 
-        title="Leave Balance" 
-        icon={Umbrella}
-        iconColor="#10B981"
-      />
+      <SectionHeader title="Leave Balance" />
 
       <View style={styles.cardWrapper}>
         <View style={styles.mainCard}>
-          {/* Leave Balance Row */}
-          <View style={styles.balanceRow}>
-            {/* Casual Leave */}
-            <View style={styles.balanceItem}>
+          {/* Leave Cards - 2 types */}
+          <View style={styles.leaveGrid}>
+            {/* Casual / Sick Leave */}
+            <View style={styles.leaveCard}>
               <View style={[styles.iconContainer, { backgroundColor: '#EEF2FF' }]}>
-                <Clock size={16} color="#6366F1" />
+                <Clock size={22} color="#6366F1" strokeWidth={1.8} />
               </View>
-              <View style={styles.balanceInfo}>
-                <Text style={[styles.balanceValue, { color: '#6366F1' }]}>08</Text>
-                <Text style={styles.balanceLabel}>Casual</Text>
-              </View>
+              <Text style={[styles.leaveValue, { color: '#6366F1' }]}>08</Text>
+              <Text style={styles.leaveLabel}>Casual / Sick</Text>
             </View>
 
             {/* Divider */}
-            <View style={styles.verticalDivider} />
+            <View style={styles.divider} />
 
             {/* Earned Leave */}
-            <View style={styles.balanceItem}>
-              <View style={[styles.iconContainer, { backgroundColor: '#ECFDF5' }]}>
-                <Briefcase size={16} color="#10B981" />
+            <View style={styles.leaveCard}>
+              <View style={[styles.iconContainer, { backgroundColor: '#DCFCE7' }]}>
+                <Briefcase size={22} color="#16A34A" strokeWidth={1.8} />
               </View>
-              <View style={styles.balanceInfo}>
-                <Text style={[styles.balanceValue, { color: '#10B981' }]}>14</Text>
-                <Text style={styles.balanceLabel}>Earned</Text>
-              </View>
+              <Text style={[styles.leaveValue, { color: '#16A34A' }]}>14</Text>
+              <Text style={styles.leaveLabel}>Earned Leave</Text>
             </View>
-
-            {/* Divider */}
-            <View style={styles.verticalDivider} />
-
-            {/* Holiday Calendar */}
-            <TouchableOpacity 
-              style={styles.holidayItem}
-              onPress={() => router.push('/holidays')}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.iconContainer, { backgroundColor: '#FFF7ED' }]}>
-                <Calendar size={16} color="#EA580C" />
-              </View>
-              <View style={styles.balanceInfo}>
-                <Text style={styles.holidayText}>Holiday</Text>
-                <Text style={styles.balanceLabel}>Calendar</Text>
-              </View>
-              <ChevronRight size={14} color="#CBD5E1" />
-            </TouchableOpacity>
           </View>
+
+          {/* Holiday Calendar Link */}
+          <TouchableOpacity 
+            style={styles.holidayBtn}
+            onPress={() => router.push('/holidays')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.holidayLeft}>
+              <Calendar size={18} color={Colors.primary} strokeWidth={2} />
+              <Text style={styles.holidayText}>View Holiday Calendar</Text>
+            </View>
+            <ChevronRight size={18} color={Colors.primary} strokeWidth={2} />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -72,70 +58,70 @@ export default function LeaveBalanceSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   cardWrapper: {
-    paddingHorizontal: Colors.spacing,
+    paddingHorizontal: 16,
   },
   mainCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 20,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    padding: 20,
   },
-  balanceRow: {
+  leaveGrid: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  balanceItem: {
+  leaveCard: {
     flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  divider: {
+    width: 1,
+    height: 60,
+    backgroundColor: '#E2E8F0',
+  },
+  iconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  leaveValue: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  leaveLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  holidayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#EFF6FF',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  holidayLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingHorizontal: 4,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  balanceInfo: {
-    gap: 1,
-  },
-  balanceValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  balanceLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#94A3B8',
-  },
-  verticalDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: '#E2E8F0',
-  },
-  holidayItem: {
-    flex: 1.1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingLeft: 8,
   },
   holidayText: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#EA580C',
+    fontWeight: '600',
+    color: Colors.primary,
   },
 });

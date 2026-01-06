@@ -1,25 +1,32 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
-
 export {
-    // Catch any errors thrown by the Layout component.
     ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Custom light theme with app colors
+const AppTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#F1F5F9',
+    card: '#FFFFFF',
+    primary: '#2563EB',
+  },
+};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -27,7 +34,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -46,26 +52,39 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  // Uniform smooth transition for all screens
+  const screenOptions = {
+    headerShown: false,
+    animation: 'slide_from_right' as const,
+    animationDuration: 250,
+    gestureEnabled: true,
+    gestureDirection: 'horizontal' as const,
+    // Smooth iOS-like animation config
+    ...(Platform.OS === 'android' && {
+      animation: 'fade_from_bottom' as const,
+      animationDuration: 200,
+    }),
+  };
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{
-          animation: 'fade_from_bottom',
-          animationDuration: 200,
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none' }} />
-        <Stack.Screen name="apply-leave" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="apply-wfh" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="approvals" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="holidays" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="profile" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="widgets" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="team" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="news" options={{ animation: 'slide_from_right' }} />
+    <ThemeProvider value={AppTheme}>
+      <Stack screenOptions={screenOptions}>
+        <Stack.Screen 
+          name="(tabs)" 
+          options={{ 
+            headerShown: false, 
+            animation: 'none' 
+          }} 
+        />
+        <Stack.Screen name="apply-leave" />
+        <Stack.Screen name="apply-wfh" />
+        <Stack.Screen name="approvals" />
+        <Stack.Screen name="holidays" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="widgets" />
+        <Stack.Screen name="team" />
+        <Stack.Screen name="meetings" />
+        <Stack.Screen name="search" />
       </Stack>
     </ThemeProvider>
   );

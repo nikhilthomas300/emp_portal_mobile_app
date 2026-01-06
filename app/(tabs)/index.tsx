@@ -1,15 +1,23 @@
 import AnnouncementModal from '@/components/AnnouncementModal';
-import { BannerCarousel, MeSection, NewsSection, QuickActions, TeamSection, UpcomingSchedule } from '@/components/home';
+import { BannerCarousel, MeSection, PendingApprovalsCard, QuickActionsGrid, TeamSection, UpcomingSchedule } from '@/components/home';
 import { LeaveBalanceSection } from '@/components/leave';
+import { QRCodeModal } from '@/components/navigation';
 import Drawer from '@/components/navigation/Drawer';
 import Colors from '@/constants/Colors';
 import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Link, useRouter } from 'expo-router';
-import { AlignLeft, ClipboardCheck, Search } from 'lucide-react-native';
+import { Link } from 'expo-router';
+import { ClipboardCheck, Menu, QrCode, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
-import Animated, { Extrapolate, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 if (Platform.OS === 'android') {
@@ -18,14 +26,13 @@ if (Platform.OS === 'android') {
   }
 }
 
-const HEADER_HEIGHT_EXPANDED = 140; // Base height without Insets
-const HEADER_HEIGHT_COLLAPSED = 70; // Base height without Insets
+const HEADER_HEIGHT_EXPANDED = 140;
+const HEADER_HEIGHT_COLLAPSED = 70;
 
 export default function HomeScreen() {
   const scrollRef = useRef<Animated.ScrollView>(null);
   // @ts-ignore
   useScrollToTop(scrollRef);
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   
   const headerMaxHeight = HEADER_HEIGHT_EXPANDED + insets.top;
@@ -42,9 +49,7 @@ export default function HomeScreen() {
 
   const headerStyle = useAnimatedStyle(() => {
     const height = interpolate(scrollY.value, [0, scrollRange], [headerMaxHeight, headerMinHeight], Extrapolate.CLAMP);
-    return {
-      height,
-    };
+    return { height };
   });
 
   const searchStyle = useAnimatedStyle(() => {
@@ -53,20 +58,12 @@ export default function HomeScreen() {
     const height = interpolate(scrollY.value, [0, scrollRange], [54, 0], Extrapolate.CLAMP);
     const marginTop = interpolate(scrollY.value, [0, scrollRange], [16, 0], Extrapolate.CLAMP);
     
-    return {
-       opacity,
-       transform: [{ scale }],
-       height,
-       marginTop,
-    };
+    return { opacity, transform: [{ scale }], height, marginTop };
   });
 
-  // Scroll to top when screen gains focus
   useFocusEffect(
     useCallback(() => {
-      // Scroll to top with animation
       scrollRef.current?.scrollTo({ y: 0, animated: true });
-      // Also reset the scroll shared value
       scrollY.value = withTiming(0, { duration: 300 });
     }, [])
   );
@@ -74,12 +71,11 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showAnnouncement, setShowAnnouncement] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
+    setTimeout(() => setRefreshing(false), 2000);
   }, []);
 
   useEffect(() => {
@@ -87,15 +83,13 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAnnouncement(true);
-    }, 2000);
+    const timer = setTimeout(() => setShowAnnouncement(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <View style={styles.container}>
-      {/* Animated Header */}
+      {/* Blue Gradient Header */}
       <Animated.View style={[styles.headerContainer, { height: headerMaxHeight }, headerStyle]}>
         <LinearGradient
             colors={['#1E40AF', '#3B82F6', '#60A5FA']}
@@ -103,39 +97,41 @@ export default function HomeScreen() {
             end={{ x: 1, y: 1 }}
             style={[styles.gradient, { paddingTop: insets.top + 10 }]}
         >
-            {/* Top Row: Menu + Profile */}
+            {/* Top Row */}
             <View style={styles.headerTopRow}>
                 <View style={styles.leftSection}>
-                    <TouchableOpacity style={styles.menuButton} onPress={() => setDrawerVisible(true)}>
-                        <AlignLeft size={22} color="#FFF" strokeWidth={2.5} />
+                    <TouchableOpacity 
+                      style={styles.menuButton} 
+                      onPress={() => setDrawerVisible(true)}
+                      activeOpacity={0.7}
+                    >
+                        <Menu size={22} color="#FFF" strokeWidth={2} />
                     </TouchableOpacity>
                     <View>
                         <Text style={styles.greeting}>Good Morning,</Text>
-                        <Text style={styles.name}>Nikhil Thomas</Text>
+                        <Text style={styles.name}>Pavan Goyal</Text>
                     </View>
                 </View>
 
                 <View style={styles.rightSection}>
+                    <TouchableOpacity style={styles.iconButton} onPress={() => setQrModalVisible(true)}>
+                        <QrCode size={20} color="#FFF" strokeWidth={2.5} />
+                    </TouchableOpacity>
                     <Link href="/approvals" asChild>
                         <TouchableOpacity style={styles.iconButton}>
                             <ClipboardCheck size={20} color="#FFF" strokeWidth={2.5} />
                             <View style={styles.badge} />
                         </TouchableOpacity>
                     </Link>
-                    <Link href="/profile" asChild>
-                        <TouchableOpacity style={styles.avatarContainer}>
-                            <Text style={styles.avatarText}>NT</Text>
-                        </TouchableOpacity>
-                    </Link>
                 </View>
             </View>
 
-            {/* Search Bar - Collapsible */}
+            {/* Search Bar */}
             <Animated.View style={[styles.searchWrapper, searchStyle]}>
                 <Link href="/search" asChild>
                     <TouchableOpacity style={styles.searchBar} activeOpacity={0.9}>
                         <Search size={20} color="#94A3B8" />
-                        <Text style={styles.searchText}>Search widgets, actions...</Text>
+                        <Text style={styles.searchText}>Search anything...</Text>
                     </TouchableOpacity>
                 </Link>
             </Animated.View>
@@ -146,10 +142,7 @@ export default function HomeScreen() {
         ref={scrollRef}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        contentContainerStyle={[
-             styles.scrollContent, 
-             { paddingTop: headerMaxHeight + 10 } // Start below header
-        ]} 
+        contentContainerStyle={[styles.scrollContent, { paddingTop: headerMaxHeight + 16 }]} 
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl 
@@ -162,26 +155,26 @@ export default function HomeScreen() {
           />
         }
       >
+        {/* Pending Approvals Alert */}
+        <PendingApprovalsCard count={3} />
+        
+        {/* Quick Actions - Primary shortcuts */}
+        <QuickActionsGrid />
+        
         {/* Banner Carousel */}
         <BannerCarousel />
-        
-        {/* Quick Actions */}
-        <QuickActions />
         
         {/* My Widgets */}
         <MeSection />
         
         {/* My Team */}
         <TeamSection />
-        
-        {/* Upcoming Schedule */}
-        <UpcomingSchedule />
 
         {/* Leave Balance */}
         <LeaveBalanceSection />
         
-        {/* News Section */}
-        <NewsSection />
+        {/* Upcoming Meeting */}
+        <UpcomingSchedule />
       </Animated.ScrollView>
       
       <AnnouncementModal 
@@ -191,7 +184,8 @@ export default function HomeScreen() {
         description="Experience the new modern employee portal with enhanced features and smooth UI."
       />
 
-       <Drawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
+      <QRCodeModal visible={qrModalVisible} onClose={() => setQrModalVisible(false)} />
+      <Drawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
     </View>
   );
 }
@@ -199,10 +193,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
   },
-  
-  // Header Styles
   headerContainer: {
       position: 'absolute',
       top: 0,
@@ -211,17 +203,17 @@ const styles = StyleSheet.create({
       zIndex: 100,
       backgroundColor: '#1E40AF',
       overflow: 'hidden',
-      borderBottomLeftRadius: 24,
-      borderBottomRightRadius: 24,
-      elevation: 8,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      elevation: 12,
       shadowColor: '#1E40AF',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
   },
   gradient: {
       flex: 1,
-      paddingHorizontal: 16,
+      paddingHorizontal: 20,
       paddingBottom: 16,
   },
   headerTopRow: {
@@ -229,32 +221,29 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       alignItems: 'center',
   },
+  greeting: {
+      fontSize: 14,
+      color: 'rgba(255,255,255,0.9)',
+      fontWeight: '500',
+  },
+  name: {
+      fontSize: 20,
+      color: '#FFF',
+      fontWeight: '700',
+      letterSpacing: -0.3,
+  },
   leftSection: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
   },
   menuButton: {
-      width: 44,
-      height: 44,
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255,255,255,0.15)',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: 'rgba(255,255,255,0.25)',
-      borderRadius: 14,
-      borderWidth: 1.5,
-      borderColor: 'rgba(255,255,255,0.35)',
-  },
-  greeting: {
-      fontSize: 13,
-      color: 'rgba(255,255,255,0.85)',
-      fontWeight: '500',
-      marginBottom: 0,
-  },
-  name: {
-      fontSize: 18,
-      color: '#FFF',
-      fontWeight: '700',
-      lineHeight: 22,
   },
   rightSection: {
       flexDirection: 'row',
@@ -266,21 +255,21 @@ const styles = StyleSheet.create({
       height: 44,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: 'rgba(255,255,255,0.25)',
+      backgroundColor: 'rgba(255,255,255,0.2)',
       borderRadius: 14,
-      borderWidth: 1.5,
-      borderColor: 'rgba(255,255,255,0.35)',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.3)',
       position: 'relative',
   },
   badge: {
       position: 'absolute',
-      top: 10,
-      right: 10,
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      top: 8,
+      right: 8,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
       backgroundColor: '#EF4444',
-      borderWidth: 1.5,
+      borderWidth: 2,
       borderColor: '#FFF',
   },
   avatarContainer: {
@@ -288,18 +277,14 @@ const styles = StyleSheet.create({
       height: 44,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: 'rgba(255,255,255,0.25)',
-      borderRadius: 14,
-      borderWidth: 1.5,
-      borderColor: 'rgba(255,255,255,0.35)',
+      backgroundColor: '#FFF',
+      borderRadius: 22,
   },
   avatarText: {
       fontSize: 15,
-      fontWeight: '700',
-      color: '#FFF',
+      fontWeight: '800',
+      color: Colors.primary,
   },
-
-  // Search Bar Styles
   searchWrapper: {
       width: '100%',
       marginTop: 16,
@@ -310,8 +295,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
     gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -324,8 +309,7 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     fontWeight: '500',
   },
-
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
 });
