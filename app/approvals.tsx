@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/navigation';
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
-import { Briefcase, Calendar, Check, Clock, CreditCard, Home, MessageCircle, X } from 'lucide-react-native';
+import { Briefcase, Calendar, Check, Clock, CreditCard, Home, MessageCircle, Search, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -71,11 +71,18 @@ const getCatIcon = (c: string) => ({ Leave: Briefcase, WFH: Home, Expense: Credi
 export default function ApprovalsScreen() {
   const insets = useSafeAreaInsets();
   const [active, setActive] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [modal, setModal] = useState<{ type: 'Approve' | 'Reject'; item: any } | null>(null);
   const [reason, setReason] = useState('');
   const [status, setStatus] = useState({ visible: false, type: 'success' as ModalType, title: '', desc: '' });
 
-  const data = MOCK_DATA.filter(d => active === 'All' || d.category === active);
+  const data = MOCK_DATA.filter(d => {
+    const matchesCategory = active === 'All' || d.category === active;
+    const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          d.type.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
   const counts = { 
     Leave: MOCK_DATA.filter(d => d.category === 'Leave').length, 
     WFH: MOCK_DATA.filter(d => d.category === 'WFH').length, 
@@ -120,43 +127,47 @@ export default function ApprovalsScreen() {
           </View>
         </View>
 
-        {/* Request Type */}
-        <View style={styles.typeRow}>
-          <Text style={styles.typeLabel}>{item.type}</Text>
-          {item.amount && <Text style={styles.amount}>{item.amount}</Text>}
-        </View>
+        {/* Content Container */}
+        <View style={styles.cardContent}>
+          {/* Request Type */}
+          <View style={styles.typeBlock}>
+            <Text style={styles.typeLabel}>{item.type}</Text>
+            {item.amount && <Text style={styles.amount}>{item.amount}</Text>}
+          </View>
 
-        {/* Date Details */}
-        <View style={styles.detailsGrid}>
-          <View style={styles.detailItem}>
-            <Calendar size={14} color="#64748B" strokeWidth={1.8} />
-            <View>
-              <Text style={styles.detailLabel}>From</Text>
-              <Text style={styles.detailValue}>{item.fromDate}</Text>
-            </View>
-          </View>
-          <View style={styles.detailItem}>
-            <Calendar size={14} color="#64748B" strokeWidth={1.8} />
-            <View>
-              <Text style={styles.detailLabel}>To</Text>
-              <Text style={styles.detailValue}>{item.toDate}</Text>
-            </View>
-          </View>
-          {item.days && (
-            <View style={styles.detailItem}>
-              <Clock size={14} color="#64748B" strokeWidth={1.8} />
-              <View>
-                <Text style={styles.detailLabel}>Duration</Text>
-                <Text style={styles.detailValue}>{item.days}</Text>
+          {/* Date Details */}
+          <View style={styles.detailsGrid}>
+            <View style={styles.detailRow}>
+              <View style={styles.detailItem}>
+                <Calendar size={14} color="#64748B" strokeWidth={1.8} />
+                <View>
+                  <Text style={styles.detailLabel}>FROM</Text>
+                  <Text style={styles.detailValue}>{item.fromDate}</Text>
+                </View>
+              </View>
+              <View style={styles.detailItem}>
+                <Calendar size={14} color="#64748B" strokeWidth={1.8} />
+                <View>
+                  <Text style={styles.detailLabel}>TO</Text>
+                  <Text style={styles.detailValue}>{item.toDate}</Text>
+                </View>
               </View>
             </View>
-          )}
-        </View>
+            
+            {item.days && (
+               <View style={styles.durationRow}>
+                 <Clock size={14} color="#64748B" strokeWidth={1.8} />
+                 <Text style={styles.detailLabel}>DURATION</Text>
+                 <Text style={styles.detailValue}>{item.days}</Text>
+               </View>
+            )}
+          </View>
 
-        {/* Reason/Comment */}
-        <View style={styles.reasonBox}>
-          <MessageCircle size={14} color="#64748B" strokeWidth={1.8} />
-          <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
+          {/* Reason/Comment */}
+          <View style={styles.reasonBox}>
+            <MessageCircle size={14} color="#64748B" strokeWidth={1.8} style={{ marginTop: 2 }} />
+            <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
+          </View>
         </View>
 
         {/* Footer */}
@@ -189,6 +200,25 @@ export default function ApprovalsScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <PageHeader title="Pending Approvals" />
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Search size={18} color="#94A3B8" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search approvals..."
+            placeholderTextColor="#94A3B8"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <X size={16} color="#94A3B8" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
 
       {/* Category Tabs */}
       <View style={styles.tabs}>
@@ -226,7 +256,7 @@ export default function ApprovalsScreen() {
           <View style={styles.empty}>
             <Check size={48} color="#D1D5DB" strokeWidth={1.5} />
             <Text style={styles.emptyTitle}>All caught up!</Text>
-            <Text style={styles.emptyText}>No pending approvals</Text>
+            <Text style={styles.emptyText}>No pending approvals found</Text>
           </View>
         }
       />
@@ -286,6 +316,29 @@ export default function ApprovalsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
 
+  // Search
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+    backgroundColor: '#FFF',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1E293B',
+    height: '100%',
+  },
+
   // Tabs
   tabs: { 
     flexDirection: 'row', 
@@ -334,11 +387,16 @@ const styles = StyleSheet.create({
   // Card
   card: { 
     backgroundColor: '#FFF', 
-    borderRadius: 16, 
+    borderRadius: 20, 
     padding: 16, 
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#BAE6FD', // Light blue border as requested
+    shadowColor: '#BAE6FD',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
   },
 
   // Card Header
@@ -346,55 +404,64 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F9FF',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   avatar: { 
     width: 44, 
     height: 44, 
-    borderRadius: 12, 
+    borderRadius: 14, 
     justifyContent: 'center', 
     alignItems: 'center',
   },
-  avatarText: { fontSize: 15, fontWeight: '700' },
+  avatarText: { fontSize: 16, fontWeight: '700' },
   headerInfo: { marginLeft: 12, flex: 1 },
-  name: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  role: { fontSize: 12, color: '#6B7280', marginTop: 1 },
+  name: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
+  role: { fontSize: 12, color: '#64748B', marginTop: 2 },
   categoryBadge: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     paddingHorizontal: 10, 
     paddingVertical: 5, 
-    borderRadius: 8, 
+    borderRadius: 10, 
     gap: 5,
   },
   categoryText: { fontSize: 11, fontWeight: '700' },
 
-  // Type Row
-  typeRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
+  cardContent: { gap: 12 },
+
+  // Type Block
+  typeBlock: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  typeLabel: { fontSize: 14, fontWeight: '600', color: '#374151' },
+  typeLabel: { fontSize: 15, fontWeight: '700', color: '#334155' },
   amount: { fontSize: 16, fontWeight: '700', color: '#059669' },
 
   // Details Grid
-  detailsGrid: { flexDirection: 'row', gap: 16, marginBottom: 12 },
-  detailItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  detailLabel: { fontSize: 10, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.3 },
-  detailValue: { fontSize: 13, fontWeight: '600', color: '#374151', marginTop: 1 },
+  detailsGrid: { gap: 10 },
+  detailRow: { flexDirection: 'row', gap: 24 },
+  detailItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  detailLabel: { fontSize: 10, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  detailValue: { fontSize: 13, fontWeight: '600', color: '#334155', marginLeft: 2 },
+  
+  durationRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 
   // Reason
   reasonBox: { 
     flexDirection: 'row', 
-    alignItems: 'flex-start', 
     gap: 10, 
     backgroundColor: '#F8FAFC', 
     padding: 12, 
-    borderRadius: 10,
-    marginBottom: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    marginTop: 4,
   },
   reasonText: { flex: 1, fontSize: 13, color: '#4B5563', lineHeight: 18 },
 
@@ -403,34 +470,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    paddingTop: 16,
+    marginTop: 8,
   },
-  appliedTime: { fontSize: 12, color: '#9CA3AF' },
-  actions: { flexDirection: 'row', gap: 8 },
+  appliedTime: { fontSize: 12, color: '#94A3B8', fontStyle: 'italic' },
+  actions: { flexDirection: 'row', gap: 10 },
   rejectBtn: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 14, 
-    height: 38, 
-    borderRadius: 10, 
-    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 16, 
+    height: 40, 
+    borderRadius: 12, 
+    backgroundColor: '#FEF2F2',
     gap: 6,
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
   },
-  rejectText: { fontSize: 13, fontWeight: '600', color: '#DC2626' },
+  rejectText: { fontSize: 13, fontWeight: '700', color: '#EF4444' },
   approveBtn: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 14, 
-    height: 38, 
-    borderRadius: 10, 
+    paddingHorizontal: 20, 
+    height: 40, 
+    borderRadius: 12, 
     backgroundColor: '#10B981',
     gap: 6,
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  approveText: { fontSize: 13, fontWeight: '600', color: '#FFF' },
+  approveText: { fontSize: 13, fontWeight: '700', color: '#FFF' },
 
-  // Modal
+  // Modal (Same styles)
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   modalCard: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, width: '100%', alignItems: 'center' },
   modalIconBox: { width: 64, height: 64, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },

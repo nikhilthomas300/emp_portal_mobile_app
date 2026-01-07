@@ -4,13 +4,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Sparkles, TrendingUp, Users, X } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const quickActions = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, route: '/apply-leave' },
   { id: 2, title: 'WFH Request', icon: Home, route: '/apply-wfh' },
-  { id: 3, title: 'My Letters', icon: FileText, route: null },
+  { id: 3, title: 'My Letters', icon: FileText, route: '' }, // Empty route for now
   { id: 4, title: 'Approvals', icon: Calendar, route: '/approvals' },
   { id: 5, title: 'Directory', icon: Users, route: '/directory' },
   { id: 6, title: 'App Store', icon: Grid, route: '/(tabs)/appstore' },
@@ -28,19 +28,21 @@ export default function SearchScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      // scrollRef.current?.scrollTo({ y: 0, animated: false });
     }, [])
   );
 
-  const handlePress = (route: string | null) => {
-    if (route) {
-      // @ts-ignore
-      router.push(route);
+  const handleActionPress = (route: string, title: string) => {
+    if (!route) {
+      Alert.alert('Coming Soon', `${title} module is coming soon.`);
+      return;
     }
+    router.push(route as any);
   };
 
   const clearSearch = () => {
     setSearchQuery('');
+    // Keep focus or dismiss keyboard? Usually keep focus for new search
     inputRef.current?.focus();
   };
 
@@ -55,12 +57,12 @@ export default function SearchScreen() {
         colors={['#1E40AF', '#3B82F6', '#60A5FA']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
+        style={[styles.gradientHeader, { paddingTop: insets.top + 16 }]}
       >
         <Text style={styles.headerTitle}>Search</Text>
-        <Text style={styles.headerSubtitle}>Find apps, widgets and more</Text>
+        <Text style={styles.headerSubtitle}>Find apps, widgets and services</Text>
         
-        {/* Enhanced Search Bar */}
+        {/* Search Bar */}
         <View style={styles.searchBarContainer}>
           <Search size={20} color="#64748B" strokeWidth={2} />
           <TextInput
@@ -70,9 +72,11 @@ export default function SearchScreen() {
             placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
+            returnKeyType="search"
+            onSubmitEditing={Keyboard.dismiss}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+            <TouchableOpacity onPress={clearSearch} style={styles.clearButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <X size={16} color="#64748B" strokeWidth={2.5} />
             </TouchableOpacity>
           )}
@@ -82,16 +86,17 @@ export default function SearchScreen() {
       <ScrollView 
         ref={scrollRef}
         style={styles.content} 
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
-        {/* Recent & Trending Searches */}
+        {/* Recent & Trending Searches (Only when text is empty) */}
         {searchQuery.length === 0 && (
           <>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Clock size={14} color="#64748B" strokeWidth={2} />
+                <Clock size={14} color="#64748B" strokeWidth={2.5} />
                 <Text style={styles.sectionTitle}>Recent</Text>
               </View>
               <View style={styles.pillsContainer}>
@@ -110,7 +115,7 @@ export default function SearchScreen() {
 
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <TrendingUp size={14} color="#64748B" strokeWidth={2} />
+                <TrendingUp size={14} color="#F59E0B" strokeWidth={2.5} />
                 <Text style={styles.sectionTitle}>Trending</Text>
               </View>
               <View style={styles.pillsContainer}>
@@ -121,7 +126,7 @@ export default function SearchScreen() {
                     activeOpacity={0.7}
                     onPress={() => setSearchQuery(term)}
                   >
-                    <Sparkles size={10} color="#F59E0B" strokeWidth={2} />
+                    <Sparkles size={12} color="#D97706" strokeWidth={2} />
                     <Text style={[styles.pillText, styles.trendingText]}>{term}</Text>
                   </TouchableOpacity>
                 ))}
@@ -130,38 +135,38 @@ export default function SearchScreen() {
           </>
         )}
 
-        {/* Quick Actions */}
+        {/* Quick Actions Grid */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Grid size={14} color="#64748B" strokeWidth={2} />
+            <Grid size={14} color="#64748B" strokeWidth={2.5} />
             <Text style={styles.sectionTitle}>
-              {searchQuery ? 'Results' : 'Quick Actions'}
+              {searchQuery ? 'Search Results' : 'Quick Actions'}
             </Text>
           </View>
           
-          <View style={styles.actionsContainer}>
-            <View style={styles.actionsGrid}>
-              {filteredActions.map((action) => (
-                <TouchableOpacity 
-                  key={action.id}
-                  style={styles.actionCard}
-                  onPress={() => handlePress(action.route)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.actionIcon}>
-                    <action.icon size={22} color={Colors.primary} strokeWidth={1.6} />
-                  </View>
-                  <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          <View style={styles.gridContainer}>
+            {filteredActions.map((action) => (
+              <TouchableOpacity 
+                key={action.id}
+                style={styles.gridItem}
+                onPress={() => handleActionPress(action.route, action.title)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.iconBox, { backgroundColor: '#EFF6FF' }]}>
+                  <action.icon size={24} color={Colors.primary} strokeWidth={1.8} />
+                </View>
+                <Text style={styles.gridLabel} numberOfLines={2}>{action.title}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {filteredActions.length === 0 && (
             <View style={styles.emptyState}>
-              <Search size={40} color="#CBD5E1" strokeWidth={1.5} />
+              <View style={styles.emptyIconBg}>
+                <Search size={32} color="#CBD5E1" strokeWidth={2} />
+              </View>
               <Text style={styles.emptyTitle}>No results found</Text>
-              <Text style={styles.emptyText}>Try a different search term</Text>
+              <Text style={styles.emptyText}>We couldn't find anything matching "{searchQuery}"</Text>
             </View>
           )}
         </View>
@@ -175,26 +180,27 @@ const styles = StyleSheet.create({
   
   gradientHeader: { 
     paddingHorizontal: 20, 
-    paddingBottom: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     shadowColor: '#1E40AF',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   headerTitle: { 
-    fontSize: 26, 
+    fontSize: 28, 
     fontWeight: '800', 
     color: '#FFF', 
     letterSpacing: -0.5,
   },
   headerSubtitle: { 
     fontSize: 14, 
-    color: 'rgba(255,255,255,0.8)', 
-    marginTop: 2,
-    marginBottom: 16,
+    color: 'rgba(255,255,255,0.9)', 
+    marginTop: 4,
+    marginBottom: 20,
+    fontWeight: '500',
   },
 
   searchBarContainer: { 
@@ -202,109 +208,124 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     backgroundColor: '#FFF', 
     paddingHorizontal: 16, 
-    paddingVertical: Platform.OS === 'ios' ? 14 : 10, 
+    height: 52,
     borderRadius: 16, 
     gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchInput: { 
     flex: 1, 
     fontSize: 16, 
     color: '#1E293B', 
-    fontWeight: '500',
+    fontWeight: '600',
+    height: '100%',
   },
   clearButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  content: { flex: 1, paddingTop: 20 },
+  content: { flex: 1 },
+  scrollContent: { paddingTop: 24 },
   
-  section: { marginBottom: 24, paddingHorizontal: 20 },
+  section: { marginBottom: 32, paddingHorizontal: 20 },
   sectionHeader: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    gap: 6, 
-    marginBottom: 12 
+    gap: 8, 
+    marginBottom: 16 
   },
   sectionTitle: { 
     fontSize: 13, 
     fontWeight: '700', 
-    color: '#64748B', 
+    color: '#94A3B8', 
     textTransform: 'uppercase', 
     letterSpacing: 0.5 
   },
   
-  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   pill: { 
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 14, 
-    paddingVertical: 8, 
-    backgroundColor: '#F1F5F9', 
+    paddingHorizontal: 16, 
+    paddingVertical: 10, 
+    backgroundColor: '#F8FAFC', 
     borderRadius: 20, 
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   trendingPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FEF3C7',
   },
   pillText: { 
     fontSize: 13, 
-    color: '#374151', 
+    color: '#475569', 
     fontWeight: '600',
   },
   trendingText: {
-    color: '#92400E',
+    color: '#B45309',
   },
 
-  actionsContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  actionsGrid: { 
-    flexDirection: 'row', 
+  gridContainer: {
+    flexDirection: 'row',
     flexWrap: 'wrap',
+    marginHorizontal: -8,
   },
-  actionCard: { 
+  gridItem: {
     width: '33.33%',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  actionIcon: { 
-    width: 52, 
-    height: 52, 
-    borderRadius: 16, 
-    backgroundColor: '#DBEAFE',
-    justifyContent: 'center', 
+    padding: 8,
     alignItems: 'center',
     marginBottom: 8,
   },
-  actionTitle: { 
-    fontSize: 11, 
-    fontWeight: '600', 
-    color: '#334155', 
+  iconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  gridLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
     textAlign: 'center',
-    lineHeight: 14,
-    paddingHorizontal: 4,
+    lineHeight: 16,
+    paddingHorizontal: 2,
   },
 
-  emptyState: { paddingVertical: 50, alignItems: 'center' },
+  emptyState: { paddingVertical: 40, alignItems: 'center' },
+  emptyIconBg: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   emptyTitle: { 
-    fontSize: 16, 
+    fontSize: 18, 
     fontWeight: '700', 
     color: '#1E293B', 
-    marginTop: 16,
+    marginBottom: 8,
   },
   emptyText: { 
-    fontSize: 13, 
-    color: '#94A3B8', 
-    marginTop: 4,
+    fontSize: 14, 
+    color: '#64748B', 
+    textAlign: 'center',
+    maxWidth: '80%',
   },
 });

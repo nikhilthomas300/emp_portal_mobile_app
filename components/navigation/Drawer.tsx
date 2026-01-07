@@ -12,8 +12,8 @@ import {
     MessageSquare,
     Newspaper,
     QrCode,
-    Settings,
     Sparkles,
+    User,
     Users,
     X,
 } from 'lucide-react-native';
@@ -38,14 +38,13 @@ const quickLinks = [
 ];
 
 const menuItems = [
-  { id: 1, title: 'Home', icon: Home, route: '/(tabs)/index' },
-  { id: 2, title: 'News', icon: Newspaper, route: '/(tabs)/news' },
+  { id: 1, title: 'My Meetings', icon: Users, route: '/meetings' },
+  { id: 2, title: 'Company News', icon: Newspaper, route: '/(tabs)/news' },
   { id: 3, title: 'App Store', icon: Grid, route: '/(tabs)/appstore' },
   { id: 4, title: 'Ask Newton', icon: MessageSquare, route: '/(tabs)/chat' },
-  { id: 5, title: 'Approvals', icon: Bell, route: '/approvals' },
-  { id: 6, title: 'Calendar', icon: Calendar, route: '/holidays' },
-  { id: 7, title: 'Directory', icon: Users, route: '/directory' },
-  { id: 8, title: 'Settings', icon: Settings, route: '/(tabs)/index' },
+  { id: 5, title: 'My Approvals', icon: Bell, route: '/approvals' },
+  { id: 6, title: 'Holiday Calendar', icon: Calendar, route: '/holidays' },
+  { id: 7, title: 'My Profile', icon: User, route: '/profile' },
 ];
 
 export default function Drawer({ visible, onClose }: DrawerProps) {
@@ -137,6 +136,7 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
                 <LogOut size={18} color="#EF4444" strokeWidth={2} />
                 <Text style={styles.logoutText}>Sign Out</Text>
               </TouchableOpacity>
+              <Text style={styles.versionText}>App Version 1.0.0</Text>
             </View>
           </View>
         </View>
@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
     paddingTop: 16, 
     borderTopWidth: 1, 
     borderTopColor: '#E2E8F0',
+    alignItems: 'center',
   },
   logoutBtn: { 
     flexDirection: 'row', 
@@ -255,6 +256,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
+    width: '100%',
   },
   logoutText: { fontSize: 14, fontWeight: '600', color: '#EF4444' },
+  versionText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 12,
+    fontWeight: '500',
+  }
 });

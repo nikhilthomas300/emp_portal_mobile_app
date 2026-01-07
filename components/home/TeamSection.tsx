@@ -5,7 +5,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-// Show 6 team widgets: 3 per row
+// Show team widgets: 4 per row
 const widgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
   { id: 2, title: 'Team Attendance', icon: Users, link: null },
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   cardWrapper: {
-    width: '33.33%',
+    width: '25%',
   },
   card: {
     alignItems: 'center',

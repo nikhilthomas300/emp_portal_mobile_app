@@ -5,7 +5,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-// Show 6 widgets: 3 per row
+// Show widgets: 4 per row
 const widgets = [
   { id: 1, title: 'My Attendance', icon: Clock },
   { id: 2, title: 'My Assets', icon: Box },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   card: {
-    width: '33.33%',
+    width: '25%',
     alignItems: 'center',
     paddingVertical: 10,
   },

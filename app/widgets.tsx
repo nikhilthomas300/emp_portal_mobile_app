@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     marginHorizontal: -6,
   },
   cardWrapper: {
-    width: '33.33%',
+    width: '25%',
     padding: 6,
   },
   card: {

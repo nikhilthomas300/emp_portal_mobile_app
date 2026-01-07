@@ -270,7 +270,7 @@ export default function ApplyWFHScreen() {
         {activeTab === 'new' && (
           <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
             <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-              <LinearGradient colors={['#4338CA', '#6366F1']} style={styles.gradient}>
+              <LinearGradient colors={['#1E40AF', '#3B82F6', '#60A5FA']} style={styles.gradient}>
                 <Text style={styles.submitText}>Submit Request</Text>
               </LinearGradient>
             </TouchableOpacity>
