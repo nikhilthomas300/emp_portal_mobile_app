@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/navigation';
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
-import { Briefcase, Calendar, Check, Clock, CreditCard, Home, MessageCircle, Search, X } from 'lucide-react-native';
+import { Briefcase, Check, CreditCard, Home, MessageCircle, Search, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -130,36 +130,24 @@ export default function ApprovalsScreen() {
         {/* Content Container */}
         <View style={styles.cardContent}>
           {/* Request Type */}
-          <View style={styles.typeBlock}>
-            <Text style={styles.typeLabel}>{item.type}</Text>
-            {item.amount && <Text style={styles.amount}>{item.amount}</Text>}
-          </View>
+          <Text style={styles.typeLabel}>{item.type}</Text>
+          {item.amount && <Text style={styles.amount}>{item.amount}</Text>}
 
-          {/* Date Details */}
-          <View style={styles.detailsGrid}>
-            <View style={styles.detailRow}>
-              <View style={styles.detailItem}>
-                <Calendar size={14} color="#64748B" strokeWidth={1.8} />
-                <View>
-                  <Text style={styles.detailLabel}>FROM</Text>
-                  <Text style={styles.detailValue}>{item.fromDate}</Text>
-                </View>
-              </View>
-              <View style={styles.detailItem}>
-                <Calendar size={14} color="#64748B" strokeWidth={1.8} />
-                <View>
-                  <Text style={styles.detailLabel}>TO</Text>
-                  <Text style={styles.detailValue}>{item.toDate}</Text>
-                </View>
-              </View>
+          {/* Date Info Grid */}
+          <View style={styles.infoGrid}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>From</Text>
+              <Text style={styles.infoValue}>{item.fromDate}</Text>
             </View>
-            
+            <View style={styles.infoItemMiddle}>
+              <Text style={styles.infoLabel}>To</Text>
+              <Text style={styles.infoValue}>{item.toDate}</Text>
+            </View>
             {item.days && (
-               <View style={styles.durationRow}>
-                 <Clock size={14} color="#64748B" strokeWidth={1.8} />
-                 <Text style={styles.detailLabel}>DURATION</Text>
-                 <Text style={styles.detailValue}>{item.days}</Text>
-               </View>
+              <View style={styles.infoItemLast}>
+                <Text style={styles.infoLabel}>Duration</Text>
+                <Text style={styles.infoValue}>{item.days}</Text>
+              </View>
             )}
           </View>
 
@@ -387,16 +375,16 @@ const styles = StyleSheet.create({
   // Card
   card: { 
     backgroundColor: '#FFF', 
-    borderRadius: 20, 
+    borderRadius: 16, 
     padding: 16, 
-    marginBottom: 16,
-    borderWidth: 1.5,
-    borderColor: '#BAE6FD', // Light blue border as requested
-    shadowColor: '#BAE6FD',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    marginBottom: 14,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
 
   // Card Header
@@ -404,53 +392,76 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 14,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F9FF',
+    borderBottomColor: '#F1F5F9',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   avatar: { 
-    width: 44, 
-    height: 44, 
-    borderRadius: 14, 
+    width: 42, 
+    height: 42, 
+    borderRadius: 12, 
     justifyContent: 'center', 
     alignItems: 'center',
   },
-  avatarText: { fontSize: 16, fontWeight: '700' },
-  headerInfo: { marginLeft: 12, flex: 1 },
-  name: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
-  role: { fontSize: 12, color: '#64748B', marginTop: 2 },
+  avatarText: { fontSize: 15, fontWeight: '700' },
+  headerInfo: { marginLeft: 10, flex: 1 },
+  name: { fontSize: 15, fontWeight: '700', color: '#1E293B' },
+  role: { fontSize: 11, color: '#64748B', marginTop: 2 },
   categoryBadge: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 10, 
-    paddingVertical: 5, 
-    borderRadius: 10, 
-    gap: 5,
+    paddingHorizontal: 8, 
+    paddingVertical: 4, 
+    borderRadius: 8, 
+    gap: 4,
   },
-  categoryText: { fontSize: 11, fontWeight: '700' },
+  categoryText: { fontSize: 10, fontWeight: '700' },
 
   cardContent: { gap: 12 },
 
-  // Type Block
-  typeBlock: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  typeLabel: { fontSize: 15, fontWeight: '700', color: '#334155' },
+  // Type
+  typeLabel: { fontSize: 15, fontWeight: '700', color: '#1E293B', marginBottom: 4 },
   amount: { fontSize: 16, fontWeight: '700', color: '#059669' },
 
-  // Details Grid
-  detailsGrid: { gap: 10 },
-  detailRow: { flexDirection: 'row', gap: 24 },
-  detailItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  detailLabel: { fontSize: 10, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  detailValue: { fontSize: 13, fontWeight: '600', color: '#334155', marginLeft: 2 },
-  
-  durationRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  // Info Grid
+  infoGrid: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    padding: 12,
+    gap: 0,
+  },
+  infoItem: {
+    flex: 1,
+    borderRightWidth: 1,
+    borderRightColor: '#E2E8F0',
+    paddingRight: 10,
+  },
+  infoItemMiddle: {
+    flex: 1,
+    borderRightWidth: 1,
+    borderRightColor: '#E2E8F0',
+    paddingHorizontal: 10,
+  },
+  infoItemLast: {
+    flex: 1,
+    paddingLeft: 10,
+  },
+  infoLabel: { 
+    fontSize: 10, 
+    color: '#94A3B8', 
+    fontWeight: '600', 
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    marginBottom: 2,
+  },
+  infoValue: { 
+    fontSize: 13, 
+    fontWeight: '600', 
+    color: '#334155',
+  },
 
   // Reason
   reasonBox: { 
@@ -470,38 +481,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between',
-    paddingTop: 16,
-    marginTop: 8,
+    paddingTop: 14,
+    marginTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
   },
-  appliedTime: { fontSize: 12, color: '#94A3B8', fontStyle: 'italic' },
-  actions: { flexDirection: 'row', gap: 10 },
+  appliedTime: { fontSize: 11, color: '#94A3B8', fontStyle: 'italic' },
+  actions: { flexDirection: 'row', gap: 8 },
   rejectBtn: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 16, 
-    height: 40, 
-    borderRadius: 12, 
+    paddingHorizontal: 14, 
+    height: 36, 
+    borderRadius: 10, 
     backgroundColor: '#FEF2F2',
-    gap: 6,
+    gap: 5,
     borderWidth: 1,
-    borderColor: '#FEE2E2',
+    borderColor: '#FECACA',
   },
-  rejectText: { fontSize: 13, fontWeight: '700', color: '#EF4444' },
+  rejectText: { fontSize: 12, fontWeight: '600', color: '#EF4444' },
   approveBtn: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 20, 
-    height: 40, 
-    borderRadius: 12, 
+    paddingHorizontal: 16, 
+    height: 36, 
+    borderRadius: 10, 
     backgroundColor: '#10B981',
-    gap: 6,
+    gap: 5,
     shadowColor: '#10B981',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2,
   },
-  approveText: { fontSize: 13, fontWeight: '700', color: '#FFF' },
+  approveText: { fontSize: 12, fontWeight: '600', color: '#FFF' },
 
   // Modal (Same styles)
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },

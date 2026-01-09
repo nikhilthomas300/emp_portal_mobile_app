@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const quickActions = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, route: '/apply-leave' },
   { id: 2, title: 'WFH Request', icon: Home, route: '/apply-wfh' },
-  { id: 3, title: 'My Letters', icon: FileText, route: '' }, // Empty route for now
+  { id: 3, title: 'My Letters', icon: FileText, route: '' },
   { id: 4, title: 'Approvals', icon: Calendar, route: '/approvals' },
   { id: 5, title: 'Directory', icon: Users, route: '/directory' },
   { id: 6, title: 'App Store', icon: Grid, route: '/(tabs)/appstore' },
@@ -42,7 +42,6 @@ export default function SearchScreen() {
 
   const clearSearch = () => {
     setSearchQuery('');
-    // Keep focus or dismiss keyboard? Usually keep focus for new search
     inputRef.current?.focus();
   };
 
@@ -57,7 +56,7 @@ export default function SearchScreen() {
         colors={['#1E40AF', '#3B82F6', '#60A5FA']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientHeader, { paddingTop: insets.top + 16 }]}
+        style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
       >
         <Text style={styles.headerTitle}>Search</Text>
         <Text style={styles.headerSubtitle}>Find apps, widgets and services</Text>
@@ -93,8 +92,9 @@ export default function SearchScreen() {
       >
         {/* Recent & Trending Searches (Only when text is empty) */}
         {searchQuery.length === 0 && (
-          <>
-            <View style={styles.section}>
+          <View style={styles.searchSuggestionsCard}>
+            {/* Recent */}
+            <View style={styles.suggestionSection}>
               <View style={styles.sectionHeader}>
                 <Clock size={14} color="#64748B" strokeWidth={2.5} />
                 <Text style={styles.sectionTitle}>Recent</Text>
@@ -113,7 +113,10 @@ export default function SearchScreen() {
               </View>
             </View>
 
-            <View style={styles.section}>
+            <View style={styles.sectionDivider} />
+
+            {/* Trending */}
+            <View style={styles.suggestionSection}>
               <View style={styles.sectionHeader}>
                 <TrendingUp size={14} color="#F59E0B" strokeWidth={2.5} />
                 <Text style={styles.sectionTitle}>Trending</Text>
@@ -132,43 +135,45 @@ export default function SearchScreen() {
                 ))}
               </View>
             </View>
-          </>
+          </View>
         )}
 
         {/* Quick Actions Grid */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleRow}>
             <Grid size={14} color="#64748B" strokeWidth={2.5} />
-            <Text style={styles.sectionTitle}>
+            <Text style={styles.sectionTitleText}>
               {searchQuery ? 'Search Results' : 'Quick Actions'}
             </Text>
           </View>
           
-          <View style={styles.gridContainer}>
-            {filteredActions.map((action) => (
-              <TouchableOpacity 
-                key={action.id}
-                style={styles.gridItem}
-                onPress={() => handleActionPress(action.route, action.title)}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.iconBox, { backgroundColor: '#EFF6FF' }]}>
-                  <action.icon size={24} color={Colors.primary} strokeWidth={1.8} />
-                </View>
-                <Text style={styles.gridLabel} numberOfLines={2}>{action.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {filteredActions.length === 0 && (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconBg}>
-                <Search size={32} color="#CBD5E1" strokeWidth={2} />
-              </View>
-              <Text style={styles.emptyTitle}>No results found</Text>
-              <Text style={styles.emptyText}>We couldn't find anything matching "{searchQuery}"</Text>
+          <View style={styles.actionsCard}>
+            <View style={styles.gridContainer}>
+              {filteredActions.map((action) => (
+                <TouchableOpacity 
+                  key={action.id}
+                  style={styles.gridItem}
+                  onPress={() => handleActionPress(action.route, action.title)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.iconBox}>
+                    <action.icon size={24} color={Colors.primary} strokeWidth={1.8} />
+                  </View>
+                  <Text style={styles.gridLabel} numberOfLines={2}>{action.title}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          )}
+
+            {filteredActions.length === 0 && (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIconBg}>
+                  <Search size={32} color="#CBD5E1" strokeWidth={2} />
+                </View>
+                <Text style={styles.emptyTitle}>No results found</Text>
+                <Text style={styles.emptyText}>We couldn't find anything matching "{searchQuery}"</Text>
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -180,26 +185,26 @@ const styles = StyleSheet.create({
   
   gradientHeader: { 
     paddingHorizontal: 20, 
-    paddingBottom: 24,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
     shadowColor: '#1E40AF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 10,
   },
   headerTitle: { 
-    fontSize: 28, 
-    fontWeight: '800', 
+    fontSize: 22, 
+    fontWeight: '700', 
     color: '#FFF', 
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
   headerSubtitle: { 
-    fontSize: 14, 
-    color: 'rgba(255,255,255,0.9)', 
+    fontSize: 13, 
+    color: 'rgba(255,255,255,0.85)', 
     marginTop: 4,
-    marginBottom: 20,
+    marginBottom: 16,
     fontWeight: '500',
   },
 
@@ -208,20 +213,20 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     backgroundColor: '#FFF', 
     paddingHorizontal: 16, 
-    height: 52,
-    borderRadius: 16, 
+    height: 48,
+    borderRadius: 14, 
     gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   searchInput: { 
     flex: 1, 
-    fontSize: 16, 
+    fontSize: 15, 
     color: '#1E293B', 
-    fontWeight: '600',
+    fontWeight: '500',
     height: '100%',
   },
   clearButton: {
@@ -234,32 +239,60 @@ const styles = StyleSheet.create({
   },
 
   content: { flex: 1 },
-  scrollContent: { paddingTop: 24 },
+  scrollContent: { paddingTop: 20, paddingHorizontal: 16 },
   
-  section: { marginBottom: 32, paddingHorizontal: 20 },
+  searchSuggestionsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 20,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  suggestionSection: {
+    marginBottom: 0,
+  },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 16,
+  },
   sectionHeader: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     gap: 8, 
-    marginBottom: 16 
+    marginBottom: 12,
+  },
+  sectionIconBg: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sectionTitle: { 
-    fontSize: 13, 
-    fontWeight: '700', 
-    color: '#94A3B8', 
+    fontSize: 12, 
+    fontWeight: '600', 
+    color: '#64748B', 
     textTransform: 'uppercase', 
-    letterSpacing: 0.5 
+    letterSpacing: 0.5,
   },
   
-  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: { 
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 16, 
+    paddingHorizontal: 14, 
     paddingVertical: 10, 
     backgroundColor: '#F8FAFC', 
-    borderRadius: 20, 
+    borderRadius: 10, 
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
@@ -276,26 +309,52 @@ const styles = StyleSheet.create({
     color: '#B45309',
   },
 
+  section: { marginBottom: 24 },
+  sectionTitleRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 8, 
+    marginBottom: 12,
+  },
+  sectionTitleText: { 
+    fontSize: 12, 
+    fontWeight: '600', 
+    color: '#64748B', 
+    textTransform: 'uppercase', 
+    letterSpacing: 0.5,
+  },
+
+  actionsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 10,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -8,
   },
   gridItem: {
     width: '33.33%',
-    padding: 8,
     alignItems: 'center',
-    marginBottom: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
   },
   iconBox: {
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: 16,
+    backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#DBEAFE',
+    marginBottom: 10,
   },
   gridLabel: {
     fontSize: 12,
@@ -303,21 +362,20 @@ const styles = StyleSheet.create({
     color: '#334155',
     textAlign: 'center',
     lineHeight: 16,
-    paddingHorizontal: 2,
   },
 
   emptyState: { paddingVertical: 40, alignItems: 'center' },
   emptyIconBg: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: 20,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   emptyTitle: { 
-    fontSize: 18, 
+    fontSize: 17, 
     fontWeight: '700', 
     color: '#1E293B', 
     marginBottom: 8,
@@ -327,5 +385,6 @@ const styles = StyleSheet.create({
     color: '#64748B', 
     textAlign: 'center',
     maxWidth: '80%',
+    lineHeight: 20,
   },
 });

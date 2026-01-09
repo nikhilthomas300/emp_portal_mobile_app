@@ -11,6 +11,7 @@ import Animated, {
   withRepeat,
   withTiming
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function CenterButton({ focused }: { focused: boolean }) {
   const breatheScale = useSharedValue(1);
@@ -50,6 +51,12 @@ function CenterButton({ focused }: { focused: boolean }) {
 export default function TabLayout() {
   const pathname = usePathname();
   const isChatScreen = pathname === '/chat';
+  const insets = useSafeAreaInsets();
+  
+  // Calculate proper bottom padding for Android with navigation buttons
+  const androidBottomPadding = Math.max(insets.bottom, 12);
+  const tabBarHeight = Platform.OS === 'ios' ? 80 : (56 + androidBottomPadding);
+  const bottomPadding = Platform.OS === 'ios' ? 0 : androidBottomPadding;
   
   return (
     <Tabs
@@ -62,8 +69,8 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           backgroundColor: '#FFFFFF',
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: tabBarHeight,
+          paddingBottom: bottomPadding,
           paddingTop: 8,
           paddingHorizontal: 8,
           borderTopWidth: 0,
@@ -160,3 +167,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+

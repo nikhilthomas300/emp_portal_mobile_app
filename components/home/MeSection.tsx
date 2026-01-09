@@ -5,7 +5,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-// Show widgets: 4 per row
+// Show widgets: 3 per row - Enterprise consistent blue theme
 const widgets = [
   { id: 1, title: 'My Attendance', icon: Clock },
   { id: 2, title: 'My Assets', icon: Box },
@@ -31,11 +31,13 @@ export default function MeSection() {
           {widgets.map((widget) => {
             const IconComponent = widget.icon;
             return (
-              <TouchableOpacity key={widget.id} style={styles.card} activeOpacity={0.7}>
-                <View style={styles.iconContainer}>
-                  <IconComponent size={22} color={Colors.primary} strokeWidth={1.6} />
+              <TouchableOpacity key={widget.id} style={styles.cardWrapper} activeOpacity={0.7}>
+                <View style={styles.card}>
+                  <View style={styles.iconContainer}>
+                    <IconComponent size={24} color={Colors.primary} strokeWidth={1.8} />
+                  </View>
+                  <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
                 </View>
-                <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
               </TouchableOpacity>
             );
           })}
@@ -52,37 +54,45 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingVertical: 16,
+    borderRadius: 20,
+    paddingVertical: 18,
     paddingHorizontal: 10,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
   },
-  card: {
-    width: '25%',
+  cardWrapper: {
+    width: '33.33%',
     alignItems: 'center',
     paddingVertical: 10,
   },
+  card: {
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#DBEAFE',
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   cardTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 14,
-    paddingHorizontal: 4,
+    lineHeight: 16,
   },
 });

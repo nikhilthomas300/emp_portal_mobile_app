@@ -5,7 +5,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-// Show team widgets: 4 per row
+// Show team widgets: 3 per row - Enterprise consistent blue theme
 const widgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
   { id: 2, title: 'Team Attendance', icon: Users, link: null },
@@ -24,7 +24,7 @@ export default function TeamSection() {
     const cardElement = (
       <View style={styles.card}>
         <View style={styles.iconContainer}>
-          <IconComponent size={22} color={Colors.primary} strokeWidth={1.6} />
+          <IconComponent size={24} color={Colors.primary} strokeWidth={1.8} />
         </View>
         <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
       </View>
@@ -67,11 +67,16 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingVertical: 16,
+    borderRadius: 20,
+    paddingVertical: 18,
     paddingHorizontal: 10,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   gridContainer: {
     flexDirection: 'row',
@@ -79,27 +84,28 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   cardWrapper: {
-    width: '25%',
-  },
-  card: {
+    width: '33.33%',
     alignItems: 'center',
     paddingVertical: 10,
   },
+  card: {
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#DBEAFE',
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   cardTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 14,
-    paddingHorizontal: 4,
+    lineHeight: 16,
   },
 });

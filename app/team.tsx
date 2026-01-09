@@ -8,11 +8,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const teamWidgets = [
   { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
-  { id: 2, title: 'Team Attendance Status', icon: Users, link: null },
+  { id: 2, title: 'Team Attendance', icon: Users, link: null },
   { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
-  { id: 4, title: 'Team Shared Assets', icon: Share2, link: null },
+  { id: 4, title: 'Shared Assets', icon: Share2, link: null },
   { id: 5, title: 'Team Letters', icon: FileText, link: null },
-  { id: 6, title: 'Team Directory', icon: UserCheck, link: null },
+  { id: 6, title: 'Directory', icon: UserCheck, link: null },
 ];
 
 export default function TeamScreen() {
@@ -21,22 +21,26 @@ export default function TeamScreen() {
 
   const renderCard = (widget: typeof teamWidgets[0]) => {
     const cardContent = (
-      <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+      <View style={styles.card}>
         <View style={styles.iconContainer}>
-          <widget.icon size={28} color={Colors.primary} strokeWidth={1.6} />
+          <widget.icon size={26} color={Colors.primary} strokeWidth={1.8} />
         </View>
         <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
-      </TouchableOpacity>
+      </View>
     );
 
     return (
       <View key={widget.id} style={styles.cardWrapper}>
         {widget.link ? (
           <Link href={widget.link as any} asChild>
-            {cardContent}
+            <TouchableOpacity activeOpacity={0.7}>
+              {cardContent}
+            </TouchableOpacity>
           </Link>
         ) : (
-          cardContent
+          <TouchableOpacity activeOpacity={0.7}>
+            {cardContent}
+          </TouchableOpacity>
         )}
       </View>
     );
@@ -70,8 +74,10 @@ export default function TeamScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.grid}>
-          {teamWidgets.map((widget) => renderCard(widget))}
+        <View style={styles.cardContainer}>
+          <View style={styles.grid}>
+            {teamWidgets.map((widget) => renderCard(widget))}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -85,12 +91,12 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 18,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     shadowColor: '#1E40AF',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 10,
   },
@@ -100,9 +106,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -110,13 +116,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.3)',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: '#FFF',
     letterSpacing: -0.3,
   },
   placeholder: {
-    width: 44,
+    width: 40,
   },
   scrollView: {
     flex: 1,
@@ -125,34 +131,36 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 40,
   },
+  cardContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 10,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -6,
   },
   cardWrapper: {
-    width: '25%',
-    padding: 6,
+    width: '33.33%',
+    alignItems: 'center',
+    paddingVertical: 12,
   },
   card: {
-    borderRadius: 16,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingHorizontal: 4,
   },
   iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 58,
+    height: 58,
+    borderRadius: 18,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',

@@ -1,3 +1,4 @@
+import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Briefcase, Calendar, Clock } from 'lucide-react-native';
@@ -18,11 +19,11 @@ export default function LeaveBalanceSection() {
           <View style={styles.balanceRow}>
             {/* Casual / Sick */}
             <View style={styles.balanceItem}>
-              <View style={[styles.iconCtx, { backgroundColor: '#EEF2FF' }]}>
-                <Clock size={20} color="#6366F1" strokeWidth={2} />
+              <View style={[styles.iconCtx, { backgroundColor: '#EFF6FF' }]}>
+                <Clock size={20} color={Colors.primary} strokeWidth={2} />
               </View>
               <View>
-                <Text style={[styles.balanceValue, { color: '#6366F1' }]}>08</Text>
+                <Text style={[styles.balanceValue, { color: Colors.primary }]}>08</Text>
                 <Text style={styles.balanceLabel}>Casual / Sick</Text>
               </View>
             </View>
@@ -55,10 +56,10 @@ export default function LeaveBalanceSection() {
             <TouchableOpacity 
               style={styles.primaryBtnWrapper} 
               onPress={() => router.push('/apply-leave')}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
               <LinearGradient
-                colors={['#2563EB', '#3B82F6']}
+                colors={['#1E40AF', '#3B82F6']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.primaryBtn}
@@ -84,13 +85,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 18,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     shadowColor: '#64748B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowRadius: 16,
     elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   balanceRow: {
     flexDirection: 'row',
@@ -138,36 +139,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F8FAFC',
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
     gap: 6,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   secondaryBtnText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#475569',
   },
   primaryBtnWrapper: {
     flex: 1,
-    shadowColor: '#2563EB',
+    shadowColor: '#1E40AF',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   primaryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
     gap: 6,
   },
   primaryBtnText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#FFFFFF',
   },

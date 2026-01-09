@@ -26,8 +26,8 @@ if (Platform.OS === 'android') {
   }
 }
 
-const HEADER_HEIGHT_EXPANDED = 120;
-const HEADER_HEIGHT_COLLAPSED = 56;
+const HEADER_HEIGHT_EXPANDED = 116;
+const HEADER_HEIGHT_COLLAPSED = 52;
 
 export default function HomeScreen() {
   const scrollRef = useRef<Animated.ScrollView>(null);
@@ -55,10 +55,11 @@ export default function HomeScreen() {
   const searchStyle = useAnimatedStyle(() => {
     const opacity = interpolate(scrollY.value, [0, scrollRange * 0.8], [1, 0], Extrapolate.CLAMP);
     const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.9], Extrapolate.CLAMP);
-    const height = interpolate(scrollY.value, [0, scrollRange], [54, 0], Extrapolate.CLAMP);
-    const marginTop = interpolate(scrollY.value, [0, scrollRange], [16, 0], Extrapolate.CLAMP);
+    const height = interpolate(scrollY.value, [0, scrollRange], [52, 0], Extrapolate.CLAMP);
+    const marginTop = interpolate(scrollY.value, [0, scrollRange], [14, 0], Extrapolate.CLAMP);
+    const marginBottom = interpolate(scrollY.value, [0, scrollRange], [8, 0], Extrapolate.CLAMP);
     
-    return { opacity, transform: [{ scale }], height, marginTop };
+    return { opacity, transform: [{ scale }], height, marginTop, marginBottom };
   });
 
   useFocusEffect(
@@ -213,8 +214,8 @@ const styles = StyleSheet.create({
   },
   gradient: {
       flex: 1,
-      paddingHorizontal: 20,
-      paddingBottom: 16,
+      paddingHorizontal: 18,
+      paddingBottom: 12,
   },
   headerTopRow: {
       flexDirection: 'row',
@@ -222,15 +223,17 @@ const styles = StyleSheet.create({
       alignItems: 'center',
   },
   greeting: {
-      fontSize: 14,
-      color: 'rgba(255,255,255,0.9)',
+      fontSize: 13,
+      color: 'rgba(255,255,255,0.85)',
       fontWeight: '500',
+      letterSpacing: 0.2,
   },
   name: {
-      fontSize: 20,
+      fontSize: 17,
       color: '#FFF',
       fontWeight: '700',
       letterSpacing: -0.3,
+      marginTop: 1,
   },
   leftSection: {
       flexDirection: 'row',
