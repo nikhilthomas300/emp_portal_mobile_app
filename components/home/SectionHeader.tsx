@@ -1,12 +1,10 @@
 import Colors from '@/constants/Colors';
-import { ChevronRight, LucideIcon } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface SectionHeaderProps {
   title: string;
-  icon?: LucideIcon;
-  iconColor?: string;
   onSeeAll?: () => void;
   showSeeAll?: boolean;
   seeAllText?: string;
@@ -14,8 +12,6 @@ interface SectionHeaderProps {
 
 export default function SectionHeader({ 
   title, 
-  icon: Icon,
-  iconColor,
   onSeeAll,
   showSeeAll = false,
   seeAllText = 'View all'
@@ -28,12 +24,10 @@ export default function SectionHeader({
         <TouchableOpacity 
           style={styles.seeAllBtn} 
           onPress={onSeeAll}
-          activeOpacity={0.6}
+          activeOpacity={0.7}
         >
           <Text style={styles.seeAllText}>{seeAllText}</Text>
-          <View style={styles.chevronContainer}>
-            <ChevronRight size={14} color={Colors.primary} strokeWidth={2.5} />
-          </View>
+          <ChevronRight size={14} color={Colors.primary} strokeWidth={2.5} />
         </TouchableOpacity>
       )}
     </View>
@@ -49,32 +43,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#0F172A',
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
   seeAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingLeft: 10,
-    paddingRight: 6,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 20,
+    gap: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
   },
   seeAllText: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.primary,
     fontWeight: '600',
-  },
-  chevronContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#DBEAFE',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

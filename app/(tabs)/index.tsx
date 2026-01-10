@@ -7,7 +7,7 @@ import Colors from '@/constants/Colors';
 import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import { ClipboardCheck, Menu, QrCode, Search } from 'lucide-react-native';
+import { Briefcase, Calendar, ClipboardCheck, FileText, Home, Menu, QrCode, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import Animated, {
@@ -26,8 +26,16 @@ if (Platform.OS === 'android') {
   }
 }
 
-const HEADER_HEIGHT_EXPANDED = 116;
-const HEADER_HEIGHT_COLLAPSED = 52;
+// Quick actions data for header
+const QUICK_ACTIONS = [
+  { id: 1, title: 'Apply Leave', icon: Briefcase, link: '/apply-leave' },
+  { id: 2, title: 'Apply WFH', icon: Home, link: '/apply-wfh' },
+  { id: 3, title: 'Digital Identity', icon: FileText, link: '/letters' },
+  { id: 4, title: 'Holidays', icon: Calendar, link: '/holidays' },
+];
+
+const HEADER_HEIGHT_EXPANDED = 200; // Search + quick actions
+const HEADER_HEIGHT_COLLAPSED = 120; // Search stays visible, quick actions hidden
 
 export default function HomeScreen() {
   const scrollRef = useRef<Animated.ScrollView>(null);
@@ -53,13 +61,20 @@ export default function HomeScreen() {
   });
 
   const searchStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [0, scrollRange * 0.8], [1, 0], Extrapolate.CLAMP);
-    const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.9], Extrapolate.CLAMP);
-    const height = interpolate(scrollY.value, [0, scrollRange], [52, 0], Extrapolate.CLAMP);
-    const marginTop = interpolate(scrollY.value, [0, scrollRange], [14, 0], Extrapolate.CLAMP);
-    const marginBottom = interpolate(scrollY.value, [0, scrollRange], [8, 0], Extrapolate.CLAMP);
+    // Search bar stays visible - only slight scale adjustment
+    const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.98], Extrapolate.CLAMP);
     
-    return { opacity, transform: [{ scale }], height, marginTop, marginBottom };
+    return { transform: [{ scale }] };
+  });
+
+  // Quick actions in header - fade out and collapse when scrolling
+  const headerQuickActionsStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(scrollY.value, [0, scrollRange * 0.5], [1, 0], Extrapolate.CLAMP);
+    const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.9], Extrapolate.CLAMP);
+    const height = interpolate(scrollY.value, [0, scrollRange], [80, 0], Extrapolate.CLAMP);
+    const marginTop = interpolate(scrollY.value, [0, scrollRange], [8, 0], Extrapolate.CLAMP);
+    
+    return { opacity, transform: [{ scale }], height, marginTop, overflow: 'hidden' };
   });
 
   useFocusEffect(
@@ -93,7 +108,7 @@ export default function HomeScreen() {
       {/* Blue Gradient Header */}
       <Animated.View style={[styles.headerContainer, { height: headerMaxHeight }, headerStyle]}>
         <LinearGradient
-            colors={['#1E40AF', '#3B82F6', '#60A5FA']}
+            colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[styles.gradient, { paddingTop: insets.top + 6 }]}
@@ -127,7 +142,7 @@ export default function HomeScreen() {
                 </View>
             </View>
 
-            {/* Search Bar */}
+            {/* Search Bar - Fades out on scroll */}
             <Animated.View style={[styles.searchWrapper, searchStyle]}>
                 <Link href="/search" asChild>
                     <TouchableOpacity style={styles.searchBar} activeOpacity={0.9}>
@@ -135,6 +150,23 @@ export default function HomeScreen() {
                         <Text style={styles.searchText}>Search anything...</Text>
                     </TouchableOpacity>
                 </Link>
+            </Animated.View>
+
+            {/* Quick Actions in Header - Circular icons with labels below */}
+            <Animated.View style={[styles.headerQuickActions, headerQuickActionsStyle]}>
+                {QUICK_ACTIONS.map((action) => {
+                    const IconComponent = action.icon;
+                    return (
+                        <Link key={action.id} href={action.link as any} asChild>
+                            <TouchableOpacity style={styles.headerQuickAction} activeOpacity={0.7}>
+                                <View style={styles.headerQuickActionIcon}>
+                                    <IconComponent size={22} color="#FFF" strokeWidth={1.8} />
+                                </View>
+                                <Text style={styles.headerQuickActionText}>{action.title}</Text>
+                            </TouchableOpacity>
+                        </Link>
+                    );
+                })}
             </Animated.View>
         </LinearGradient>
       </Animated.View>
@@ -202,12 +234,12 @@ const styles = StyleSheet.create({
       left: 0,
       right: 0,
       zIndex: 100,
-      backgroundColor: '#1E40AF',
+      backgroundColor: Colors.gradientStart,
       overflow: 'hidden',
       borderBottomLeftRadius: 28,
       borderBottomRightRadius: 28,
       elevation: 12,
-      shadowColor: '#1E40AF',
+      shadowColor: Colors.gradientStart,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.35,
       shadowRadius: 12,
@@ -290,8 +322,8 @@ const styles = StyleSheet.create({
   },
   searchWrapper: {
       width: '100%',
-      marginTop: 10,
-      overflow: 'hidden',
+      marginTop: 12,
+      marginBottom: 2,
   },
   searchBar: {
     flexDirection: 'row',
@@ -311,6 +343,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#94A3B8',
     fontWeight: '500',
+  },
+  // Header Quick Actions (circular icons with labels below - premium style)
+  headerQuickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    paddingHorizontal: 4,
+    overflow: 'hidden',
+  },
+  headerQuickAction: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  headerQuickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  headerQuickActionText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: 0.2,
   },
   scrollContent: {
     paddingBottom: 120,

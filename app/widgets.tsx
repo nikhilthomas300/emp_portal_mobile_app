@@ -1,34 +1,68 @@
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Activity, ArrowLeft, Box, Clock, CreditCard, DollarSign, FileText, Truck, User, Users, Utensils } from 'lucide-react-native';
+import { ArrowLeft, FileText } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SvgProps } from 'react-native-svg';
 
-const allWidgets = [
-  { id: 1, title: 'My Attendance', icon: Clock },
-  { id: 2, title: 'My Transport', icon: Truck },
-  { id: 3, title: 'Salary Status', icon: DollarSign },
-  { id: 4, title: 'My Assets', icon: Box },
-  { id: 5, title: 'My Letters', icon: FileText },
-  { id: 6, title: 'My Profile', icon: User },
-  { id: 7, title: 'Flex', icon: Activity },
-  { id: 8, title: 'Facility Access', icon: CreditCard },
-  { id: 9, title: 'Performance', icon: Users },
-  { id: 10, title: 'My Visitors', icon: Users },
-  { id: 11, title: 'Meal Card', icon: Utensils },
+// Import SVG icons
+import FlexIcon from '@/assets/images/widgets/Flex.svg';
+import MealCardIcon from '@/assets/images/widgets/MealCard.svg';
+import MyAssetsIcon from '@/assets/images/widgets/MyAssets.svg';
+import MyAttendanceIcon from '@/assets/images/widgets/MyAttendance.svg';
+import MyProfileIcon from '@/assets/images/widgets/MyProfile.svg';
+import MyTransportIcon from '@/assets/images/widgets/MyTransport.svg';
+import OrgHierarchyIcon from '@/assets/images/widgets/OrgHirearchy.svg';
+import SalaryIcon from '@/assets/images/widgets/Salary.svg';
+import VisitorIcon from '@/assets/images/widgets/Visitor.svg';
+import AccessIcon from '@/assets/images/widgets/access_widget.svg';
+import CheckinIcon from '@/assets/images/widgets/checkin.svg';
+
+type WidgetType = {
+  id: number;
+  title: string;
+  Icon?: React.FC<SvgProps>;
+  FallbackIcon?: any;
+};
+
+const allWidgets: WidgetType[] = [
+  { id: 1, title: 'My Attendance', Icon: MyAttendanceIcon },
+  { id: 2, title: 'My Transport', Icon: MyTransportIcon },
+  { id: 3, title: 'Salary Status', Icon: SalaryIcon },
+  { id: 4, title: 'My Assets', Icon: MyAssetsIcon },
+  { id: 5, title: 'My Letters', FallbackIcon: FileText },
+  { id: 6, title: 'My Profile', Icon: MyProfileIcon },
+  { id: 7, title: 'Flex', Icon: FlexIcon },
+  { id: 8, title: 'Facility Access', Icon: AccessIcon },
+  { id: 9, title: 'Org Hierarchy', Icon: OrgHierarchyIcon },
+  { id: 10, title: 'My Visitors', Icon: VisitorIcon },
+  { id: 11, title: 'Meal Card', Icon: MealCardIcon },
+  { id: 12, title: 'Check-In', Icon: CheckinIcon },
 ];
 
 export default function WidgetsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  const renderIcon = (widget: WidgetType) => {
+    if (widget.FallbackIcon) {
+      const FallbackComponent = widget.FallbackIcon;
+      return <FallbackComponent size={28} color={Colors.primary} strokeWidth={1.8} />;
+    }
+    if (widget.Icon) {
+      const SvgIcon = widget.Icon;
+      return <SvgIcon width={34} height={34} />;
+    }
+    return null;
+  };
+
   return (
     <View style={styles.container}>
       {/* Blue Gradient Header */}
       <LinearGradient
-        colors={['#1E40AF', '#3B82F6', '#60A5FA']}
+        colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.header, { paddingTop: insets.top + 12 }]}
@@ -56,12 +90,10 @@ export default function WidgetsScreen() {
           <View style={styles.grid}>
             {allWidgets.map((widget) => (
               <TouchableOpacity key={widget.id} style={styles.cardWrapper} activeOpacity={0.7}>
-                <View style={styles.card}>
-                  <View style={styles.iconContainer}>
-                    <widget.icon size={26} color={Colors.primary} strokeWidth={1.8} />
-                  </View>
-                  <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
+                <View style={styles.iconCircle}>
+                  {renderIcon(widget)}
                 </View>
+                <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -74,14 +106,14 @@ export default function WidgetsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
   },
   header: {
     paddingHorizontal: 20,
     paddingBottom: 18,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    shadowColor: '#1E40AF',
+    shadowColor: Colors.gradientStart,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -120,45 +152,45 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 18,
-    paddingHorizontal: 10,
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 4 },
+    borderRadius: 24,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowRadius: 24,
+    elevation: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(59, 130, 246, 0.08)',
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   cardWrapper: {
-    width: '33.33%',
+    width: '25%',
     alignItems: 'center',
-    paddingVertical: 12,
-  },
-  card: {
-    alignItems: 'center',
+    paddingVertical: 14,
     paddingHorizontal: 4,
   },
-  iconContainer: {
-    width: 58,
-    height: 58,
-    borderRadius: 18,
+  iconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.15)',
   },
   cardTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 16,
-    minHeight: 32,
+    lineHeight: 15,
+    minHeight: 30,
+    letterSpacing: 0.1,
   },
 });

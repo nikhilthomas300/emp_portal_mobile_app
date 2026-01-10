@@ -1,44 +1,62 @@
 import Colors from '@/constants/Colors';
 import { Link, useRouter } from 'expo-router';
-import { CalendarOff, CheckCircle, FileText, Share2, UserCheck, Users } from 'lucide-react-native';
+import { FileText } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SvgProps } from 'react-native-svg';
 import SectionHeader from './SectionHeader';
 
-// Show team widgets: 3 per row - Enterprise consistent blue theme
-const widgets = [
-  { id: 1, title: 'My Approvals', icon: CheckCircle, link: '/approvals' },
-  { id: 2, title: 'Team Attendance', icon: Users, link: null },
-  { id: 3, title: 'Team Leaves', icon: CalendarOff, link: null },
-  { id: 4, title: 'Shared Assets', icon: Share2, link: null },
-  { id: 5, title: 'Team Letters', icon: FileText, link: null },
-  { id: 6, title: 'Directory', icon: UserCheck, link: null },
+// Import SVG icons for team widgets
+import AccessIcon from '@/assets/images/widgets/access_widget.svg';
+import CheckinIcon from '@/assets/images/widgets/checkin.svg';
+import MyAttendanceIcon from '@/assets/images/widgets/MyAttendance.svg';
+import OrgHierarchyIcon from '@/assets/images/widgets/OrgHirearchy.svg';
+import VisitorIcon from '@/assets/images/widgets/Visitor.svg';
+
+// Show team widgets: 4 per row - Premium design with SVG icons
+const widgets: Array<{id: number; title: string; Icon?: React.FC<SvgProps>; FallbackIcon?: any; link: string | null}> = [
+  { id: 1, title: 'My Approvals', Icon: CheckinIcon, link: '/approvals' },
+  { id: 2, title: 'Team Attendance', Icon: MyAttendanceIcon, link: null },
+  { id: 3, title: 'Visitor Mgmt', Icon: VisitorIcon, link: null },
+  { id: 4, title: 'Org Hierarchy', Icon: OrgHierarchyIcon, link: null },
+  { id: 5, title: 'Team Letters', FallbackIcon: FileText, link: null },
+  { id: 6, title: 'Access Card', Icon: AccessIcon, link: null },
 ];
 
 export default function TeamSection() {
   const router = useRouter();
 
-  const renderCard = (widget: typeof widgets[0]) => {
-    const IconComponent = widget.icon;
-    
-    const cardElement = (
-      <View style={styles.card}>
-        <View style={styles.iconContainer}>
-          <IconComponent size={24} color={Colors.primary} strokeWidth={1.8} />
+  const renderIcon = (widget: typeof widgets[0]) => {
+    if (widget.FallbackIcon) {
+      const FallbackComponent = widget.FallbackIcon;
+      return <FallbackComponent size={26} color={Colors.primary} strokeWidth={1.8} />;
+    }
+    if (widget.Icon) {
+      const SvgIcon = widget.Icon;
+      return <SvgIcon width={32} height={32} />;
+    }
+    return null;
+  };
+
+  const renderWidget = (widget: typeof widgets[0]) => {
+    const widgetContent = (
+      <>
+        <View style={styles.iconCircle}>
+          {renderIcon(widget)}
         </View>
-        <Text style={styles.cardTitle} numberOfLines={2}>{widget.title}</Text>
-      </View>
+        <Text style={styles.widgetTitle} numberOfLines={2}>{widget.title}</Text>
+      </>
     );
 
     return widget.link ? (
       <Link key={widget.id} href={widget.link as any} asChild>
-        <TouchableOpacity activeOpacity={0.7} style={styles.cardWrapper}>
-          {cardElement}
+        <TouchableOpacity activeOpacity={0.7} style={styles.widgetItem}>
+          {widgetContent}
         </TouchableOpacity>
       </Link>
     ) : (
-      <TouchableOpacity key={widget.id} activeOpacity={0.7} style={styles.cardWrapper}>
-        {cardElement}
+      <TouchableOpacity key={widget.id} activeOpacity={0.7} style={styles.widgetItem}>
+        {widgetContent}
       </TouchableOpacity>
     );
   };
@@ -46,14 +64,14 @@ export default function TeamSection() {
   return (
     <View style={styles.container}>
       <SectionHeader 
-        title="My Team" 
+        title="My Team Widgets" 
         showSeeAll
         onSeeAll={() => router.push('/team')}
       />
       
       <View style={styles.cardContainer}>
         <View style={styles.gridContainer}>
-          {widgets.map((widget) => renderCard(widget))}
+          {widgets.map((widget) => renderWidget(widget))}
         </View>
       </View>
     </View>
@@ -62,50 +80,53 @@ export default function TeamSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 18,
-    paddingHorizontal: 10,
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 4 },
+    borderRadius: 24,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
+    // Premium shadow
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowRadius: 24,
+    elevation: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(59, 130, 246, 0.08)',
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
   },
-  cardWrapper: {
-    width: '33.33%',
+  widgetItem: {
+    width: '25%',
     alignItems: 'center',
-    paddingVertical: 10,
-  },
-  card: {
-    alignItems: 'center',
+    paddingVertical: 12,
     paddingHorizontal: 4,
   },
-  iconContainer: {
+  iconCircle: {
     width: 56,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 28,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
+    // Subtle inner glow
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.15)',
   },
-  cardTitle: {
-    fontSize: 12,
+  widgetTitle: {
+    fontSize: 11,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 15,
+    minHeight: 30,
+    letterSpacing: 0.1,
   },
 });

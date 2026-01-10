@@ -1,49 +1,57 @@
-import Colors from '@/constants/Colors';
-import { Link } from 'expo-router';
-import {
-  Briefcase,
-  Calendar,
-  FileText,
-  Home,
-} from 'lucide-react-native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SectionHeader from './SectionHeader';
 
-const actions = [
-  { id: 1, title: 'Apply Leave', icon: Briefcase, link: '/apply-leave', isNew: false },
-  { id: 2, title: 'Apply WFH', icon: Home, link: '/apply-wfh', isNew: false },
-  { id: 3, title: 'My Letters', icon: FileText, link: '/letters', isNew: false },
-  { id: 4, title: 'My Holidays', icon: Calendar, link: '/holidays', isNew: true },
+// App icons from assets
+const appIcons: { [key: string]: any } = {
+  'EASEF': require('@/assets/images/apps/EASEF.png'),
+  'EPAY': require('@/assets/images/apps/EPAY.png'),
+  'PROVIDENT': require('@/assets/images/apps/PROVIDENT.png'),
+  'PS': require('@/assets/images/apps/PS.png'),
+  'SSP': require('@/assets/images/apps/SSP.png'),
+  'TALENTNEXT': require('@/assets/images/apps/TALENTNEXT.png'),
+};
+
+// 8 Quick Links
+const quickLinks = [
+  { id: 1, title: 'Oracle EBS', image: 'PS' },
+  { id: 2, title: 'HCM', image: 'SSP' },
+  { id: 3, title: 'SCM', image: 'PROVIDENT' },
+  { id: 4, title: 'CareerOrbit', image: 'EPAY' },
+  { id: 5, title: 'TalentNext', image: 'TALENTNEXT' },
+  { id: 6, title: 'Ease+', image: 'EASEF' },
+  { id: 7, title: 'Geek Cloud', image: 'SSP' },
+  { id: 8, title: 'Accolade', image: 'PROVIDENT' },
 ];
 
 export default function QuickActionsGrid() {
+  const handlePress = (title: string) => {
+    Alert.alert('Opening', `${title} app is opening...`);
+  };
+
   return (
     <View style={styles.container}>
-      <SectionHeader title="Quick Actions" />
+      <SectionHeader title="Quick Links" />
       
       <View style={styles.cardContainer}>
         <View style={styles.gridContainer}>
-          {actions.map((action) => {
-            const IconComponent = action.icon;
-            return (
-              <Link key={action.id} href={action.link as any} asChild>
-                <TouchableOpacity style={styles.actionItem} activeOpacity={0.7}>
-                  <View style={styles.iconWrapper}>
-                    {action.isNew && (
-                      <View style={styles.newBadge}>
-                        <Text style={styles.newBadgeText}>New</Text>
-                      </View>
-                    )}
-                    <View style={styles.iconContainer}>
-                      <IconComponent size={24} color={Colors.primary} strokeWidth={1.8} />
-                    </View>
-                  </View>
-                  <Text style={styles.actionTitle} numberOfLines={2}>{action.title}</Text>
-                </TouchableOpacity>
-              </Link>
-            );
-          })}
+          {quickLinks.map((app) => (
+            <TouchableOpacity 
+              key={app.id} 
+              style={styles.appItem}
+              onPress={() => handlePress(app.title)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.iconWrapper}>
+                <Image 
+                  source={appIcons[app.image]} 
+                  style={styles.appIcon}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.appTitle} numberOfLines={1}>{app.title}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
     </View>
@@ -52,58 +60,53 @@ export default function QuickActionsGrid() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 10,
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
     borderWidth: 1,
     borderColor: '#F1F5F9',
   },
   gridContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
   },
-  actionItem: {
+  appItem: {
+    width: '25%',
     alignItems: 'center',
-    width: 75,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
   },
   iconWrapper: {
-    position: 'relative',
-    marginBottom: 8,
-  },
-  iconContainer: {
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#F8FAFC',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  newBadge: {
-    position: 'absolute',
-    top: -6,
-    right: -8,
-    zIndex: 1,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
+  appIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 6,
   },
-  newBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    textTransform: 'uppercase',
-  },
-  actionTitle: {
-    fontSize: 11,
+  appTitle: {
+    fontSize: 10,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 14,
   },
 });

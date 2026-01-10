@@ -17,6 +17,10 @@ export default {
   tint: tintColorLight,
   tabIconDefault: '#9ca3af', // Gray 400
   tabIconSelected: '#2563EB', // Blue 600
+  // Header gradient colors (slightly darker for premium look)
+  gradientStart: '#1A3A9C', // Darker blue
+  gradientMiddle: '#2D6FE8', // Rich medium blue
+  gradientEnd: '#4A90F4', // Slightly darker light blue
   spacing: 20,
   radius: 20,
   shadows: {

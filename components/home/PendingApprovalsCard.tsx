@@ -1,4 +1,5 @@
 import Colors from '@/constants/Colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { Bell, ChevronRight } from 'lucide-react-native';
 import React, { useEffect } from 'react';
@@ -18,24 +19,40 @@ interface PendingApprovalsCardProps {
 
 export default function PendingApprovalsCard({ count = 3 }: PendingApprovalsCardProps) {
   const rotation = useSharedValue(0);
+  const scale = useSharedValue(1);
 
   useEffect(() => {
     // Bell shake animation
     rotation.value = withRepeat(
       withSequence(
-        withTiming(-10, { duration: 100, easing: Easing.ease }),
-        withTiming(10, { duration: 100, easing: Easing.ease }),
-        withTiming(-10, { duration: 100, easing: Easing.ease }),
-        withTiming(0, { duration: 100, easing: Easing.ease }),
-        withTiming(0, { duration: 2000 })
+        withTiming(-12, { duration: 80, easing: Easing.ease }),
+        withTiming(12, { duration: 80, easing: Easing.ease }),
+        withTiming(-8, { duration: 80, easing: Easing.ease }),
+        withTiming(8, { duration: 80, easing: Easing.ease }),
+        withTiming(0, { duration: 80, easing: Easing.ease }),
+        withTiming(0, { duration: 3000 })
       ),
       -1,
       false
     );
+
+    // Subtle pulse for badge
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.1, { duration: 600, easing: Easing.ease }),
+        withTiming(1, { duration: 600, easing: Easing.ease })
+      ),
+      -1,
+      true
+    );
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
+  const bellAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  const badgeAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
   }));
 
   if (count === 0) return null;
@@ -43,24 +60,41 @@ export default function PendingApprovalsCard({ count = 3 }: PendingApprovalsCard
   return (
     <View style={styles.container}>
       <Link href="/approvals" asChild>
-        <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-          <View style={styles.iconContainer}>
-            <Animated.View style={animatedStyle}>
-              <Bell size={20} color={Colors.primary} strokeWidth={2} />
-            </Animated.View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{count}</Text>
+        <TouchableOpacity style={styles.card} activeOpacity={0.9}>
+          <LinearGradient
+            colors={['#FFFFFF', '#F8FAFC']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.cardGradient}
+          >
+            {/* Icon with Badge */}
+            <View style={styles.iconContainer}>
+              <LinearGradient
+                colors={[Colors.gradientEnd, Colors.gradientMiddle]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.iconGradient}
+              >
+                <Animated.View style={bellAnimatedStyle}>
+                  <Bell size={22} color="#FFFFFF" strokeWidth={2.2} fill="rgba(255,255,255,0.2)" />
+                </Animated.View>
+              </LinearGradient>
+              <Animated.View style={[styles.badge, badgeAnimatedStyle]}>
+                <Text style={styles.badgeText}>{count}</Text>
+              </Animated.View>
             </View>
-          </View>
-          
-          <View style={styles.textContent}>
-            <Text style={styles.title}>Pending Approvals</Text>
-            <Text style={styles.subtitle}>Tap to review requests</Text>
-          </View>
-          
-          <View style={styles.arrowContainer}>
-            <ChevronRight size={18} color={Colors.primary} strokeWidth={2.5} />
-          </View>
+            
+            {/* Text Content */}
+            <View style={styles.textContent}>
+              <Text style={styles.title}>Pending Approvals</Text>
+              <Text style={styles.subtitle}>Tap to review {count} request{count > 1 ? 's' : ''}</Text>
+            </View>
+            
+            {/* Arrow */}
+            <View style={styles.arrowContainer}>
+              <ChevronRight size={20} color={Colors.primary} strokeWidth={2.5} />
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
       </Link>
     </View>
@@ -70,73 +104,86 @@ export default function PendingApprovalsCard({ count = 3 }: PendingApprovalsCard
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingLeft: 14,
-    paddingRight: 12,
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  cardGradient: {
+    paddingVertical: 16,
+    paddingLeft: 16,
+    paddingRight: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: 'rgba(59, 130, 246, 0.15)',
+    borderRadius: 20,
   },
   iconContainer: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: '#EFF6FF',
+    position: 'relative',
+    marginRight: 16,
+  },
+  iconGradient: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
-    position: 'relative',
   },
   badge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    top: -6,
+    right: -6,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    paddingHorizontal: 6,
+    borderWidth: 2.5,
     borderColor: '#FFFFFF',
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
   },
   badgeText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#FFFFFF',
   },
   textContent: {
     flex: 1,
   },
   title: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 2,
+    color: '#0F172A',
+    marginBottom: 3,
+    letterSpacing: -0.2,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#64748B',
     fontWeight: '500',
   },
   arrowContainer: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.15)',
   },
 });

@@ -3,31 +3,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import {
-  ArrowLeft,
-  BarChart,
-  BookOpen,
-  Briefcase,
-  CheckCircle,
-  Cloud,
-  Code,
-  Database,
-  Globe,
-  HardDrive,
-  Layout,
-  Mail,
-  MessageCircle,
-  Plane,
-  RotateCw,
-  Search,
-  Server,
-  Shield,
-  ShieldCheck,
-  Terminal,
-  Users,
-  Video
+    ArrowLeft,
+    RotateCw,
+    Search
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Dimensions, LayoutAnimation, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
+import { Dimensions, Image, LayoutAnimation, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
@@ -40,31 +21,25 @@ const GAP = 10;
 const PADDING = 16;
 const CARD_WIDTH = (width - (PADDING * 2) - GAP) / 2;
 
-const CATEGORIES = ['All', 'Productivity', 'Communication', 'HR & Finance', 'Dev Tools', 'Utilities'];
+const CATEGORIES = ['All', 'HR & Finance', 'Utilities'];
+
+// App icons from assets
+const appIcons: { [key: string]: any } = {
+  'EASEF': require('@/assets/images/apps/EASEF.png'),
+  'EPAY': require('@/assets/images/apps/EPAY.png'),
+  'PROVIDENT': require('@/assets/images/apps/PROVIDENT.png'),
+  'PS': require('@/assets/images/apps/PS.png'),
+  'SSP': require('@/assets/images/apps/SSP.png'),
+  'TALENTNEXT': require('@/assets/images/apps/TALENTNEXT.png'),
+};
 
 const APPS = [
-  { id: 2, name: 'Teams', icon: MessageCircle, color: '#6264A7', bg: '#EEEFFA', category: 'Communication', url: 'https://teams.microsoft.com' },
-  { id: 3, name: 'Outlook', icon: Mail, color: '#0078D4', bg: '#E5F3FF', category: 'Communication', url: 'https://outlook.office.com' },
-  { id: 4, name: 'Confluence', icon: Layout, color: '#2684FF', bg: '#E5EFFF', category: 'Productivity', url: 'https://www.atlassian.com/software/confluence' },
-  { id: 5, name: 'Jira', icon: CheckCircle, color: '#2684FF', bg: '#E5EFFF', category: 'Productivity', url: 'https://www.atlassian.com/software/jira' },
-  { id: 6, name: 'OneDrive', icon: Cloud, color: '#0078D4', bg: '#E5F3FF', category: 'Productivity', url: 'https://onedrive.live.com' },
-  { id: 9, name: 'SharePoint', icon: Globe, color: '#0078D4', bg: '#E5F3FF', category: 'Productivity', url: 'https://sharepoint.com' },
-  { id: 10, name: 'Power BI', icon: BarChart, color: '#F2C811', bg: '#FEF9E7', category: 'Productivity', url: 'https://powerbi.microsoft.com' },
-  { id: 11, name: 'Zoom', icon: Video, color: '#2D8CFF', bg: '#E8F4FF', category: 'Communication', url: 'https://zoom.us' },
-  { id: 15, name: 'Workday', icon: Briefcase, color: '#0875E1', bg: '#E3F0FF', category: 'HR & Finance', url: 'https://www.workday.com' },
-  { id: 16, name: 'SuccessFactors', icon: Users, color: '#0A6ED1', bg: '#E3F0FF', category: 'HR & Finance', url: 'https://www.sap.com/products/hcm.html' },
-  { id: 17, name: 'SAP', icon: Database, color: '#008FD3', bg: '#E0F2FA', category: 'HR & Finance', url: 'https://www.sap.com' },
-  { id: 18, name: 'Oracle', icon: Server, color: '#C74634', bg: '#FCEBE9', category: 'HR & Finance', url: 'https://www.oracle.com' },
-  { id: 26, name: 'Travel & Exp', icon: Plane, color: '#0EA5E9', bg: '#E0F2FE', category: 'HR & Finance', url: null },
-  { id: 7, name: 'GitHub', icon: Code, color: '#24292E', bg: '#F3F4F6', category: 'Dev Tools', url: 'https://github.com' },
-  { id: 22, name: 'VS Code', icon: Terminal, color: '#007ACC', bg: '#E0F2FF', category: 'Dev Tools', url: 'https://code.visualstudio.com' },
-  { id: 30, name: 'Cloud Infra', icon: Server, color: '#64748B', bg: '#F1F5F9', category: 'Dev Tools', url: null },
-  { id: 25, name: 'LMS', icon: BookOpen, color: '#F59E0B', bg: '#FEF3C7', category: 'Dev Tools', url: null },
-  { id: 1, name: 'Digital Risk', icon: Shield, color: '#DC2626', bg: '#FEF2F2', category: 'Utilities', url: null },
-  { id: 8, name: 'Drive', icon: HardDrive, color: '#1FA463', bg: '#E3FCEF', category: 'Utilities', url: 'https://drive.google.com' },
-  { id: 19, name: 'ServiceNow', icon: CheckCircle, color: '#81B5A1', bg: '#E8F5F1', category: 'Utilities', url: 'https://www.servicenow.com' },
-  { id: 21, name: 'Tableau', icon: BarChart, color: '#E97627', bg: '#FCEFE5', category: 'Utilities', url: 'https://www.tableau.com' },
-  { id: 27, name: 'InfoSec', icon: ShieldCheck, color: '#10B981', bg: '#D1FAE5', category: 'Utilities', url: null },
+  { id: 1, name: 'EASEF', image: 'EASEF', category: 'HR & Finance', description: 'Employee Self Service' },
+  { id: 2, name: 'EPAY', image: 'EPAY', category: 'HR & Finance', description: 'Payroll & Salary' },
+  { id: 3, name: 'Provident Fund', image: 'PROVIDENT', category: 'HR & Finance', description: 'PF Management' },
+  { id: 4, name: 'People Soft', image: 'PS', category: 'Utilities', description: 'HR System' },
+  { id: 5, name: 'SSP', image: 'SSP', category: 'Utilities', description: 'Service Portal' },
+  { id: 6, name: 'TalentNext', image: 'TALENTNEXT', category: 'Utilities', description: 'Learning & Career' },
 ];
 
 export default function AppStoreScreen() {
@@ -133,7 +108,7 @@ export default function AppStoreScreen() {
     <View style={styles.container}>
       {/* Blue Gradient Header */}
       <LinearGradient
-        colors={['#1E40AF', '#3B82F6', '#60A5FA']}
+        colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
@@ -182,15 +157,16 @@ export default function AppStoreScreen() {
               <TouchableOpacity 
                 key={app.id} 
                 style={styles.appCard}
-                onPress={() => app.url && setActiveUrl(app.url)}
-                activeOpacity={app.url ? 0.7 : 1}
+                activeOpacity={0.7}
               >
-                <View style={[styles.iconContainer, { backgroundColor: app.bg }]}>
-                  <app.icon size={20} color={app.color} strokeWidth={2} />
-                </View>
+                <Image 
+                  source={appIcons[app.image]} 
+                  style={styles.appIcon}
+                  resizeMode="contain"
+                />
                 <View style={styles.cardInfo}>
                   <Text style={styles.appName} numberOfLines={1}>{app.name}</Text>
-                  <Text style={styles.appCategory} numberOfLines={1}>{app.category}</Text>
+                  <Text style={styles.appDescription} numberOfLines={1}>{app.description}</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -266,9 +242,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   iconContainer: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  appIcon: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 10,
+  },
   cardInfo: { flex: 1, gap: 2 },
   appName: { fontSize: 14, fontWeight: '600', color: '#0F172A' },
   appCategory: { fontSize: 11, color: '#94A3B8', fontWeight: '500' },
+  appDescription: { fontSize: 11, color: '#94A3B8', fontWeight: '500' },
 
   emptyState: { paddingVertical: 60, alignItems: 'center' },
   emptyText: { fontSize: 15, fontWeight: '500', color: '#94A3B8' },

@@ -139,7 +139,7 @@ export default function NewsTab() {
       {/* Animated Header */}
       <Animated.View style={[styles.headerContainer, headerStyle]}>
         <LinearGradient
-            colors={['#1E40AF', '#3B82F6', '#60A5FA']}
+            colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[styles.gradient, { paddingTop: insets.top + 10 }]}
@@ -262,12 +262,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   
   headerContainer: {
-    backgroundColor: '#1E40AF',
+    backgroundColor: Colors.gradientStart,
     overflow: 'hidden',
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#1E40AF',
+    shadowColor: Colors.gradientStart,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,

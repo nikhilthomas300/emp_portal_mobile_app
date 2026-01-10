@@ -1,9 +1,9 @@
 import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs, usePathname } from 'expo-router';
-import { Bot, Grid, Home, Newspaper, Search } from 'lucide-react-native';
+import { Grid, Home, Newspaper, Search } from 'lucide-react-native';
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Image, Platform, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -12,6 +12,9 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Newton icon
+const newtonIcon = require('@/assets/images/others/newton.png');
 
 function CenterButton({ focused }: { focused: boolean }) {
   const breatheScale = useSharedValue(1);
@@ -41,7 +44,11 @@ function CenterButton({ focused }: { focused: boolean }) {
           end={{ x: 1, y: 1 }}
           style={styles.centerButton}
         >
-          <Bot size={22} color={focused ? "#FFFFFF" : '#3B82F6'} strokeWidth={2} />
+          <Image 
+            source={newtonIcon} 
+            style={[styles.newtonIcon, { tintColor: focused ? '#FFFFFF' : '#3B82F6' }]}
+            resizeMode="contain"
+          />
         </LinearGradient>
       </Animated.View>
     </View>
@@ -165,6 +172,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  newtonIcon: {
+    width: 26,
+    height: 26,
   },
 });
 

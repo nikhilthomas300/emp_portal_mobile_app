@@ -2,21 +2,20 @@ import Colors from '@/constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, Clock, FileText, Grid, Home, Search, Sparkles, TrendingUp, Users, X } from 'lucide-react-native';
+import { Briefcase, Calendar, Clock, CreditCard, Home, Layers, Search, Sparkles, TrendingUp } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
-import { Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const quickActions = [
+// Quick Links - 4 items with proper routes
+const quickLinks = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, route: '/apply-leave' },
-  { id: 2, title: 'WFH Request', icon: Home, route: '/apply-wfh' },
-  { id: 3, title: 'My Letters', icon: FileText, route: '' },
-  { id: 4, title: 'Approvals', icon: Calendar, route: '/approvals' },
-  { id: 5, title: 'Directory', icon: Users, route: '/directory' },
-  { id: 6, title: 'App Store', icon: Grid, route: '/(tabs)/appstore' },
+  { id: 2, title: 'Apply WFH', icon: Home, route: '/apply-wfh' },
+  { id: 3, title: 'Digital Identity', icon: CreditCard, route: '/digital-identity' },
+  { id: 4, title: 'Holidays', icon: Calendar, route: '/holidays' },
 ];
 
-const recentSearches = ['Oracle HCM', 'Payroll', 'CareerOrbit', 'Leave'];
+const recentSearches = ['Oracle HCM', 'Payroll', 'CareerOrbit'];
 const trendingSearches = ['Wellness', 'Training', 'Benefits'];
 
 export default function SearchScreen() {
@@ -27,16 +26,10 @@ export default function SearchScreen() {
   const inputRef = useRef<TextInput>(null);
 
   useFocusEffect(
-    useCallback(() => {
-      // scrollRef.current?.scrollTo({ y: 0, animated: false });
-    }, [])
+    useCallback(() => {}, [])
   );
 
-  const handleActionPress = (route: string, title: string) => {
-    if (!route) {
-      Alert.alert('Coming Soon', `${title} module is coming soon.`);
-      return;
-    }
+  const handleLinkPress = (route: string) => {
     router.push(route as any);
   };
 
@@ -45,25 +38,25 @@ export default function SearchScreen() {
     inputRef.current?.focus();
   };
 
-  const filteredActions = quickActions.filter(w => 
-    w.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredLinks = quickLinks.filter(item => 
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <View style={styles.container}>
-      {/* Blue Gradient Header */}
+      {/* Header */}
       <LinearGradient
-        colors={['#1E40AF', '#3B82F6', '#60A5FA']}
+        colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
       >
         <Text style={styles.headerTitle}>Search</Text>
-        <Text style={styles.headerSubtitle}>Find apps, widgets and services</Text>
+        <Text style={styles.headerSubtitle}>Find apps, widgets & services</Text>
         
         {/* Search Bar */}
         <View style={styles.searchBarContainer}>
-          <Search size={20} color="#64748B" strokeWidth={2} />
+          <Search size={18} color="#64748B" strokeWidth={2} />
           <TextInput
             ref={inputRef}
             style={styles.searchInput}
@@ -75,8 +68,8 @@ export default function SearchScreen() {
             onSubmitEditing={Keyboard.dismiss}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={clearSearch} style={styles.clearButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <X size={16} color="#64748B" strokeWidth={2.5} />
+            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+              <Text style={styles.clearText}>✕</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -90,13 +83,13 @@ export default function SearchScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        {/* Recent & Trending Searches (Only when text is empty) */}
+        {/* Recent & Trending */}
         {searchQuery.length === 0 && (
-          <View style={styles.searchSuggestionsCard}>
+          <View style={styles.suggestionsCard}>
             {/* Recent */}
             <View style={styles.suggestionSection}>
               <View style={styles.sectionHeader}>
-                <Clock size={14} color="#64748B" strokeWidth={2.5} />
+                <Clock size={14} color="#64748B" strokeWidth={2} />
                 <Text style={styles.sectionTitle}>Recent</Text>
               </View>
               <View style={styles.pillsContainer}>
@@ -113,12 +106,12 @@ export default function SearchScreen() {
               </View>
             </View>
 
-            <View style={styles.sectionDivider} />
+            <View style={styles.divider} />
 
             {/* Trending */}
             <View style={styles.suggestionSection}>
               <View style={styles.sectionHeader}>
-                <TrendingUp size={14} color="#F59E0B" strokeWidth={2.5} />
+                <TrendingUp size={14} color="#F59E0B" strokeWidth={2} />
                 <Text style={styles.sectionTitle}>Trending</Text>
               </View>
               <View style={styles.pillsContainer}>
@@ -138,39 +131,37 @@ export default function SearchScreen() {
           </View>
         )}
 
-        {/* Quick Actions Grid */}
+        {/* Quick Links */}
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
-            <Grid size={14} color="#64748B" strokeWidth={2.5} />
+            <Layers size={14} color={Colors.primary} strokeWidth={2} />
             <Text style={styles.sectionTitleText}>
-              {searchQuery ? 'Search Results' : 'Quick Actions'}
+              {searchQuery ? 'Search Results' : 'Quick Links'}
             </Text>
           </View>
           
-          <View style={styles.actionsCard}>
+          <View style={styles.linksCard}>
             <View style={styles.gridContainer}>
-              {filteredActions.map((action) => (
+              {filteredLinks.map((link) => (
                 <TouchableOpacity 
-                  key={action.id}
+                  key={link.id}
                   style={styles.gridItem}
-                  onPress={() => handleActionPress(action.route, action.title)}
+                  onPress={() => handleLinkPress(link.route)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.iconBox}>
-                    <action.icon size={24} color={Colors.primary} strokeWidth={1.8} />
+                    <link.icon size={24} color={Colors.primary} strokeWidth={1.8} />
                   </View>
-                  <Text style={styles.gridLabel} numberOfLines={2}>{action.title}</Text>
+                  <Text style={styles.gridLabel} numberOfLines={2}>{link.title}</Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            {filteredActions.length === 0 && (
+            {filteredLinks.length === 0 && searchQuery && (
               <View style={styles.emptyState}>
-                <View style={styles.emptyIconBg}>
-                  <Search size={32} color="#CBD5E1" strokeWidth={2} />
-                </View>
+                <Search size={28} color="#CBD5E1" strokeWidth={2} />
                 <Text style={styles.emptyTitle}>No results found</Text>
-                <Text style={styles.emptyText}>We couldn't find anything matching "{searchQuery}"</Text>
+                <Text style={styles.emptyText}>Try a different search term</Text>
               </View>
             )}
           </View>
@@ -181,53 +172,39 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
   
   gradientHeader: { 
     paddingHorizontal: 20, 
     paddingBottom: 20,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    shadowColor: '#1E40AF',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 10,
   },
   headerTitle: { 
-    fontSize: 22, 
+    fontSize: 24, 
     fontWeight: '700', 
     color: '#FFF', 
-    letterSpacing: -0.3,
   },
   headerSubtitle: { 
     fontSize: 13, 
     color: 'rgba(255,255,255,0.85)', 
     marginTop: 4,
     marginBottom: 16,
-    fontWeight: '500',
   },
 
   searchBarContainer: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     backgroundColor: '#FFF', 
-    paddingHorizontal: 16, 
+    paddingHorizontal: 14, 
     height: 48,
     borderRadius: 14, 
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    gap: 10,
   },
   searchInput: { 
     flex: 1, 
     fontSize: 15, 
     color: '#1E293B', 
-    fontWeight: '500',
-    height: '100%',
   },
   clearButton: {
     width: 24,
@@ -237,83 +214,71 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  clearText: {
+    fontSize: 12,
+    color: '#64748B',
+  },
 
   content: { flex: 1 },
   scrollContent: { paddingTop: 20, paddingHorizontal: 16 },
   
-  searchSuggestionsCard: {
+  suggestionsCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 18,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 20,
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
     borderWidth: 1,
     borderColor: '#F1F5F9',
   },
-  suggestionSection: {
-    marginBottom: 0,
-  },
-  sectionDivider: {
+  suggestionSection: {},
+  divider: {
     height: 1,
     backgroundColor: '#F1F5F9',
-    marginVertical: 16,
+    marginVertical: 14,
   },
   sectionHeader: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    gap: 8, 
-    marginBottom: 12,
-  },
-  sectionIconBg: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 6, 
+    marginBottom: 10,
   },
   sectionTitle: { 
     fontSize: 12, 
     fontWeight: '600', 
     color: '#64748B', 
     textTransform: 'uppercase', 
-    letterSpacing: 0.5,
   },
   
   pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: { 
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14, 
-    paddingVertical: 10, 
+    gap: 4,
+    paddingHorizontal: 12, 
+    paddingVertical: 8, 
     backgroundColor: '#F8FAFC', 
-    borderRadius: 10, 
+    borderRadius: 8, 
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   trendingPill: {
     backgroundColor: '#FFFBEB',
-    borderColor: '#FEF3C7',
+    borderColor: '#FDE68A',
   },
   pillText: { 
     fontSize: 13, 
     color: '#475569', 
-    fontWeight: '600',
+    fontWeight: '500',
   },
   trendingText: {
     color: '#B45309',
   },
 
-  section: { marginBottom: 24 },
+  section: { marginBottom: 20 },
   sectionTitleRow: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    gap: 8, 
+    gap: 6, 
     marginBottom: 12,
   },
   sectionTitleText: { 
@@ -321,19 +286,13 @@ const styles = StyleSheet.create({
     fontWeight: '600', 
     color: '#64748B', 
     textTransform: 'uppercase', 
-    letterSpacing: 0.5,
   },
 
-  actionsCard: {
+  linksCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 18,
-    paddingHorizontal: 10,
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: '#F1F5F9',
   },
@@ -342,49 +301,38 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   gridItem: {
-    width: '33.33%',
+    width: '25%',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 4,
   },
   iconBox: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   gridLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 14,
   },
 
-  emptyState: { paddingVertical: 40, alignItems: 'center' },
-  emptyIconBg: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
+  emptyState: { paddingVertical: 30, alignItems: 'center' },
   emptyTitle: { 
-    fontSize: 17, 
-    fontWeight: '700', 
-    color: '#1E293B', 
-    marginBottom: 8,
+    fontSize: 15, 
+    fontWeight: '600', 
+    color: '#64748B', 
+    marginTop: 10,
   },
   emptyText: { 
-    fontSize: 14, 
-    color: '#64748B', 
-    textAlign: 'center',
-    maxWidth: '80%',
-    lineHeight: 20,
+    fontSize: 13, 
+    color: '#94A3B8', 
+    marginTop: 4,
   },
 });
