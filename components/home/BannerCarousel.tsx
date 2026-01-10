@@ -5,9 +5,9 @@ import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 const { width } = Dimensions.get('window');
 
 const banners = [
-  { id: 1, image: require('../../assets/images/banner1.png') },
-  { id: 2, image: require('../../assets/images/banner2.png') },
-  { id: 3, image: require('../../assets/images/banner3.png') },
+  { id: 1, image: require('../../assets/images/banner1.jpg') },
+  { id: 2, image: require('../../assets/images/banner2.jpg') },
+  { id: 3, image: require('../../assets/images/banner3.jpg') },
 ];
 
 export default function BannerCarousel() {

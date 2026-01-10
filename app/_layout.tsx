@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import 'react-native-reanimated';
 
 export {
-    ErrorBoundary
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -84,7 +84,6 @@ function RootLayoutNav() {
         <Stack.Screen name="widgets" />
         <Stack.Screen name="team" />
         <Stack.Screen name="meetings" />
-        <Stack.Screen name="search" />
       </Stack>
     </ThemeProvider>
   );
