@@ -12,7 +12,7 @@ const appIcons: { [key: string]: any } = {
   'TALENTNEXT': require('@/assets/images/apps/TALENTNEXT.png'),
 };
 
-// 8 Quick Links
+// 8 Quick Links in 2 rows
 const quickLinks = [
   { id: 1, title: 'Oracle EBS', image: 'PS' },
   { id: 2, title: 'HCM', image: 'SSP' },
@@ -60,51 +60,49 @@ export default function QuickActionsGrid() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     paddingVertical: 16,
     paddingHorizontal: 8,
-    shadowColor: '#64748B',
+    shadowColor: '#0066FF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowRadius: 16,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EFF6FF',
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
   },
   appItem: {
     width: '25%',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 4,
   },
   iconWrapper: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     backgroundColor: '#F8FAFC',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
   },
   appIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 6,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
   },
   appTitle: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',

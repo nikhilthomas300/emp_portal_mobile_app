@@ -49,7 +49,7 @@ export default function SearchScreen() {
         colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
+        style={[styles.gradientHeader, { paddingTop: insets.top + 8 }]}
       >
         <Text style={styles.headerTitle}>Search</Text>
         <Text style={styles.headerSubtitle}>Find apps, widgets & services</Text>
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   
   gradientHeader: { 
-    paddingHorizontal: 20, 
-    paddingBottom: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingHorizontal: 18, 
+    paddingBottom: 16,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   headerTitle: { 
     fontSize: 24, 
@@ -187,9 +187,9 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: { 
     fontSize: 13, 
-    color: 'rgba(255,255,255,0.85)', 
-    marginTop: 4,
-    marginBottom: 16,
+    color: 'rgba(255,255,255,0.8)', 
+    marginTop: 2,
+    marginBottom: 14,
   },
 
   searchBarContainer: { 
@@ -197,25 +197,30 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     backgroundColor: '#FFF', 
     paddingHorizontal: 14, 
-    height: 48,
+    height: 44,
     borderRadius: 14, 
     gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   searchInput: { 
     flex: 1, 
-    fontSize: 15, 
+    fontSize: 14, 
     color: '#1E293B', 
   },
   clearButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
   },
   clearText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#64748B',
   },
 

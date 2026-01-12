@@ -242,6 +242,18 @@ export default function ApplyWFHScreen() {
                 value={reason}
                 onChangeText={setReason}
               />
+
+              {/* Submit Button - inside ScrollView */}
+              <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} activeOpacity={0.8}>
+                <LinearGradient 
+                  colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gradient}
+                >
+                  <Text style={styles.submitText}>Submit Request</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </>
           ) : (
             <>
@@ -265,17 +277,6 @@ export default function ApplyWFHScreen() {
             </>
           )}
         </ScrollView>
-
-        {/* Fixed Submit Button - Inside KeyboardAvoidingView */}
-        {activeTab === 'new' && (
-          <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-              <LinearGradient colors={['#1E40AF', '#3B82F6', '#60A5FA']} style={styles.gradient}>
-                <Text style={styles.submitText}>Submit Request</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        )}
       </KeyboardAvoidingView>
 
       {/* Date Pickers */}
@@ -312,7 +313,7 @@ export default function ApplyWFHScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
-  content: { padding: 16, paddingBottom: 120 },
+  content: { padding: 16, paddingBottom: 40 },
 
   tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginVertical: 12, backgroundColor: '#E2E8F0', borderRadius: 12, padding: 4 },
   tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
@@ -356,8 +357,8 @@ const styles = StyleSheet.create({
   commentText: { flex: 1, fontSize: 13, color: '#64748B', lineHeight: 18 },
 
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFF', paddingHorizontal: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#E2E8F0' },
-  submitBtn: { borderRadius: 14, overflow: 'hidden' },
-  gradient: { paddingVertical: 16, alignItems: 'center' },
+  submitBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 24, shadowColor: '#0D3C75', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  gradient: { paddingVertical: 18, alignItems: 'center' },
   submitText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 20 },

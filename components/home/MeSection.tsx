@@ -3,44 +3,56 @@ import { useRouter } from 'expo-router';
 import { FileText } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SvgProps } from 'react-native-svg';
 import SectionHeader from './SectionHeader';
 
-// Import SVG icons directly
+// Import SVG icons
 import FlexIcon from '@/assets/images/widgets/Flex.svg';
 import MyAssetsIcon from '@/assets/images/widgets/MyAssets.svg';
 import MyAttendanceIcon from '@/assets/images/widgets/MyAttendance.svg';
 import MyProfileIcon from '@/assets/images/widgets/MyProfile.svg';
 import SalaryIcon from '@/assets/images/widgets/Salary.svg';
 
-// Fallback icons when SVG doesn't work
-const fallbackIcons: Record<string, any> = {
-  'My Letters': FileText,
+// Widget colors - consistently themed
+const widgetColors: Record<string, string> = {
+  'Attendance': '#0066FF',
+  'Assets': '#8B5CF6',
+  'Letters': '#F59E0B',
+  'Flex': '#00B4D8',
+  'Profile': '#00C48C',
+  'Salary': '#FF4757',
 };
 
-// Show widgets: 4 per row - Premium design with SVG icons
-const widgets: Array<{id: number; title: string; Icon?: React.FC<SvgProps>; FallbackIcon?: any}> = [
-  { id: 1, title: 'My Attendance', Icon: MyAttendanceIcon },
-  { id: 2, title: 'My Assets', Icon: MyAssetsIcon },
-  { id: 3, title: 'My Letters', FallbackIcon: FileText },
+// 8 widgets to show the 4-column layout properly
+const widgets = [
+  { id: 1, title: 'Attendance', Icon: MyAttendanceIcon },
+  { id: 2, title: 'Assets', Icon: MyAssetsIcon },
+  { id: 3, title: 'Letters', FallbackIcon: FileText },
   { id: 4, title: 'Flex', Icon: FlexIcon },
-  { id: 5, title: 'My Profile', Icon: MyProfileIcon },
+  { id: 5, title: 'Profile', Icon: MyProfileIcon },
   { id: 6, title: 'Salary', Icon: SalaryIcon },
 ];
 
 export default function MeSection() {
   const router = useRouter();
 
-  const renderIcon = (widget: typeof widgets[0]) => {
+  const renderIcon = (widget: any) => {
+    const color = widgetColors[widget.title] || Colors.primary;
+    
     if (widget.FallbackIcon) {
       const FallbackComponent = widget.FallbackIcon;
-      return <FallbackComponent size={26} color={Colors.primary} strokeWidth={1.8} />;
+      // Slightly smaller icon size for 4-column layout
+      return <FallbackComponent size={24} color={color} strokeWidth={2} />;
     }
     if (widget.Icon) {
       const SvgIcon = widget.Icon;
       return <SvgIcon width={32} height={32} />;
     }
     return null;
+  };
+
+  const getIconBgColor = (title: string) => {
+    const color = widgetColors[title] || Colors.primary;
+    return color + '15'; // 15 = ~8% opacity
   };
 
   return (
@@ -54,11 +66,15 @@ export default function MeSection() {
       <View style={styles.cardContainer}>
         <View style={styles.gridContainer}>
           {widgets.map((widget) => (
-            <TouchableOpacity key={widget.id} style={styles.widgetItem} activeOpacity={0.7}>
-              <View style={styles.iconCircle}>
+            <TouchableOpacity 
+              key={widget.id} 
+              style={styles.widgetItem} 
+              activeOpacity={0.7}
+            >
+              <View style={[styles.iconCircle, { backgroundColor: getIconBgColor(widget.title) }]}>
                 {renderIcon(widget)}
               </View>
-              <Text style={styles.widgetTitle} numberOfLines={2}>{widget.title}</Text>
+              <Text style={styles.widgetTitle} numberOfLines={1}>{widget.title}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -69,53 +85,45 @@ export default function MeSection() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   cardContainer: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     paddingVertical: 20,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     // Premium shadow
-    shadowColor: '#1E40AF',
+    shadowColor: '#64748B',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
     shadowRadius: 24,
     elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.08)',
+    borderColor: '#F1F5F9',
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
   },
   widgetItem: {
-    width: '25%',
+    width: '25%', // Force 4 items per row
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
+    marginBottom: 16,
   },
   iconCircle: {
-    width: 56,
+    width: 56, // Optimized size
     height: 56,
-    borderRadius: 28,
-    backgroundColor: '#EFF6FF',
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    // Subtle inner glow
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.15)',
+    marginBottom: 8,
   },
   widgetTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: '#334155',
     textAlign: 'center',
-    lineHeight: 15,
-    minHeight: 30,
-    letterSpacing: 0.1,
+    letterSpacing: -0.2,
   },
 });

@@ -1,56 +1,31 @@
-import Colors from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs, usePathname } from 'expo-router';
 import { Grid, Home, Newspaper, Search } from 'lucide-react-native';
 import React from 'react';
-import { Image, Platform, StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming
-} from 'react-native-reanimated';
+import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Newton icon
 const newtonIcon = require('@/assets/images/others/newton.png');
 
+// Sophisticated center button
 function CenterButton({ focused }: { focused: boolean }) {
-  const breatheScale = useSharedValue(1);
-
-  React.useEffect(() => {
-    if (focused) {
-      breatheScale.value = withRepeat(
-        withTiming(1.05, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true
-      );
-    } else {
-      breatheScale.value = withTiming(1);
-    }
-  }, [focused]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: breatheScale.value }],
-  }));
-
   return (
     <View style={styles.centerButtonWrapper}>
-      <Animated.View style={[styles.centerButtonOuter, animatedStyle]}>
+      <View style={[styles.centerButtonOuter, focused && styles.centerButtonOuterActive]}>
         <LinearGradient
-          colors={focused ? ['#1E40AF', '#3B82F6'] : ['#EFF6FF', '#DBEAFE']}
+          colors={focused ? ['#2563EB', '#1D4ED8'] : ['#F1F5F9', '#E2E8F0']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.centerButton}
         >
           <Image 
             source={newtonIcon} 
-            style={[styles.newtonIcon, { tintColor: focused ? '#FFFFFF' : '#3B82F6' }]}
+            style={[styles.newtonIcon, { tintColor: focused ? '#FFFFFF' : '#64748B' }]}
             resizeMode="contain"
           />
         </LinearGradient>
-      </Animated.View>
+      </View>
     </View>
   );
 }
@@ -60,15 +35,18 @@ export default function TabLayout() {
   const isChatScreen = pathname === '/chat';
   const insets = useSafeAreaInsets();
   
-  // Calculate proper bottom padding for Android with navigation buttons
-  const androidBottomPadding = Math.max(insets.bottom, 12);
-  const tabBarHeight = Platform.OS === 'ios' ? 80 : (56 + androidBottomPadding);
-  const bottomPadding = Platform.OS === 'ios' ? 0 : androidBottomPadding;
+  const bottomPadding = Platform.select({
+    ios: Math.max(insets.bottom - 12, 4),
+    android: 6,
+    default: 6,
+  });
+  
+  const tabBarHeight = 62 + bottomPadding;
   
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: '#0F172A',
         tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: isChatScreen ? { display: 'none' } : {
           position: 'absolute',
@@ -79,26 +57,23 @@ export default function TabLayout() {
           height: tabBarHeight,
           paddingBottom: bottomPadding,
           paddingTop: 8,
-          paddingHorizontal: 8,
           borderTopWidth: 0,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          shadowColor: '#0F172A',
-          shadowOffset: { width: 0, height: -8 },
-          shadowOpacity: 0.1,
-          shadowRadius: 24,
-          elevation: 24,
-        },
-        tabBarItemStyle: {
-          paddingTop: 2,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          // Premium deep shadow
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 20,
+          elevation: 20,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
-          marginTop: 2,
+          marginTop: 4,
+          letterSpacing: 0.2,
         },
         headerShown: false,
-        animation: 'shift',
       }}
     >
       <Tabs.Screen
@@ -106,7 +81,9 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Home size={22} color={color} strokeWidth={focused ? 2.5 : 1.8} fill={focused ? color : 'transparent'} />
+            <View style={[styles.iconWrapper, focused && styles.activeWrapper]}>
+              <Home size={24} color={focused ? '#2563EB' : color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
           ),
         }}
       />
@@ -115,17 +92,18 @@ export default function TabLayout() {
         options={{
           title: 'News',
           tabBarIcon: ({ color, focused }) => (
-            <Newspaper size={22} color={color} strokeWidth={focused ? 2.5 : 1.8} />
+            <View style={[styles.iconWrapper, focused && styles.activeWrapper]}>
+              <Newspaper size={24} color={focused ? '#2563EB' : color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Newton',
-          tabBarIcon: ({ focused }) => (
-            <CenterButton focused={focused} />
-          ),
+          title: '',
+          tabBarIcon: ({ focused }) => <CenterButton focused={focused} />,
+          tabBarLabel: () => <Text style={styles.centerLabel}>Newton</Text>,
         }}
       />
       <Tabs.Screen
@@ -133,7 +111,9 @@ export default function TabLayout() {
         options={{
           title: 'Apps',
           tabBarIcon: ({ color, focused }) => (
-            <Grid size={22} color={color} strokeWidth={focused ? 2.5 : 1.8} />
+            <View style={[styles.iconWrapper, focused && styles.activeWrapper]}>
+              <Grid size={24} color={focused ? '#2563EB' : color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
           ),
         }}
       />
@@ -142,7 +122,9 @@ export default function TabLayout() {
         options={{
           title: 'Search',
           tabBarIcon: ({ color, focused }) => (
-            <Search size={22} color={color} strokeWidth={focused ? 2.5 : 1.8} />
+            <View style={[styles.iconWrapper, focused && styles.activeWrapper]}>
+              <Search size={24} color={focused ? '#2563EB' : color} strokeWidth={focused ? 2.5 : 2} />
+            </View>
           ),
         }}
       />
@@ -151,31 +133,53 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  iconWrapper: {
+    width: 44,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    marginBottom: 2,
+  },
+  activeWrapper: {
+    backgroundColor: '#EFF6FF', // Subtle blue tint for active state
+  },
   centerButtonWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -28,
+    top: -24,
   },
   centerButtonOuter: {
-    borderRadius: 18,
-    padding: 3,
+    padding: 6,
     backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  centerButtonOuterActive: {
     shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 12,
+    elevation: 8,
   },
   centerButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 15,
+    width: 52,
+    height: 52,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   newtonIcon: {
-    width: 26,
-    height: 26,
+    width: 28,
+    height: 28,
+  },
+  centerLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 4,
   },
 });
-

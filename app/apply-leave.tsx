@@ -70,7 +70,7 @@ export default function ApplyLeaveScreen() {
       >
         <ScrollView 
           showsVerticalScrollIndicator={false} 
-          contentContainerStyle={[styles.content, { paddingBottom: activeTab === 'new' ? 120 : 20 }]}
+          contentContainerStyle={[styles.content, { paddingBottom: 40 }]}
           keyboardShouldPersistTaps="handled"
         >
           {activeTab === 'new' ? (
@@ -154,6 +154,19 @@ export default function ApplyLeaveScreen() {
                   onChangeText={setReason}
                 />
               </View>
+
+              {/* Submit Button - inside ScrollView */}
+              <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} activeOpacity={0.8}>
+                <LinearGradient 
+                  colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gradient}
+                >
+                  <Text style={styles.submitText}>Submit Leave Request</Text>
+                  <ChevronRight size={18} color="#FFF" strokeWidth={2.5} />
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.historyList}>
@@ -189,23 +202,6 @@ export default function ApplyLeaveScreen() {
             </View>
           )}
         </ScrollView>
-
-        {/* Fixed Submit Button */}
-        {activeTab === 'new' && (
-          <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} activeOpacity={0.8}>
-              <LinearGradient 
-                colors={['#1E40AF', '#3B82F6', '#60A5FA']} // Updated to standard blue gradient
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradient}
-              >
-                <Text style={styles.submitText}>Submit Leave Request</Text>
-                <ChevronRight size={18} color="#FFF" strokeWidth={2.5} />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        )}
       </KeyboardAvoidingView>
 
       {/* Date Pickers */}
@@ -302,8 +298,8 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFF', paddingHorizontal: 20, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F1F5F9' },
-  submitBtn: { borderRadius: 16, overflow: 'hidden', shadowColor: '#2563EB', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
-  gradient: { paddingVertical: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  submitBtn: { borderRadius: 16, overflow: 'hidden', shadowColor: '#0D3C75', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6, marginTop: 10 },
+  gradient: { paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 },
   submitText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 20 },

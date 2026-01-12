@@ -1,5 +1,5 @@
 import Colors from '@/constants/Colors';
-import { ChevronRight } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -14,7 +14,7 @@ export default function SectionHeader({
   title, 
   onSeeAll,
   showSeeAll = false,
-  seeAllText = 'View all'
+  seeAllText = 'View All'
 }: SectionHeaderProps) {
   return (
     <View style={styles.container}>
@@ -27,7 +27,9 @@ export default function SectionHeader({
           activeOpacity={0.7}
         >
           <Text style={styles.seeAllText}>{seeAllText}</Text>
-          <ChevronRight size={14} color={Colors.primary} strokeWidth={2.5} />
+          <View style={styles.iconContainer}>
+            <ArrowRight size={12} color="#FFFFFF" strokeWidth={2.5} />
+          </View>
         </TouchableOpacity>
       )}
     </View>
@@ -41,9 +43,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
     paddingHorizontal: 18,
+    marginTop: 8,
   },
   title: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
     color: '#0F172A',
     letterSpacing: -0.3,
@@ -51,13 +54,19 @@ const styles = StyleSheet.create({
   seeAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
-    paddingVertical: 4,
-    paddingHorizontal: 2,
+    gap: 6,
   },
   seeAllText: {
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.primary,
     fontWeight: '600',
+  },
+  iconContainer: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

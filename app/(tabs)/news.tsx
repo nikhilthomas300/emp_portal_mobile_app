@@ -1,10 +1,9 @@
 import Colors from '@/constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Bookmark, ChevronRight, Clock, RefreshCw, Search } from 'lucide-react-native';
+import { Bookmark, ChevronRight, Clock, RefreshCw } from 'lucide-react-native';
 import React, { useCallback, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Animated, { Extrapolate, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface NewsItem {
@@ -63,55 +62,23 @@ const allNewsData: NewsItem[] = [
 
 const categories = ['All', 'Events', 'HR', 'Announcements', 'Technology', 'Facilities'];
 
-const HEADER_MAX_HEIGHT = 160;
-const HEADER_MIN_HEIGHT = 80;
+const HEADER_HEIGHT = 80;
 
 export default function NewsTab() {
   const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
   const [savedItems, setSavedItems] = useState<string[]>([]);
-  const scrollRef = useRef<Animated.ScrollView>(null);
-  const scrollY = useSharedValue(0);
-
-  // Adjusted Max/Min heights accounting for insets
-  const maxH = HEADER_MAX_HEIGHT + insets.top;
-  const minH = HEADER_MIN_HEIGHT + insets.top;
-  const scrollRange = 80;
+  const scrollRef = useRef<ScrollView>(null);
 
   useFocusEffect(
     useCallback(() => {
-      // @ts-ignore
       scrollRef.current?.scrollTo({ y: 0, animated: false });
     }, [])
   );
 
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
-
-  const headerStyle = useAnimatedStyle(() => {
-    const height = interpolate(scrollY.value, [0, scrollRange], [maxH, minH], Extrapolate.CLAMP);
-    return { height };
-  });
-
-  const searchContainerStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [0, scrollRange / 2], [1, 0], Extrapolate.CLAMP);
-    const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.9], Extrapolate.CLAMP);
-    const height = interpolate(scrollY.value, [0, scrollRange], [54, 0], Extrapolate.CLAMP);
-    const marginTop = interpolate(scrollY.value, [0, scrollRange], [16, 0], Extrapolate.CLAMP);
-    return {
-      opacity,
-      transform: [{ scale }],
-      height,
-      marginTop,
-    };
-  });
-
   const filteredNews = allNewsData.filter((item) => {
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesCategory;
   });
 
   const getCategoryColor = (category: string) => {
@@ -136,8 +103,8 @@ export default function NewsTab() {
 
   return (
     <View style={styles.container}>
-      {/* Animated Header */}
-      <Animated.View style={[styles.headerContainer, headerStyle]}>
+      {/* Header */}
+      <View style={[styles.headerContainer, { height: HEADER_HEIGHT + insets.top }]}>
         <LinearGradient
             colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
             start={{ x: 0, y: 0 }}
@@ -150,29 +117,15 @@ export default function NewsTab() {
                 <Text style={styles.headerSubtitle}>Stay updated with latest updates</Text>
               </View>
               <TouchableOpacity style={styles.refreshIcon} activeOpacity={0.7}>
-                <RefreshCw size={20} color="#FFF" strokeWidth={2} />
+                <RefreshCw size={18} color="#FFF" strokeWidth={2} />
               </TouchableOpacity>
             </View>
-            
-            {/* Search Bar inside gradient */}
-            <Animated.View style={[styles.searchWrapper, searchContainerStyle]}>
-              <View style={styles.searchBar}>
-                <Search size={18} color="#64748B" />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search news..."
-                    placeholderTextColor="#94A3B8"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-              </View>
-            </Animated.View>
         </LinearGradient>
-      </Animated.View>
+      </View>
 
       {/* Sticky Categories */}
       <View style={styles.categoriesContainer}>
-        <Animated.ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
           {categories.map((category) => (
             <TouchableOpacity
               key={category}
@@ -184,14 +137,12 @@ export default function NewsTab() {
               </Text>
             </TouchableOpacity>
           ))}
-        </Animated.ScrollView>
+        </ScrollView>
       </View>
 
       {/* News List */}
-      <Animated.ScrollView
+      <ScrollView
         ref={scrollRef}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -253,7 +204,7 @@ export default function NewsTab() {
             <Text style={styles.emptyText}>No news found</Text>
           </View>
         )}
-      </Animated.ScrollView>
+      </ScrollView>
     </View>
   );
 }
@@ -275,40 +226,24 @@ const styles = StyleSheet.create({
   },
   gradient: { 
     flex: 1,
-    paddingHorizontal: 16, 
-    paddingBottom: 16,
+    paddingHorizontal: 18, 
+    paddingBottom: 12,
   },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
-  headerTitle: { fontSize: 24, fontWeight: '800', color: '#FFF' },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 },
+  headerTitle: { fontSize: 24, fontWeight: '700', color: '#FFF' },
   headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
   refreshIcon: { 
-    width: 44, 
-    height: 44, 
-    borderRadius: 14, 
-    backgroundColor: 'rgba(255,255,255,0.2)', 
+    width: 40, 
+    height: 40, 
+    borderRadius: 12, 
+    backgroundColor: 'rgba(255,255,255,0.12)', 
     justifyContent: 'center', 
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.3)', 
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)', 
   },
   
-  searchWrapper: { width: '100%', overflow: 'hidden' },
-  searchBar: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#FFF', 
-    borderRadius: 14, 
-    paddingHorizontal: 14, 
-    paddingVertical: Platform.OS === 'ios' ? 12 : 10, 
-    gap: 10,
-    marginTop: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  searchInput: { flex: 1, fontSize: 15, color: '#1E293B', fontWeight: '500' },
+
 
   categoriesContainer: { 
     backgroundColor: '#FFF', 

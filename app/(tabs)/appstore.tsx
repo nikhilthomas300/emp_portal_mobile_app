@@ -111,7 +111,7 @@ export default function AppStoreScreen() {
         colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientHeader, { paddingTop: insets.top + 12 }]}
+        style={[styles.gradientHeader, { paddingTop: insets.top + 8 }]}
       >
         <Text style={styles.headerTitle}>App Store</Text>
         <Text style={styles.headerSubtitle}>Discover enterprise apps & tools</Text>
@@ -181,13 +181,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   
   gradientHeader: { 
-    paddingHorizontal: PADDING, 
-    paddingBottom: 20,
+    paddingHorizontal: 18, 
+    paddingBottom: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-  headerTitle: { fontSize: 28, fontWeight: '800', color: '#FFF', marginBottom: 4 },
-  headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 16 },
+  headerTitle: { 
+    fontSize: 24, 
+    fontWeight: '700', 
+    color: '#FFF', 
+  },
+  headerSubtitle: { 
+    fontSize: 13, 
+    color: 'rgba(255,255,255,0.8)', 
+    marginTop: 2,
+    marginBottom: 14,
+  },
   
   searchBar: { 
     flexDirection: 'row', 
@@ -195,15 +204,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF', 
     borderRadius: 14, 
     paddingHorizontal: 14, 
-    paddingVertical: Platform.OS === 'ios' ? 12 : 10, 
+    height: 44,
     gap: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
   },
-  searchInput: { flex: 1, fontSize: 15, color: '#1E293B', fontWeight: '500' },
+  searchInput: { flex: 1, fontSize: 14, color: '#1E293B', fontWeight: '500' },
 
   categoriesContainer: { 
     backgroundColor: '#FFF', 

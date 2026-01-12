@@ -7,7 +7,6 @@ const { width } = Dimensions.get('window');
 const banners = [
   { id: 1, image: require('../../assets/images/banner1.jpg') },
   { id: 2, image: require('../../assets/images/banner2.jpg') },
-  { id: 3, image: require('../../assets/images/banner3.jpg') },
 ];
 
 export default function BannerCarousel() {
@@ -75,7 +74,7 @@ export default function BannerCarousel() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   carouselWrapper: {
     overflow: 'hidden',
@@ -86,8 +85,8 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     width: width - (Colors.spacing * 2),
-    height: 120,
-    borderRadius: 20,
+    height: 100,
+    borderRadius: 16,
     overflow: 'hidden',
     ...Colors.shadows.medium,
   },
@@ -99,19 +98,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
-    gap: 8,
+    marginTop: 12,
+    gap: 6,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#E2E8F0',
   },
   activeDot: {
-    width: 24,
-    height: 8,
-    borderRadius: 4,
+    width: 20,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: Colors.primary,
   },
 });

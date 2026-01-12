@@ -1,21 +1,21 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import {
-    Bell,
-    Briefcase,
-    Calendar,
-    ChevronRight,
-    FileText,
-    Grid,
-    Home,
-    LogOut,
-    MessageSquare,
-    Newspaper,
-    QrCode,
-    Sparkles,
-    User,
-    Users,
-    X,
+  Bell,
+  Briefcase,
+  Calendar,
+  ChevronRight,
+  FileText,
+  Grid,
+  Home,
+  LogOut,
+  MessageSquare,
+  Newspaper,
+  QrCode,
+  Sparkles,
+  User,
+  Users,
+  X,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Dimensions, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QRCodeModal from './QRCodeModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 320);
+const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.85, 340);
 
 interface DrawerProps {
   visible: boolean;
@@ -61,16 +61,22 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
 
   return (
     <>
-      <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose} statusBarTranslucent={true}>
+      <Modal 
+        animationType="fade" 
+        transparent={true} 
+        visible={visible} 
+        onRequestClose={onClose} 
+        statusBarTranslucent={true}
+      >
         <View style={styles.container}>
           {/* Backdrop */}
           <TouchableOpacity style={styles.backdrop} onPress={onClose} activeOpacity={1} />
 
           {/* Drawer Content */}
           <View style={[styles.drawer, { width: DRAWER_WIDTH }]}>
-            {/* Blue Gradient Header */}
+            {/* Header - matching app header theme */}
             <LinearGradient
-              colors={['#1E40AF', '#3B82F6', '#60A5FA']}
+              colors={['#0D3C75', '#165BAA', '#2563EB']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={[styles.header, { paddingTop: insets.top + 12 }]}
@@ -78,65 +84,42 @@ export default function Drawer({ visible, onClose }: DrawerProps) {
               <View style={styles.headerTop}>
                 <View style={styles.headerInfo}>
                   <View style={styles.logoIcon}>
-                    <Sparkles size={22} color="#FFF" strokeWidth={2} />
+                    <Sparkles size={24} color="#FFD700" strokeWidth={2} />
                   </View>
                   <View>
-                    <Text style={styles.appName}>Company Hub</Text>
-                    <Text style={styles.tagline}>Enterprise Portal</Text>
+                    <Text style={styles.appName}>Employee Portal</Text>
+                    <Text style={styles.tagline}>Enterprise Hub</Text>
                   </View>
                 </View>
                 
                 <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                  <X size={18} color="#FFF" strokeWidth={2.5} />
+                  <X size={20} color="#FFF" strokeWidth={2.5} />
                 </TouchableOpacity>
               </View>
             </LinearGradient>
 
-            {/* Quick Links */}
-            <View style={styles.quickSection}>
-              {quickLinks.map((item) => (
-                item.route ? (
-                  <Link key={item.id} href={item.route as any} asChild>
-                    <TouchableOpacity style={styles.quickItem} onPress={onClose}>
-                      <View style={styles.quickIcon}>
-                        <item.icon size={20} color="#3B82F6" strokeWidth={1.8} />
-                      </View>
-                      <Text style={styles.quickText}>{item.title}</Text>
-                    </TouchableOpacity>
-                  </Link>
-                ) : (
-                  <TouchableOpacity key={item.id} style={styles.quickItem} onPress={() => handleQuickLinkPress(item)}>
-                    <View style={styles.quickIcon}>
-                      <item.icon size={20} color="#3B82F6" strokeWidth={1.8} />
-                    </View>
-                    <Text style={styles.quickText}>{item.title}</Text>
-                  </TouchableOpacity>
-                )
-              ))}
-            </View>
-
             {/* Menu */}
             <ScrollView showsVerticalScrollIndicator={false} style={styles.menuScroll} contentContainerStyle={styles.menuContent}>
-              {menuItems.map((item) => (
+              {menuItems.map((item, index) => (
                 <Link key={item.id} href={item.route as any} asChild>
                   <TouchableOpacity style={styles.menuItem} onPress={onClose} activeOpacity={0.7}>
                     <View style={styles.menuIconBg}>
-                      <item.icon size={18} color="#3B82F6" strokeWidth={1.8} />
+                      <item.icon size={20} color="#0066FF" strokeWidth={2} />
                     </View>
                     <Text style={styles.menuText}>{item.title}</Text>
-                    <ChevronRight size={16} color="#CBD5E1" strokeWidth={2} />
+                    <ChevronRight size={18} color="#CBD5E1" strokeWidth={2} />
                   </TouchableOpacity>
                 </Link>
               ))}
             </ScrollView>
 
             {/* Footer */}
-            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
               <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.8}>
-                <LogOut size={18} color="#EF4444" strokeWidth={2} />
+                <LogOut size={20} color="#FF4757" strokeWidth={2} />
                 <Text style={styles.logoutText}>Sign Out</Text>
               </TouchableOpacity>
-              <Text style={styles.versionText}>App Version 1.0.0</Text>
+              <Text style={styles.versionText}>Version 1.0.0</Text>
             </View>
           </View>
         </View>
@@ -151,7 +134,7 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(10, 22, 40, 0.6)',
   },
   backdrop: { 
     flex: 1,
@@ -165,102 +148,142 @@ const styles = StyleSheet.create({
   },
   
   header: { 
-    paddingHorizontal: 16, 
+    paddingHorizontal: 18, 
     paddingBottom: 16,
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 14,
   },
   headerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
   },
   closeButton: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoIcon: { 
-    width: 44, 
-    height: 44, 
-    borderRadius: 12, 
-    backgroundColor: 'rgba(255,255,255,0.2)', 
+    width: 48, 
+    height: 48, 
+    borderRadius: 14, 
+    backgroundColor: 'rgba(255,255,255,0.12)', 
     justifyContent: 'center', 
     alignItems: 'center',
   },
   appName: { fontSize: 18, fontWeight: '700', color: '#FFFFFF' },
-  tagline: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 1 },
+  tagline: { fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
+
+  userSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 14,
+    padding: 14,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0066FF',
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  userEmail: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 2,
+  },
 
   quickSection: { 
     flexDirection: 'row', 
-    paddingHorizontal: 12, 
-    paddingVertical: 16, 
+    paddingHorizontal: 16, 
+    paddingVertical: 18, 
     backgroundColor: '#F8FAFC',
     borderBottomWidth: 1, 
     borderBottomColor: '#E2E8F0',
+    gap: 10,
   },
   quickItem: { flex: 1, alignItems: 'center', gap: 8 },
   quickIcon: { 
-    width: 48, 
-    height: 48, 
-    borderRadius: 14, 
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    width: 52, 
+    height: 52, 
+    borderRadius: 16, 
+    backgroundColor: '#E6F0FF',
     justifyContent: 'center', 
     alignItems: 'center',
   },
-  quickText: { fontSize: 11, fontWeight: '600', color: '#374151' },
+  quickText: { fontSize: 12, fontWeight: '600', color: '#1E293B' },
 
-  menuScroll: { flex: 1 },
-  menuContent: { paddingHorizontal: 12, paddingVertical: 12 },
+  menuScroll: { flex: 1, backgroundColor: '#F8FAFC' },
+  menuContent: { paddingHorizontal: 14, paddingTop: 14, paddingBottom: 14 },
   menuItem: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    gap: 14, 
-    paddingVertical: 12, 
+    gap: 10, 
+    paddingVertical: 10, 
     paddingHorizontal: 12, 
     borderRadius: 12,
-    marginBottom: 2,
+    marginBottom: 6,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   menuIconBg: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  menuText: { flex: 1, fontSize: 15, fontWeight: '600', color: '#334155' },
+  menuText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1E293B' },
 
   footer: { 
-    paddingHorizontal: 16, 
+    paddingHorizontal: 20, 
     paddingTop: 16, 
+    paddingBottom: 10,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1, 
-    borderTopColor: '#E2E8F0',
+    borderTopColor: '#F1F5F9',
     alignItems: 'center',
   },
   logoutBtn: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'center', 
-    gap: 8, 
+    gap: 10, 
     paddingVertical: 14, 
-    borderRadius: 12, 
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
+    borderRadius: 14, 
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1.5,
+    borderColor: '#FECDD3',
     width: '100%',
   },
-  logoutText: { fontSize: 14, fontWeight: '600', color: '#EF4444' },
+  logoutText: { fontSize: 15, fontWeight: '600', color: '#E11D48' },
   versionText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#94A3B8',
     marginTop: 12,
     fontWeight: '500',

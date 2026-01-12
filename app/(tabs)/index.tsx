@@ -1,15 +1,16 @@
 import AnnouncementModal from '@/components/AnnouncementModal';
-import { BannerCarousel, MeSection, PendingApprovalsCard, QuickActionsGrid, TeamSection, UpcomingSchedule } from '@/components/home';
+import { ActionBanner, BannerCarousel, MeSection, QuickActionsGrid, TeamSection, UpcomingSchedule } from '@/components/home';
 import { LeaveBalanceSection } from '@/components/leave';
 import { QRCodeModal } from '@/components/navigation';
 import Drawer from '@/components/navigation/Drawer';
+import { HomeShimmer } from '@/components/ShimmerLoader';
 import Colors from '@/constants/Colors';
 import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import { Briefcase, Calendar, ClipboardCheck, FileText, Home, Menu, QrCode, Search } from 'lucide-react-native';
+import { Bell, Briefcase, Calendar, FileText, Home, Menu, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutAnimation, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { LayoutAnimation, Platform, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import Animated, {
   Extrapolate,
   interpolate,
@@ -26,16 +27,16 @@ if (Platform.OS === 'android') {
   }
 }
 
-// Quick actions data for header
+// Quick actions for header - ID Card logic mapped here
 const QUICK_ACTIONS = [
   { id: 1, title: 'Apply Leave', icon: Briefcase, link: '/apply-leave' },
   { id: 2, title: 'Apply WFH', icon: Home, link: '/apply-wfh' },
-  { id: 3, title: 'Digital Identity', icon: FileText, link: '/letters' },
+  { id: 3, title: 'Digital Identity', icon: FileText, action: 'qr' }, // Mapped to QR action
   { id: 4, title: 'Holidays', icon: Calendar, link: '/holidays' },
 ];
 
-const HEADER_HEIGHT_EXPANDED = 200; // Search + quick actions
-const HEADER_HEIGHT_COLLAPSED = 120; // Search stays visible, quick actions hidden
+const HEADER_EXPANDED = 200;
+const HEADER_COLLAPSED = 120;
 
 export default function HomeScreen() {
   const scrollRef = useRef<Animated.ScrollView>(null);
@@ -43,9 +44,9 @@ export default function HomeScreen() {
   useScrollToTop(scrollRef);
   const insets = useSafeAreaInsets();
   
-  const headerMaxHeight = HEADER_HEIGHT_EXPANDED + insets.top;
-  const headerMinHeight = HEADER_HEIGHT_COLLAPSED + insets.top;
-  const scrollRange = headerMaxHeight - headerMinHeight;
+  const headerMax = HEADER_EXPANDED + insets.top;
+  const headerMin = HEADER_COLLAPSED + insets.top;
+  const scrollRange = headerMax - headerMin;
 
   const scrollY = useSharedValue(0);
 
@@ -56,25 +57,15 @@ export default function HomeScreen() {
   });
 
   const headerStyle = useAnimatedStyle(() => {
-    const height = interpolate(scrollY.value, [0, scrollRange], [headerMaxHeight, headerMinHeight], Extrapolate.CLAMP);
+    const height = interpolate(scrollY.value, [0, scrollRange], [headerMax, headerMin], Extrapolate.CLAMP);
     return { height };
   });
 
-  const searchStyle = useAnimatedStyle(() => {
-    // Search bar stays visible - only slight scale adjustment
-    const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.98], Extrapolate.CLAMP);
-    
-    return { transform: [{ scale }] };
-  });
-
-  // Quick actions in header - fade out and collapse when scrolling
-  const headerQuickActionsStyle = useAnimatedStyle(() => {
+  const quickActionsStyle = useAnimatedStyle(() => {
     const opacity = interpolate(scrollY.value, [0, scrollRange * 0.5], [1, 0], Extrapolate.CLAMP);
-    const scale = interpolate(scrollY.value, [0, scrollRange], [1, 0.9], Extrapolate.CLAMP);
-    const height = interpolate(scrollY.value, [0, scrollRange], [80, 0], Extrapolate.CLAMP);
-    const marginTop = interpolate(scrollY.value, [0, scrollRange], [8, 0], Extrapolate.CLAMP);
-    
-    return { opacity, transform: [{ scale }], height, marginTop, overflow: 'hidden' };
+    const height = interpolate(scrollY.value, [0, scrollRange], [64, 0], Extrapolate.CLAMP);
+    const translateY = interpolate(scrollY.value, [0, scrollRange], [0, -16], Extrapolate.CLAMP);
+    return { opacity, height, transform: [{ translateY }], overflow: 'hidden' as const };
   });
 
   useFocusEffect(
@@ -88,6 +79,7 @@ export default function HomeScreen() {
   const [showAnnouncement, setShowAnnouncement] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -98,76 +90,123 @@ export default function HomeScreen() {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   }, []);
 
+  // Shimmer for 3 seconds, then show content and popup
   useEffect(() => {
-    const timer = setTimeout(() => setShowAnnouncement(true), 2000);
-    return () => clearTimeout(timer);
+    const shimmerTimer = setTimeout(() => {
+      setIsLoading(false);
+      // Show announcement popup 500ms after shimmer ends
+      setTimeout(() => setShowAnnouncement(true), 500);
+    }, 3000);
+    return () => clearTimeout(shimmerTimer);
   }, []);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  const handleQuickAction = (action: any) => {
+    if (action.action === 'qr') {
+      setQrModalVisible(true);
+    }
+  };
+
+  // Show shimmer loader while loading
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <HomeShimmer />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Blue Gradient Header */}
-      <Animated.View style={[styles.headerContainer, { height: headerMaxHeight }, headerStyle]}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      
+      {/* Premium Header */}
+      <Animated.View style={[styles.headerContainer, { height: headerMax }, headerStyle]}>
         <LinearGradient
-            colors={[Colors.gradientStart, Colors.gradientMiddle, Colors.gradientEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.gradient, { paddingTop: insets.top + 6 }]}
+          colors={['#0D3C75', '#165BAA', '#2563EB']} // Balanced Enterprise Blue
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.gradient, { paddingTop: insets.top + 4 }]}
         >
-            {/* Top Row */}
-            <View style={styles.headerTopRow}>
-                <View style={styles.leftSection}>
-                    <TouchableOpacity 
-                      style={styles.menuButton} 
-                      onPress={() => setDrawerVisible(true)}
-                      activeOpacity={0.7}
-                    >
-                        <Menu size={22} color="#FFF" strokeWidth={2} />
-                    </TouchableOpacity>
-                    <View>
-                        <Text style={styles.greeting}>Good Morning,</Text>
-                        <Text style={styles.name}>Pavan Goyal</Text>
-                    </View>
-                </View>
-
-                <View style={styles.rightSection}>
-                    <TouchableOpacity style={styles.iconButton} onPress={() => setQrModalVisible(true)}>
-                        <QrCode size={20} color="#FFF" strokeWidth={2.5} />
-                    </TouchableOpacity>
-                    <Link href="/approvals" asChild>
-                        <TouchableOpacity style={styles.iconButton}>
-                            <ClipboardCheck size={20} color="#FFF" strokeWidth={2.5} />
-                            <View style={styles.badge} />
-                        </TouchableOpacity>
-                    </Link>
-                </View>
+          {/* Top Bar */}
+          <View style={styles.headerTopRow}>
+            <View style={styles.leftSection}>
+              <TouchableOpacity 
+                style={styles.menuButton} 
+                onPress={() => setDrawerVisible(true)}
+                activeOpacity={0.8}
+              >
+                <Menu size={22} color="#FFF" strokeWidth={2} />
+              </TouchableOpacity>
+              <View style={styles.userInfo}>
+                <Text style={styles.greeting}>{getGreeting()} 👋</Text>
+                {/* Handled long names with ellipsis */}
+                <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+                  Pavan Goyal
+                </Text>
+              </View>
             </View>
 
-            {/* Search Bar - Fades out on scroll */}
-            <Animated.View style={[styles.searchWrapper, searchStyle]}>
-                <Link href="/search" asChild>
-                    <TouchableOpacity style={styles.searchBar} activeOpacity={0.9}>
-                        <Search size={20} color="#94A3B8" />
-                        <Text style={styles.searchText}>Search anything...</Text>
-                    </TouchableOpacity>
-                </Link>
-            </Animated.View>
+            <View style={styles.rightSection}>
+              <Link href="/approvals" asChild>
+                <TouchableOpacity style={styles.notifButton} activeOpacity={0.8}>
+                  <Bell size={20} color="#FFF" strokeWidth={2} />
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>3</Text>
+                  </View>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
 
-            {/* Quick Actions in Header - Circular icons with labels below */}
-            <Animated.View style={[styles.headerQuickActions, headerQuickActionsStyle]}>
-                {QUICK_ACTIONS.map((action) => {
-                    const IconComponent = action.icon;
-                    return (
-                        <Link key={action.id} href={action.link as any} asChild>
-                            <TouchableOpacity style={styles.headerQuickAction} activeOpacity={0.7}>
-                                <View style={styles.headerQuickActionIcon}>
-                                    <IconComponent size={22} color="#FFF" strokeWidth={1.8} />
-                                </View>
-                                <Text style={styles.headerQuickActionText}>{action.title}</Text>
-                            </TouchableOpacity>
-                        </Link>
-                    );
-                })}
-            </Animated.View>
+          {/* Search Bar - Sleek & Modern */}
+          <Link href="/search" asChild>
+            <TouchableOpacity style={styles.searchBar} activeOpacity={0.95}>
+              <Search size={20} color="#64748B" strokeWidth={2} />
+              <Text style={styles.searchText}>Search apps, widgets, people...</Text>
+            </TouchableOpacity>
+          </Link>
+
+          {/* Quick Actions Row */}
+          <Animated.View style={[styles.quickActionsRow, quickActionsStyle]}>
+            {QUICK_ACTIONS.map((action) => {
+              const IconComponent = action.icon;
+              
+              if (action.link) {
+                return (
+                  <Link key={action.id} href={action.link as any} asChild>
+                    <TouchableOpacity style={styles.quickActionBtn} activeOpacity={0.8}>
+                      <View style={styles.quickActionIcon}>
+                        <IconComponent size={18} color="#FFFFFF" strokeWidth={2} />
+                      </View>
+                      <Text style={styles.quickActionText}>{action.title}</Text>
+                    </TouchableOpacity>
+                  </Link>
+                );
+              }
+
+              return (
+                <TouchableOpacity 
+                  key={action.id} 
+                  style={styles.quickActionBtn} 
+                  activeOpacity={0.8}
+                  onPress={() => handleQuickAction(action)}
+                >
+                  <View style={styles.quickActionIcon}>
+                    <IconComponent size={18} color="#FFFFFF" strokeWidth={2} />
+                  </View>
+                  <Text style={styles.quickActionText}>{action.title}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </Animated.View>
         </LinearGradient>
       </Animated.View>
 
@@ -175,7 +214,7 @@ export default function HomeScreen() {
         ref={scrollRef}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: headerMaxHeight + 16 }]} 
+        contentContainerStyle={[styles.scrollContent, { paddingTop: headerMax + 14 }]} 
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl 
@@ -184,14 +223,20 @@ export default function HomeScreen() {
             tintColor={Colors.primary} 
             colors={[Colors.primary]}
             progressBackgroundColor="#FFF"
-            progressViewOffset={headerMaxHeight}
+            progressViewOffset={headerMax}
           />
         }
       >
-        {/* Pending Approvals Alert */}
-        <PendingApprovalsCard count={3} />
+        {/* Action Banner (Approvals) */}
+        <ActionBanner 
+          type="approval"
+          title="Pending Approvals"
+          subtitle="3 requests awaiting your review"
+          count={3}
+          href="/approvals"
+        />
         
-        {/* Quick Actions - Primary shortcuts */}
+        {/* Quick Links */}
         <QuickActionsGrid />
         
         {/* Banner Carousel */}
@@ -208,13 +253,15 @@ export default function HomeScreen() {
         
         {/* Upcoming Meeting */}
         <UpcomingSchedule />
+        
+        <View style={{ height: 30 }} />
       </Animated.ScrollView>
       
       <AnnouncementModal 
         visible={showAnnouncement} 
         onClose={() => setShowAnnouncement(false)}
-        title="Welcome to Employee Portal"
-        description="Experience the new modern employee portal with enhanced features and smooth UI."
+        title="Welcome"
+        description="Experience the new modern employee portal."
       />
 
       <QRCodeModal visible={qrModalVisible} onClose={() => setQrModalVisible(false)} />
@@ -226,155 +273,144 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
   },
   headerContainer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      zIndex: 100,
-      backgroundColor: Colors.gradientStart,
-      overflow: 'hidden',
-      borderBottomLeftRadius: 28,
-      borderBottomRightRadius: 28,
-      elevation: 12,
-      shadowColor: Colors.gradientStart,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    overflow: 'hidden',
+    // borderBottomLeftRadius: 24,
+    // borderBottomRightRadius: 24,
+    backgroundColor: '#0D3C75',
   },
   gradient: {
-      flex: 1,
-      paddingHorizontal: 18,
-      paddingBottom: 12,
+    flex: 1,
+    paddingHorizontal: 22,
   },
   headerTopRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-  },
-  greeting: {
-      fontSize: 13,
-      color: 'rgba(255,255,255,0.85)',
-      fontWeight: '500',
-      letterSpacing: 0.2,
-  },
-  name: {
-      fontSize: 17,
-      color: '#FFF',
-      fontWeight: '700',
-      letterSpacing: -0.3,
-      marginTop: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 4,
   },
   leftSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    flex: 1,
+    marginRight: 12,
   },
   menuButton: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      justifyContent: 'center',
-      alignItems: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  userInfo: {
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '500',
+    marginBottom: 1,
+    letterSpacing: 0.3,
+  },
+  name: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    letterSpacing: -0.2,
   },
   rightSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  iconButton: {
-      width: 38,
-      height: 38,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255,255,255,0.2)',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.3)',
-      position: 'relative',
+  notifButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    position: 'relative',
   },
   badge: {
-      position: 'absolute',
-      top: 6,
-      right: 6,
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: '#EF4444',
-      borderWidth: 2,
-      borderColor: '#FFF',
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#0D3C75',
   },
-  avatarContainer: {
-      width: 44,
-      height: 44,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#FFF',
-      borderRadius: 22,
-  },
-  avatarText: {
-      fontSize: 15,
-      fontWeight: '800',
-      color: Colors.primary,
-  },
-  searchWrapper: {
-      width: '100%',
-      marginTop: 12,
-      marginBottom: 2,
+  badgeText: {
+    fontSize: 10,
+    color: '#FFF',
+    fontWeight: '800',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 10,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
   searchText: {
-    fontSize: 15,
-    color: '#94A3B8',
+    flex: 1,
+    fontSize: 14,
+    color: '#64748B',
     fontWeight: '500',
   },
-  // Header Quick Actions (circular icons with labels below - premium style)
-  headerQuickActions: {
+  quickActionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'flex-start',
-    paddingHorizontal: 4,
-    overflow: 'hidden',
+    paddingHorizontal: 0,
   },
-  headerQuickAction: {
+  quickActionBtn: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    gap: 4,
+    width: '25%',
   },
-  headerQuickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+  quickActionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  headerQuickActionText: {
-    fontSize: 11,
+  quickActionText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.85)',
     fontWeight: '600',
-    color: '#FFFFFF',
     textAlign: 'center',
-    letterSpacing: 0.2,
   },
   scrollContent: {
-    paddingBottom: 120,
+    paddingBottom: 110,
   },
 });
