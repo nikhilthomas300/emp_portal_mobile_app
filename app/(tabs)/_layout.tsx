@@ -5,23 +5,23 @@ import React from 'react';
 import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Newton icon
-const newtonIcon = require('@/assets/images/others/newton.png');
+// Newton icon (animated gif)
+const newtonGif = require('@/assets/images/others/newton.gif');
 
-// Sophisticated center button
+// Sophisticated center button with animated gif
 function CenterButton({ focused }: { focused: boolean }) {
   return (
     <View style={styles.centerButtonWrapper}>
       <View style={[styles.centerButtonOuter, focused && styles.centerButtonOuterActive]}>
         <LinearGradient
-          colors={focused ? ['#2563EB', '#1D4ED8'] : ['#F1F5F9', '#E2E8F0']}
+          colors={focused ? ['#2563EB', '#1D4ED8'] : ['#FFFFFF', '#F8FAFC']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.centerButton}
         >
           <Image 
-            source={newtonIcon} 
-            style={[styles.newtonIcon, { tintColor: focused ? '#FFFFFF' : '#64748B' }]}
+            source={newtonGif} 
+            style={styles.newtonIcon}
             resizeMode="contain"
           />
         </LinearGradient>
@@ -173,8 +173,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   newtonIcon: {
-    width: 28,
-    height: 28,
+    width: 50,
+    height: 50,
   },
   centerLabel: {
     fontSize: 10,

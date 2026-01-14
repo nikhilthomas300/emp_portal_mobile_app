@@ -28,27 +28,29 @@ export default function HolidaysScreen() {
 
   const renderHeader = () => (
     <View style={styles.headerSection}>
-      {/* Year Badge */}
-      <View style={styles.yearBadge}>
-        <CalendarIcon size={16} color={Colors.primary} strokeWidth={2} />
-        <Text style={styles.yearText}>Year 2024 - 2025</Text>
-      </View>
-
-      {/* Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{totalHolidays}</Text>
-          <Text style={styles.statLabel}>TOTAL</Text>
+      {/* Combined Stats Card */}
+      <View style={styles.statsCard}>
+        <View style={styles.yearSection}>
+          <CalendarIcon size={18} color={Colors.primary} strokeWidth={2} />
+          <View>
+            <Text style={styles.yearLabel}>Fiscal Year</Text>
+            <Text style={styles.yearText}>2024 - 2025</Text>
+          </View>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: Colors.primary }]}>{publicHolidays}</Text>
-          <Text style={styles.statLabel}>PUBLIC</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: '#F59E0B' }]}>{optionalHolidays}</Text>
-          <Text style={styles.statLabel}>OPTIONAL</Text>
+        <View style={styles.statsDivider} />
+        <View style={styles.statsSection}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{totalHolidays}</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={[styles.statNumber, { color: Colors.primary }]}>{publicHolidays}</Text>
+            <Text style={styles.statLabel}>Public</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={[styles.statNumber, { color: '#F59E0B' }]}>{optionalHolidays}</Text>
+            <Text style={styles.statLabel}>Optional</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -97,55 +99,62 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   headerSection: {
-    alignItems: 'center',
     paddingBottom: 16,
   },
-  yearBadge: {
+  statsCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
-    marginBottom: 16,
-  },
-  yearText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    borderWidth: 1.5,
+    padding: 16,
+    borderWidth: 1,
     borderColor: '#E2E8F0',
-    width: '100%',
   },
-  statItem: {
-    flex: 1,
+  yearSection: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+    paddingRight: 16,
   },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 2,
-  },
-  statLabel: {
+  yearLabel: {
     fontSize: 10,
     color: '#64748B',
     fontWeight: '600',
-    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
-  statDivider: {
+  yearText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginTop: 1,
+  },
+  statsDivider: {
     width: 1,
+    height: 36,
     backgroundColor: '#E2E8F0',
+  },
+  statsSection: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingLeft: 8,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  statLabel: {
+    fontSize: 9,
+    color: '#64748B',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    marginTop: 1,
   },
   listContent: {
     padding: 16,
@@ -156,36 +165,36 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   dateBox: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 50,
-    height: 50,
+    width: 48,
+    height: 48,
     borderRadius: 12,
     marginRight: 12,
   },
   dateText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
   },
   monthText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
   },
   details: {
     flex: 1,
   },
   holidayName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#1E293B',
     marginBottom: 2,
   },
   dayText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#64748B',
     fontWeight: '500',
   },
@@ -195,7 +204,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tagText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
 });
