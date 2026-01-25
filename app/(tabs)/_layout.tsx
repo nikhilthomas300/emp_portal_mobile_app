@@ -5,7 +5,7 @@ import React from 'react';
 import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Newton icon (animated gif)
+// Dexter icon (animated gif)
 const newtonGif = require('@/assets/images/others/newton.gif');
 
 // Sophisticated center button with animated gif
@@ -103,7 +103,7 @@ export default function TabLayout() {
         options={{
           title: '',
           tabBarIcon: ({ focused }) => <CenterButton focused={focused} />,
-          tabBarLabel: () => <Text style={styles.centerLabel}>Newton</Text>,
+          tabBarLabel: () => <Text style={styles.centerLabel}>Dexter</Text>,
         }}
       />
       <Tabs.Screen
