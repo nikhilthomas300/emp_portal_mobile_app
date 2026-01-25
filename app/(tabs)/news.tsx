@@ -1,3 +1,4 @@
+import VideoCarousel from '@/components/news/VideoCarousel';
 import Colors from '@/constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -145,6 +146,7 @@ export default function NewsTab() {
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        nestedScrollEnabled={true}
       >
         {/* Highlight Card */}
         {highlightNews && (
@@ -167,6 +169,9 @@ export default function NewsTab() {
             </LinearGradient>
           </TouchableOpacity>
         )}
+
+        {/* Video Carousel */}
+        <VideoCarousel />
 
         {/* Regular News */}
         {regularNews.map((item) => (

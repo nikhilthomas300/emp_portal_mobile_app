@@ -24,12 +24,12 @@ const widgetColors: Record<string, string> = {
 
 // 8 widgets to show the 4-column layout properly
 const widgets = [
-  { id: 1, title: 'Attendance', Icon: MyAttendanceIcon },
-  { id: 2, title: 'Assets', Icon: MyAssetsIcon },
-  { id: 3, title: 'Letters', FallbackIcon: FileText },
-  { id: 4, title: 'Flex', Icon: FlexIcon },
-  { id: 5, title: 'Profile', Icon: MyProfileIcon },
-  { id: 6, title: 'Salary', Icon: SalaryIcon },
+  { id: 1, title: 'Attendance', Icon: MyAttendanceIcon, route: '/attendance' },
+  { id: 2, title: 'Assets', Icon: MyAssetsIcon, route: '/assets' },
+  { id: 3, title: 'Letters', FallbackIcon: FileText, route: '/my-letters' },
+  { id: 4, title: 'Flex', Icon: FlexIcon, route: '/flex' },
+  { id: 5, title: 'Profile', Icon: MyProfileIcon, route: '/profile' },
+  { id: 6, title: 'Salary', Icon: SalaryIcon, route: '/salary' },
 ];
 
 export default function MeSection() {
@@ -55,6 +55,12 @@ export default function MeSection() {
     return color + '15'; // 15 = ~8% opacity
   };
 
+  const handleWidgetPress = (widget: any) => {
+    if (widget.route) {
+      router.push(widget.route as any);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <SectionHeader 
@@ -70,6 +76,7 @@ export default function MeSection() {
               key={widget.id} 
               style={styles.widgetItem} 
               activeOpacity={0.7}
+              onPress={() => handleWidgetPress(widget)}
             >
               <View style={[styles.iconCircle, { backgroundColor: getIconBgColor(widget.title) }]}>
                 {renderIcon(widget)}

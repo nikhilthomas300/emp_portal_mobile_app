@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs, usePathname } from 'expo-router';
 import { Grid, Home, Newspaper, Search } from 'lucide-react-native';
@@ -86,6 +87,9 @@ export default function TabLayout() {
             </View>
           ),
         }}
+        listeners={{
+          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+        }}
       />
       <Tabs.Screen
         name="news"
@@ -97,6 +101,9 @@ export default function TabLayout() {
             </View>
           ),
         }}
+        listeners={{
+          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+        }}
       />
       <Tabs.Screen
         name="chat"
@@ -104,6 +111,9 @@ export default function TabLayout() {
           title: '',
           tabBarIcon: ({ focused }) => <CenterButton focused={focused} />,
           tabBarLabel: () => <Text style={styles.centerLabel}>Dexter</Text>,
+        }}
+        listeners={{
+          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),
         }}
       />
       <Tabs.Screen
@@ -116,6 +126,9 @@ export default function TabLayout() {
             </View>
           ),
         }}
+        listeners={{
+          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+        }}
       />
       <Tabs.Screen
         name="search"
@@ -126,6 +139,9 @@ export default function TabLayout() {
               <Search size={24} color={focused ? '#2563EB' : color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
+        }}
+        listeners={{
+          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
         }}
       />
     </Tabs>

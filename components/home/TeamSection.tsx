@@ -26,7 +26,7 @@ const widgets = [
   { id: 2, title: 'Attendance', Icon: MyAttendanceIcon, link: null },
   { id: 3, title: 'Visitors', Icon: VisitorIcon, link: null },
   { id: 4, title: 'Org Chart', Icon: OrgHierarchyIcon, link: null },
-  { id: 5, title: 'Letters', FallbackIcon: FileText, link: null },
+  { id: 5, title: 'Letters', FallbackIcon: FileText, link: '/team-letters' },
   { id: 6, title: 'Access', Icon: AccessIcon, link: null },
 ];
 

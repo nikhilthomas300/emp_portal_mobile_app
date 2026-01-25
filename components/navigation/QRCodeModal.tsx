@@ -1,263 +1,288 @@
-import Colors from '@/constants/Colors';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Download, QrCode, Share2, X } from 'lucide-react-native';
-import React from 'react';
+import * as Haptics from 'expo-haptics';
+import { X } from 'lucide-react-native';
+import React, { useEffect } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+} from 'react-native-reanimated';
 
 interface QRCodeModalProps {
   visible: boolean;
   onClose: () => void;
 }
 
+// Generate a realistic QR code pattern
+const generateQRPattern = () => {
+  // Standard QR code has fixed position patterns in corners
+  const size = 21; // 21x21 is a common QR code size (Version 1)
+  const pattern: boolean[][] = [];
+  
+  for (let i = 0; i < size; i++) {
+    pattern[i] = [];
+    for (let j = 0; j < size; j++) {
+      // Position detection patterns (7x7 squares in 3 corners)
+      const isTopLeftFinder = i < 7 && j < 7;
+      const isTopRightFinder = i < 7 && j >= size - 7;
+      const isBottomLeftFinder = i >= size - 7 && j < 7;
+      
+      if (isTopLeftFinder || isTopRightFinder || isBottomLeftFinder) {
+        // Finder patterns
+        const localI = isBottomLeftFinder ? i - (size - 7) : i;
+        const localJ = isTopRightFinder ? j - (size - 7) : j;
+        
+        // Outer border or inner square
+        if (localI === 0 || localI === 6 || localJ === 0 || localJ === 6) {
+          pattern[i][j] = true;
+        } else if (localI >= 2 && localI <= 4 && localJ >= 2 && localJ <= 4) {
+          pattern[i][j] = true;
+        } else {
+          pattern[i][j] = false;
+        }
+      } else if (i === 6 || j === 6) {
+        // Timing patterns
+        pattern[i][j] = (i + j) % 2 === 0;
+      } else {
+        // Data area - pseudo-random but deterministic
+        pattern[i][j] = ((i * 7 + j * 11 + i * j) % 3) === 0;
+      }
+    }
+  }
+  return pattern;
+};
+
+const QR_PATTERN = generateQRPattern();
+
 export default function QRCodeModal({ visible, onClose }: QRCodeModalProps) {
-  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (visible) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  }, [visible]);
+
+  const handleClose = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onClose();
+  };
+
+  if (!visible) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+    <Modal transparent animationType="none" visible={visible} onRequestClose={onClose} statusBarTranslucent>
       <View style={styles.overlay}>
-        <View style={styles.modalCard}>
+        {/* Dark Overlay Background */}
+        <Animated.View 
+          entering={FadeIn.duration(250)} 
+          exiting={FadeOut.duration(200)}
+          style={styles.backdrop}
+        >
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={handleClose}
+          />
+        </Animated.View>
+
+        {/* Bottom Sheet */}
+        <Animated.View
+          entering={SlideInDown.duration(400).easing(Easing.out(Easing.cubic))}
+          exiting={SlideOutDown.duration(250).easing(Easing.in(Easing.cubic))}
+          style={styles.sheetContainer}
+        >
+          {/* Handle Bar */}
+          <View style={styles.handleBar} />
+
           {/* Close Button */}
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <X size={20} color="#64748B" strokeWidth={2} />
+          <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.7}>
+            <X size={20} color="#64748B" strokeWidth={2.5} />
           </TouchableOpacity>
 
-          {/* Header */}
-          <LinearGradient
-            colors={['#1E40AF', '#3B82F6', '#60A5FA']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.header}
-          >
-            <View style={styles.headerIcon}>
-              <QrCode size={28} color="#FFF" strokeWidth={1.5} />
-            </View>
-            <Text style={styles.headerTitle}>Digital Identity</Text>
-            <Text style={styles.headerSubtitle}>Scan to verify your identity</Text>
-          </LinearGradient>
+          {/* Title & Subtitle */}
+          <Text style={styles.title}>Digital Identity</Text>
+          <Text style={styles.subtitle}>Scan to verify your identity</Text>
 
           {/* QR Code */}
-          <View style={styles.qrContainer}>
-            <View style={styles.qrWrapper}>
-              {/* QR Code placeholder - replace with actual QR component */}
+          <View style={styles.qrOuterContainer}>
+            <View style={styles.qrContainer}>
+              {/* Corner brackets */}
+              <View style={[styles.cornerBracket, styles.topLeftBracket]} />
+              <View style={[styles.cornerBracket, styles.topRightBracket]} />
+              <View style={[styles.cornerBracket, styles.bottomLeftBracket]} />
+              <View style={[styles.cornerBracket, styles.bottomRightBracket]} />
+              
+              {/* QR Code Grid */}
               <View style={styles.qrCode}>
-                {/* Simulated QR pattern */}
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, i % 2 === 0 && styles.qrCellFilled]} />
-                  ))}
-                </View>
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, i % 3 === 0 && styles.qrCellFilled]} />
-                  ))}
-                </View>
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, (i % 2 === 1) && styles.qrCellFilled]} />
-                  ))}
-                </View>
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, i % 4 === 0 && styles.qrCellFilled]} />
-                  ))}
-                </View>
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, i % 2 === 0 && styles.qrCellFilled]} />
-                  ))}
-                </View>
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, i % 3 === 1 && styles.qrCellFilled]} />
-                  ))}
-                </View>
-                <View style={styles.qrRow}>
-                  {[1,2,3,4,5,6,7].map(i => (
-                    <View key={i} style={[styles.qrCell, (i % 2 === 0) && styles.qrCellFilled]} />
-                  ))}
-                </View>
+                {QR_PATTERN.map((row, i) => (
+                  <View key={i} style={styles.qrRow}>
+                    {row.map((filled, j) => (
+                      <View 
+                        key={j} 
+                        style={[
+                          styles.qrCell, 
+                          filled && styles.qrCellFilled
+                        ]} 
+                      />
+                    ))}
+                  </View>
+                ))}
               </View>
-
-              {/* Corner decorations */}
-              <View style={[styles.corner, styles.topLeft]} />
-              <View style={[styles.corner, styles.topRight]} />
-              <View style={[styles.corner, styles.bottomLeft]} />
-              <View style={[styles.corner, styles.bottomRight]} />
             </View>
           </View>
 
           {/* User Info */}
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>Nikhil Thomas</Text>
+            <Text style={styles.userName}>Pavan Goyal</Text>
             <Text style={styles.userId}>EMP-2024-1234</Text>
           </View>
-
-          {/* Actions */}
-          <View style={styles.actions}>
-            <TouchableOpacity style={styles.actionBtn}>
-              <Download size={18} color={Colors.primary} strokeWidth={2} />
-              <Text style={styles.actionText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}>
-              <Share2 size={18} color={Colors.primary} strokeWidth={2} />
-              <Text style={styles.actionText}>Share</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: { 
-    flex: 1, 
-    backgroundColor: 'rgba(15, 23, 42, 0.6)', 
-    justifyContent: 'center', 
-    alignItems: 'center',
-    padding: 24,
+  overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
   },
-  modalCard: { 
-    width: '100%',
-    maxWidth: 340,
-    backgroundColor: '#FFF', 
-    borderRadius: 24,
-    overflow: 'hidden',
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  sheetContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    // Premium shadow
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 30,
+    elevation: 25,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2,
+    marginBottom: 24,
   },
   closeBtn: {
     position: 'absolute',
     top: 16,
     right: 16,
-    zIndex: 10,
     width: 36,
     height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 18,
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 20,
   },
-  header: {
+  title: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#0F172A',
+    textAlign: 'center',
+    marginBottom: 6,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#64748B',
+    textAlign: 'center',
+    marginBottom: 28,
+  },
+  qrOuterContainer: {
     alignItems: 'center',
-    paddingTop: 32,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
+    marginBottom: 28,
   },
-  headerIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF', marginBottom: 4 },
-  headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
-
   qrContainer: {
-    alignItems: 'center',
-    paddingVertical: 24,
-    paddingHorizontal: 24,
-  },
-  qrWrapper: {
     position: 'relative',
-    padding: 16,
-    backgroundColor: '#F8FAFC',
+    padding: 20,
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#E2E8F0',
+    // Subtle shadow
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  cornerBracket: {
+    position: 'absolute',
+    width: 28,
+    height: 28,
+    borderColor: '#2563EB',
+  },
+  topLeftBracket: { 
+    top: -2, 
+    left: -2, 
+    borderTopWidth: 4, 
+    borderLeftWidth: 4, 
+    borderTopLeftRadius: 12,
+  },
+  topRightBracket: { 
+    top: -2, 
+    right: -2, 
+    borderTopWidth: 4, 
+    borderRightWidth: 4, 
+    borderTopRightRadius: 12,
+  },
+  bottomLeftBracket: { 
+    bottom: -2, 
+    left: -2, 
+    borderBottomWidth: 4, 
+    borderLeftWidth: 4, 
+    borderBottomLeftRadius: 12,
+  },
+  bottomRightBracket: { 
+    bottom: -2, 
+    right: -2, 
+    borderBottomWidth: 4, 
+    borderRightWidth: 4, 
+    borderBottomRightRadius: 12,
   },
   qrCode: {
-    width: 150,
-    height: 150,
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 8,
-    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
   },
   qrRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 4,
-    marginVertical: 2,
   },
   qrCell: {
-    width: 16,
-    height: 16,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 2,
+    width: 10,
+    height: 10,
+    backgroundColor: '#FFFFFF',
   },
   qrCellFilled: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#0F172A',
+    borderRadius: 1,
   },
-  corner: {
-    position: 'absolute',
-    width: 20,
-    height: 20,
-    borderColor: Colors.primary,
-  },
-  topLeft: { 
-    top: 0, 
-    left: 0, 
-    borderTopWidth: 4, 
-    borderLeftWidth: 4, 
-    borderTopLeftRadius: 8,
-  },
-  topRight: { 
-    top: 0, 
-    right: 0, 
-    borderTopWidth: 4, 
-    borderRightWidth: 4, 
-    borderTopRightRadius: 8,
-  },
-  bottomLeft: { 
-    bottom: 0, 
-    left: 0, 
-    borderBottomWidth: 4, 
-    borderLeftWidth: 4, 
-    borderBottomLeftRadius: 8,
-  },
-  bottomRight: { 
-    bottom: 0, 
-    right: 0, 
-    borderBottomWidth: 4, 
-    borderRightWidth: 4, 
-    borderBottomRightRadius: 8,
-  },
-
   userInfo: {
     alignItems: 'center',
-    paddingBottom: 20,
+    marginBottom: 8,
   },
-  userName: { fontSize: 18, fontWeight: '700', color: '#1E293B', marginBottom: 4 },
-  userId: { fontSize: 14, color: '#64748B', fontWeight: '500' },
+  userName: { 
+    fontSize: 22, 
+    fontWeight: '700', 
+    color: '#0F172A', 
+    marginBottom: 4,
+    letterSpacing: -0.3,
+  },
+  userId: { 
+    fontSize: 15, 
+    color: '#64748B', 
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
 
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  actionText: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
 });

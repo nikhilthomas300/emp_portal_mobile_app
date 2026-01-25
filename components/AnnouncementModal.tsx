@@ -1,21 +1,41 @@
-import Colors from '@/constants/Colors';
-import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Megaphone, X } from 'lucide-react-native';
+import { Sparkles, X } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ImageSourcePropType, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  ZoomIn,
-  ZoomOut,
+  Easing,
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+  useAnimatedStyle,
   useSharedValue,
-  withSpring
+  withRepeat,
+  withSequence,
+  withTiming
 } from 'react-native-reanimated';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface AnnouncementModalProps {
   visible: boolean;
   onClose: () => void;
+  // Content
   title: string;
   description: string;
+  // Optional customization
+  badge?: string;
+  badgeColor?: string;
+  buttonText?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+  onButtonPress?: () => void;
+  // Image at top (overlapping)
+  image?: ImageSourcePropType;
+  imageSize?: number;
+  // Icon instead of image
+  showIcon?: boolean;
 }
 
 export default function AnnouncementModal({
@@ -23,71 +43,150 @@ export default function AnnouncementModal({
   onClose,
   title,
   description,
+  badge,
+  badgeColor = '#2563EB',
+  buttonText = 'Got it',
+  buttonColor,
+  buttonTextColor = '#FFFFFF',
+  onButtonPress,
+  image,
+  imageSize = 100,
+  showIcon = true,
 }: AnnouncementModalProps) {
 
-  const scale = useSharedValue(0.8);
+  const shimmer = useSharedValue(0);
+  const iconScale = useSharedValue(1);
 
   useEffect(() => {
     if (visible) {
-      scale.value = withSpring(1, { damping: 15 });
-    } else {
-      scale.value = 0.8;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // Subtle pulse animation for the icon
+      iconScale.value = withRepeat(
+        withSequence(
+          withTiming(1.05, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        true
+      );
+      // Shimmer effect for button
+      shimmer.value = withRepeat(
+        withTiming(1, { duration: 2000, easing: Easing.linear }),
+        -1,
+        false
+      );
     }
   }, [visible]);
+
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }],
+  }));
+
+  const handleButtonPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (onButtonPress) {
+      onButtonPress();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onClose();
+  };
 
   if (!visible) return null;
 
   return (
     <Modal transparent animationType="none" visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
-        {/* Backdrop Blur */}
-        {Platform.OS === 'ios' ? (
-          <BlurView intensity={80} style={StyleSheet.absoluteFill} tint="dark" />
-        ) : (
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.8)' }]} />
-        )}
-
-        <Animated.View
-          entering={ZoomIn.duration(300)}
-          exiting={ZoomOut.duration(200)}
-          style={styles.container}
+        {/* Dark Overlay Background with fade */}
+        <Animated.View 
+          entering={FadeIn.duration(250)} 
+          exiting={FadeOut.duration(200)}
+          style={styles.backdrop}
         >
-          <View style={styles.card}>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill} 
+            activeOpacity={1} 
+            onPress={handleClose}
+          />
+        </Animated.View>
 
-            {/* Close Button */}
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <X size={20} color="#9CA3AF" />
-            </TouchableOpacity>
+        {/* Bottom Sheet - Smooth slide animation */}
+        <Animated.View
+          entering={SlideInDown.duration(400).easing(Easing.out(Easing.cubic))}
+          exiting={SlideOutDown.duration(250).easing(Easing.in(Easing.cubic))}
+          style={styles.sheetContainer}
+        >
+          {/* Decorative top handle */}
+          <View style={styles.handleBar} />
 
-            {/* Icon - Clean & Centered */}
-            <View style={styles.iconContainer}>
-              <View style={styles.iconCircle}>
-                <Megaphone size={32} color={Colors.primary} fill={Colors.primary} fillOpacity={0.1} />
+          {/* Floating Image or Icon */}
+          {image ? (
+            <View style={[styles.imageContainer, { marginTop: -imageSize * 0.5 }]}>
+              <View style={styles.imageShadow}>
+                <Image 
+                  source={image} 
+                  style={[styles.floatingImage, { width: imageSize, height: imageSize }]}
+                  resizeMode="contain"
+                />
               </View>
             </View>
-
-            {/* Content */}
-            <View style={styles.content}>
-              <Text style={styles.title}>{title}</Text>
-              <Text style={styles.description}>{description}</Text>
-
-              <TouchableOpacity 
-                activeOpacity={0.8}
-                onPress={onClose}
-                style={styles.btnWrapper}
-              >
+          ) : showIcon && (
+            <View style={styles.iconOuterContainer}>
+              <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
                 <LinearGradient
-                  colors={[Colors.primary, '#4338CA']} // Primary Blue Gradient
+                  colors={['#2563EB', '#7C3AED']}
                   start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.actionBtn}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.iconGradient}
                 >
-                  <Text style={styles.btnText}>Got it</Text>
+                  <Sparkles size={36} color="#FFFFFF" strokeWidth={1.5} />
                 </LinearGradient>
-              </TouchableOpacity>
+                {/* Glow effect */}
+                <View style={styles.iconGlow} />
+              </Animated.View>
             </View>
+          )}
 
+          {/* Close Button */}
+          <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.7}>
+            <X size={18} color="#64748B" strokeWidth={2.5} />
+          </TouchableOpacity>
+
+          {/* Badge */}
+          {badge && (
+            <View style={[styles.badgeContainer, { backgroundColor: badgeColor }]}>
+              <Text style={styles.badgeText}>{badge}</Text>
+            </View>
+          )}
+
+          {/* Content */}
+          <View style={styles.content}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.description}>{description}</Text>
           </View>
+
+          {/* Action Button with Gradient */}
+          <TouchableOpacity 
+            activeOpacity={0.9}
+            onPress={handleButtonPress}
+            style={styles.btnWrapper}
+          >
+            <LinearGradient
+              colors={buttonColor ? [buttonColor, buttonColor] : ['#10B981', '#059669']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.actionBtn}
+            >
+              <Text style={[styles.btnText, { color: buttonTextColor }]}>{buttonText}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Bottom safe area padding */}
+          <View style={styles.bottomPadding} />
         </Animated.View>
       </View>
     </Modal>
@@ -97,89 +196,140 @@ export default function AnnouncementModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  sheetContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    // Premium shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 30,
+    elevation: 25,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 2,
+    marginBottom: 24,
+  },
+  imageContainer: {
+    position: 'absolute',
+    top: 0,
+    alignSelf: 'center',
+    zIndex: 10,
+  },
+  imageShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  floatingImage: {
+    borderRadius: 20,
+  },
+  iconOuterContainer: {
+    marginBottom: 20,
+  },
+  iconContainer: {
+    position: 'relative',
+  },
+  iconGradient: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
   },
-  container: {
-    width: '100%',
-    maxWidth: 340,
-    alignItems: 'center',
-  },
-  card: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingTop: 32,
-    paddingBottom: 8,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 8,
-    position: 'relative',
+  iconGlow: {
+    position: 'absolute',
+    top: -4,
+    left: -4,
+    right: -4,
+    bottom: -4,
+    borderRadius: 28,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: 'rgba(37, 99, 235, 0.2)',
   },
   closeBtn: {
     position: 'absolute',
     top: 16,
     right: 16,
-    padding: 4,
-    zIndex: 10,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 20,
-  },
-  iconContainer: {
-    marginBottom: 16,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#EEF2FF', // Very pale blue
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E7FF',
+    zIndex: 20,
+  },
+  badgeContainer: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   content: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
     alignItems: 'center',
-    width: '100%',
+    paddingHorizontal: 12,
+    marginBottom: 28,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '800',
-    color: '#1F2937',
+    color: '#0F172A',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
     letterSpacing: -0.5,
+    lineHeight: 30,
   },
   description: {
     fontSize: 15,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 28,
+    lineHeight: 24,
   },
   btnWrapper: {
     width: '100%',
+    marginBottom: 8,
   },
   actionBtn: {
-    paddingVertical: 14,
-    borderRadius: 16,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-    alignItems: 'center',
     width: '100%',
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
   },
   btnText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  bottomPadding: {
+    height: Platform.OS === 'ios' ? 28 : 20,
   },
 });

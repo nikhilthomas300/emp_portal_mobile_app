@@ -6,18 +6,19 @@ import Drawer from '@/components/navigation/Drawer';
 import { HomeShimmer } from '@/components/ShimmerLoader';
 import Colors from '@/constants/Colors';
 import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { Bell, Briefcase, Calendar, FileText, Home, Menu, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutAnimation, Platform, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import Animated, {
-  Extrapolate,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming
+    Extrapolate,
+    interpolate,
+    useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -140,7 +141,10 @@ export default function HomeScreen() {
             <View style={styles.leftSection}>
               <TouchableOpacity 
                 style={styles.menuButton} 
-                onPress={() => setDrawerVisible(true)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setDrawerVisible(true);
+                }}
                 activeOpacity={0.8}
               >
                 <Menu size={22} color="#FFF" strokeWidth={2} />
@@ -260,8 +264,12 @@ export default function HomeScreen() {
       <AnnouncementModal 
         visible={showAnnouncement} 
         onClose={() => setShowAnnouncement(false)}
-        title="Welcome"
-        description="Experience the new modern employee portal."
+        badge="NEW UPDATE"
+        badgeColor="#2563EB"
+        title="Welcome to the New Employee Portal"
+        description="Experience a modern, intuitive design with quick access to all your essential work tools and information."
+        buttonText="Let's Explore"
+        buttonColor="#2563EB"
       />
 
       <QRCodeModal visible={qrModalVisible} onClose={() => setQrModalVisible(false)} />
