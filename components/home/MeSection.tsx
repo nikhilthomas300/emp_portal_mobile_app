@@ -1,8 +1,10 @@
 import Colors from '@/constants/Colors';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { FileText } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import SectionHeader from './SectionHeader';
 
 // Import SVG icons
@@ -12,50 +14,32 @@ import MyAttendanceIcon from '@/assets/images/widgets/MyAttendance.svg';
 import MyProfileIcon from '@/assets/images/widgets/MyProfile.svg';
 import SalaryIcon from '@/assets/images/widgets/Salary.svg';
 
-// Widget colors - consistently themed
-const widgetColors: Record<string, string> = {
-  'Attendance': '#0066FF',
-  'Assets': '#8B5CF6',
-  'Letters': '#F59E0B',
-  'Flex': '#00B4D8',
-  'Profile': '#00C48C',
-  'Salary': '#FF4757',
-};
-
-// 8 widgets to show the 4-column layout properly
 const widgets = [
-  { id: 1, title: 'Attendance', Icon: MyAttendanceIcon, route: '/attendance' },
-  { id: 2, title: 'Assets', Icon: MyAssetsIcon, route: '/assets' },
-  { id: 3, title: 'Letters', FallbackIcon: FileText, route: '/my-letters' },
-  { id: 4, title: 'Flex', Icon: FlexIcon, route: '/flex' },
-  { id: 5, title: 'Profile', Icon: MyProfileIcon, route: '/profile' },
-  { id: 6, title: 'Salary', Icon: SalaryIcon, route: '/salary' },
+  { id: 1, title: 'My Attendance', Icon: MyAttendanceIcon, route: '/attendance' },
+  { id: 2, title: 'My Assets', Icon: MyAssetsIcon, route: '/assets' },
+  { id: 3, title: 'My Letters', FallbackIcon: FileText, route: '/my-letters' },
+  { id: 4, title: 'My Flex', Icon: FlexIcon, route: '/flex' },
+  { id: 5, title: 'My Profile', Icon: MyProfileIcon, route: '/profile' },
+  { id: 6, title: 'My Salary', Icon: SalaryIcon, route: '/salary' },
 ];
 
 export default function MeSection() {
   const router = useRouter();
 
   const renderIcon = (widget: any) => {
-    const color = widgetColors[widget.title] || Colors.primary;
-    
     if (widget.FallbackIcon) {
       const FallbackComponent = widget.FallbackIcon;
-      // Slightly smaller icon size for 4-column layout
-      return <FallbackComponent size={24} color={color} strokeWidth={2} />;
+      return <FallbackComponent size={26} color={Colors.primary} strokeWidth={1.8} />;
     }
     if (widget.Icon) {
       const SvgIcon = widget.Icon;
-      return <SvgIcon width={32} height={32} />;
+      return <SvgIcon width={30} height={30} />;
     }
     return null;
   };
 
-  const getIconBgColor = (title: string) => {
-    const color = widgetColors[title] || Colors.primary;
-    return color + '15'; // 15 = ~8% opacity
-  };
-
   const handleWidgetPress = (widget: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (widget.route) {
       router.push(widget.route as any);
     }
@@ -69,23 +53,28 @@ export default function MeSection() {
         onSeeAll={() => router.push('/widgets')}
       />
       
-      <View style={styles.cardContainer}>
+      <Animated.View 
+        entering={FadeInUp.duration(400).delay(100)}
+        style={styles.card}
+      >
         <View style={styles.gridContainer}>
           {widgets.map((widget) => (
             <TouchableOpacity 
               key={widget.id} 
-              style={styles.widgetItem} 
+              style={styles.widgetItem}
               activeOpacity={0.7}
               onPress={() => handleWidgetPress(widget)}
             >
-              <View style={[styles.iconCircle, { backgroundColor: getIconBgColor(widget.title) }]}>
+              <View style={styles.iconContainer}>
                 {renderIcon(widget)}
               </View>
-              <Text style={styles.widgetTitle} numberOfLines={1}>{widget.title}</Text>
+              <Text style={styles.widgetTitle} numberOfLines={2}>
+                {widget.title}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -94,43 +83,47 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
   },
-  cardContainer: {
+  card: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
+    borderRadius: 20,
     paddingVertical: 20,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     // Premium shadow
-    shadowColor: '#64748B',
-    shadowOffset: { width: 0, height: 8 },
+    shadowColor: '#1E3A5F',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowRadius: 12,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E8F0FE',
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   widgetItem: {
-    width: '25%', // Force 4 items per row
+    width: '33.33%', // 3 items per row for larger size
     alignItems: 'center',
-    marginBottom: 16,
+    paddingVertical: 12,
   },
-  iconCircle: {
-    width: 56, // Optimized size
-    height: 56,
-    borderRadius: 18,
+  iconContainer: {
+    width: 58,
+    height: 58,
+    borderRadius: 16,
+    backgroundColor: '#EEF4FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
+    // Subtle border for polish
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
   },
   widgetTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#334155',
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#1E293B',
     textAlign: 'center',
-    letterSpacing: -0.2,
+    lineHeight: 18,
   },
 });

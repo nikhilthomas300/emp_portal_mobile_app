@@ -1,7 +1,10 @@
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { AlertCircle, Bell, CheckCircle, ChevronRight, Clock } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 export type ActionType = 'approval' | 'task' | 'alert' | 'reminder';
 
@@ -15,10 +18,30 @@ interface ActionBannerProps {
 }
 
 const typeConfig = {
-  approval: { icon: Bell, color: '#0066FF', bgColor: '#0066FF' },
-  task: { icon: CheckCircle, color: '#00C48C', bgColor: '#00C48C' },
-  alert: { icon: AlertCircle, color: '#FF4757', bgColor: '#FF4757' },
-  reminder: { icon: Clock, color: '#F59E0B', bgColor: '#F59E0B' },
+  approval: { 
+    icon: Bell, 
+    gradients: ['#3B82F6', '#2563EB'],
+    lightColor: '#EFF6FF',
+    color: '#2563EB' 
+  },
+  task: { 
+    icon: CheckCircle, 
+    gradients: ['#10B981', '#059669'],
+    lightColor: '#ECFDF5',
+    color: '#10B981' 
+  },
+  alert: { 
+    icon: AlertCircle, 
+    gradients: ['#EF4444', '#DC2626'],
+    lightColor: '#FEF2F2',
+    color: '#EF4444' 
+  },
+  reminder: { 
+    icon: Clock, 
+    gradients: ['#F59E0B', '#D97706'],
+    lightColor: '#FFFBEB',
+    color: '#F59E0B' 
+  },
 };
 
 export default function ActionBanner({ 
@@ -32,11 +55,26 @@ export default function ActionBanner({
   const config = typeConfig[type];
   const IconComponent = config.icon;
 
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.();
+  };
+
   const content = (
-    <View style={styles.card}>
-      {/* Icon */}
-      <View style={[styles.iconContainer, { backgroundColor: config.bgColor }]}>
-        <IconComponent size={20} color="#FFFFFF" strokeWidth={2} />
+    <Animated.View 
+      entering={FadeInDown.duration(400)}
+      style={styles.card}
+    >
+      {/* Icon with gradient */}
+      <View style={styles.iconWrapper}>
+        <LinearGradient
+          colors={config.gradients as any}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.iconContainer}
+        >
+          <IconComponent size={22} color="#FFFFFF" strokeWidth={2} />
+        </LinearGradient>
         {count && count > 0 && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{count > 9 ? '9+' : count}</Text>
@@ -51,17 +89,17 @@ export default function ActionBanner({
       </View>
       
       {/* Arrow */}
-      <View style={[styles.arrowContainer, { backgroundColor: config.color + '15' }]}>
+      <View style={[styles.arrowContainer, { backgroundColor: config.lightColor }]}>
         <ChevronRight size={20} color={config.color} strokeWidth={2.5} />
       </View>
-    </View>
+    </Animated.View>
   );
 
   if (href) {
     return (
       <View style={styles.container}>
         <Link href={href as any} asChild>
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity activeOpacity={0.85} onPress={handlePress}>
             {content}
           </TouchableOpacity>
         </Link>
@@ -71,7 +109,7 @@ export default function ActionBanner({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
+      <TouchableOpacity activeOpacity={0.85} onPress={handlePress}>
         {content}
       </TouchableOpacity>
     </View>
@@ -81,68 +119,71 @@ export default function ActionBanner({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 20,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    shadowColor: '#0066FF',
-    shadowOffset: { width: 0, height: 4 },
+    gap: 14,
+    // Premium shadow
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowRadius: 24,
+    elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0, 102, 255, 0.08)',
+    borderColor: 'rgba(241, 245, 249, 0.8)',
+  },
+  iconWrapper: {
+    position: 'relative',
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 50,
+    height: 50,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
   },
   badge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#FF4757',
+    top: -6,
+    right: -6,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#EF4444',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#FFFFFF',
-    paddingHorizontal: 3,
+    paddingHorizontal: 4,
   },
   badgeText: {
-    fontSize: 9,
-    fontWeight: '800',
+    fontSize: 10,
+    fontFamily: 'Inter_800ExtraBold',
     color: '#FFFFFF',
   },
   textContent: {
     flex: 1,
   },
   title: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0A1628',
-    marginBottom: 2,
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    color: '#0F172A',
+    marginBottom: 3,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
     color: '#64748B',
-    fontWeight: '500',
   },
   arrowContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },

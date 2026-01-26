@@ -1,14 +1,21 @@
+import {
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+} from '@expo-google-fonts/inter';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Text, TextInput } from 'react-native';
 import 'react-native-reanimated';
 
 export {
-  ErrorBoundary
+    ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -17,12 +24,38 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 
-// Custom light theme with app colors
+// Apply Inter font globally to all Text components
+const oldTextRender = (Text as any).render;
+(Text as any).render = function (...args: any[]) {
+  const origin = oldTextRender.call(this, ...args);
+  return {
+    ...origin,
+    props: {
+      ...origin.props,
+      style: [{ fontFamily: 'Inter_400Regular' }, origin.props.style],
+    },
+  };
+};
+
+// Apply Inter font globally to all TextInput components
+const oldTextInputRender = (TextInput as any).render;
+(TextInput as any).render = function (...args: any[]) {
+  const origin = oldTextInputRender.call(this, ...args);
+  return {
+    ...origin,
+    props: {
+      ...origin.props,
+      style: [{ fontFamily: 'Inter_400Regular' }, origin.props.style],
+    },
+  };
+};
+
+// Custom light theme with premium app colors
 const AppTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: '#F1F5F9',
+    background: '#F8FAFC',
     card: '#FFFFFF',
     primary: '#2563EB',
   },
@@ -30,6 +63,11 @@ const AppTheme = {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
@@ -84,6 +122,8 @@ function RootLayoutNav() {
         <Stack.Screen name="widgets" />
         <Stack.Screen name="team" />
         <Stack.Screen name="meetings" />
+        <Stack.Screen name="my-letters" />
+        <Stack.Screen name="team-letters" />
       </Stack>
     </ThemeProvider>
   );

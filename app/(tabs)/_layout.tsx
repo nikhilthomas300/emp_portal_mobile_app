@@ -38,8 +38,8 @@ export default function TabLayout() {
   
   const bottomPadding = Platform.select({
     ios: Math.max(insets.bottom - 12, 4),
-    android: 6,
-    default: 6,
+    android: Math.max(insets.bottom, 12),
+    default: 8,
   });
   
   const tabBarHeight = 62 + bottomPadding;

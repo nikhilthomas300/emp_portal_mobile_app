@@ -36,7 +36,7 @@ const QUICK_ACTIONS = [
   { id: 4, title: 'Holidays', icon: Calendar, link: '/holidays' },
 ];
 
-const HEADER_EXPANDED = 200;
+const HEADER_EXPANDED = 220;
 const HEADER_COLLAPSED = 120;
 
 export default function HomeScreen() {
@@ -64,7 +64,7 @@ export default function HomeScreen() {
 
   const quickActionsStyle = useAnimatedStyle(() => {
     const opacity = interpolate(scrollY.value, [0, scrollRange * 0.5], [1, 0], Extrapolate.CLAMP);
-    const height = interpolate(scrollY.value, [0, scrollRange], [64, 0], Extrapolate.CLAMP);
+    const height = interpolate(scrollY.value, [0, scrollRange], [80, 0], Extrapolate.CLAMP);
     const translateY = interpolate(scrollY.value, [0, scrollRange], [0, -16], Extrapolate.CLAMP);
     return { opacity, height, transform: [{ translateY }], overflow: 'hidden' as const };
   });
@@ -131,7 +131,7 @@ export default function HomeScreen() {
       {/* Premium Header */}
       <Animated.View style={[styles.headerContainer, { height: headerMax }, headerStyle]}>
         <LinearGradient
-          colors={['#0D3C75', '#165BAA', '#2563EB']} // Balanced Enterprise Blue
+          colors={['#0B1E42', '#153E75', '#2563EB']} // Rich Deep Enterprise Blue
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.gradient, { paddingTop: insets.top + 4 }]}
@@ -375,47 +375,46 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
-    marginBottom: 16,
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    gap: 12,
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   searchText: {
     flex: 1,
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '500',
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
+    color: '#94A3B8',
   },
   quickActionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: 0,
+    marginBottom: 4,
   },
   quickActionBtn: {
     alignItems: 'center',
-    gap: 4,
+    gap: 8,
     width: '25%',
   },
   quickActionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.18)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   quickActionText: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.85)',
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
+    color: 'rgba(255,255,255,0.95)',
     textAlign: 'center',
   },
   scrollContent: {

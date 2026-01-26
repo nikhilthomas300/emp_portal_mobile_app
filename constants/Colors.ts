@@ -1,27 +1,27 @@
-// Premium Enterprise Color System
-const tintColorLight = '#0066FF';
+// 2026 Premium Enterprise Color System
+const tintColorLight = '#2563EB';
 const tintColorDark = '#fff';
 
 export default {
-  // Primary Brand Colors - Refined Blue Palette
-  primary: '#0066FF', // Vibrant enterprise blue
-  primaryDark: '#0052CC', // Darker blue for depth
-  primaryLight: '#E6F0FF', // Light blue background
-  primarySoft: '#4D94FF', // Softer blue for accents
+  // Primary Brand Colors - Modern 2026 Blue Palette
+  primary: '#2563EB', // Enterprise blue
+  primaryDark: '#1D4ED8', // Deep blue for depth
+  primaryLight: '#EFF6FF', // Light blue background
+  primarySoft: '#3B82F6', // Softer blue for accents
   
   // Secondary Colors
   secondary: '#3B82F6',
-  accent: '#8B5CF6', // Premium purple accent
+  accent: '#7C3AED', // Premium purple accent
   
   // Semantic Colors
-  success: '#00C48C', // Modern green
-  warning: '#FFB020', // Warm amber
-  danger: '#FF4757', // Refined red
-  info: '#00B4D8', // Cyan info
+  success: '#10B981', // Modern emerald green
+  warning: '#F59E0B', // Warm amber
+  danger: '#EF4444', // Clean red
+  info: '#0EA5E9', // Sky blue info
   
-  // Text Colors
-  text: '#0A1628', // Deep navy for text
-  textPrimary: '#0A1628',
+  // Text Colors - Refined Slate palette
+  text: '#0F172A', // Deep slate for text
+  textPrimary: '#0F172A',
   textSecondary: '#475569', // Muted secondary text
   textTertiary: '#94A3B8', // Lighter tertiary
   textInverse: '#FFFFFF',
@@ -40,53 +40,53 @@ export default {
   secondaryText: '#64748B',
   tint: tintColorLight,
   tabIconDefault: '#94A3B8',
-  tabIconSelected: '#0066FF',
+  tabIconSelected: '#2563EB',
   
-  // Premium Header Gradient - Matching Home page
-  gradientStart: '#0D3C75', // Deep enterprise blue
-  gradientMiddle: '#165BAA', // Rich blue
+  // Premium Header Gradient - Rich Enterprise Blue
+  gradientStart: '#0B1E42', // Deep navy
+  gradientMiddle: '#153E75', // Rich blue
   gradientEnd: '#2563EB', // Bright blue
   
   // Secondary gradients
-  gradientPrimary: ['#0066FF', '#4D94FF'] as [string, string],
-  gradientSuccess: ['#00C48C', '#00E5A0'] as [string, string],
-  gradientPremium: ['#0D3C75', '#165BAA', '#2563EB'] as [string, string, string],
+  gradientPrimary: ['#2563EB', '#3B82F6'] as [string, string],
+  gradientSuccess: ['#10B981', '#34D399'] as [string, string],
+  gradientPremium: ['#0B1E42', '#153E75', '#2563EB'] as [string, string, string],
   
   // Design tokens
   spacing: 20,
-  radius: 20,
-  radiusSm: 12,
+  radius: 24,
+  radiusSm: 14,
   radiusLg: 28,
   radiusXl: 32,
   
   // Premium shadows
   shadows: {
     small: {
-      shadowColor: '#0A1628',
+      shadowColor: '#64748B',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
       shadowRadius: 4,
       elevation: 2,
     },
     medium: {
-      shadowColor: '#0A1628',
+      shadowColor: '#64748B',
       shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
+      shadowOpacity: 0.06,
+      shadowRadius: 16,
       elevation: 6,
     },
     large: {
-      shadowColor: '#0A1628',
+      shadowColor: '#64748B',
       shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.12,
-      shadowRadius: 24,
+      shadowOpacity: 0.08,
+      shadowRadius: 28,
       elevation: 12,
     },
     glow: {
-      shadowColor: '#0066FF',
+      shadowColor: '#2563EB',
       shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.25,
-      shadowRadius: 16,
+      shadowOpacity: 0.2,
+      shadowRadius: 20,
       elevation: 10,
     },
   },

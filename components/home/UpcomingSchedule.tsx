@@ -1,12 +1,19 @@
 import Colors from '@/constants/Colors';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Clock, Video } from 'lucide-react-native';
+import { ChevronRight, Clock, Users, Video } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import SectionHeader from './SectionHeader';
 
 export default function UpcomingSchedule() {
   const router = useRouter();
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/meetings');
+  };
 
   return (
     <View style={styles.container}>
@@ -14,35 +21,42 @@ export default function UpcomingSchedule() {
         title="Upcoming Meeting"
         showSeeAll={true}
         seeAllText="All"
-        onSeeAll={() => router.push('/meetings')}
+        onSeeAll={handlePress}
       />
 
-      <TouchableOpacity 
-        style={styles.card} 
-        activeOpacity={0.8}
-        onPress={() => router.push('/meetings')}
-      >
-        {/* Video Icon */}
-        <View style={styles.iconContainer}>
-          <Video size={20} color="#FFFFFF" strokeWidth={2} />
-        </View>
-        
-        {/* Content */}
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={1}>Weekly Sync - Project AI</Text>
-          <View style={styles.metaRow}>
-            <Clock size={13} color="#64748B" strokeWidth={2} />
-            <Text style={styles.timeText}>Today, 10:00 AM</Text>
-            <View style={styles.badge}>
+      <Animated.View entering={FadeInUp.duration(400).delay(200)}>
+        <TouchableOpacity 
+          style={styles.card} 
+          activeOpacity={0.8}
+          onPress={handlePress}
+        >
+          {/* Icon */}
+          <View style={styles.iconContainer}>
+            <Video size={22} color={Colors.primary} strokeWidth={2} />
+          </View>
+          
+          {/* Content */}
+          <View style={styles.content}>
+            <Text style={styles.title} numberOfLines={1}>Weekly Team Sync</Text>
+            <View style={styles.metaRow}>
+              <Clock size={13} color="#64748B" strokeWidth={2} />
+              <Text style={styles.timeText}>10:00 AM</Text>
               <View style={styles.dot} />
-              <Text style={styles.badgeText}>In 30 min</Text>
+              <Users size={13} color="#64748B" strokeWidth={2} />
+              <Text style={styles.timeText}>5 members</Text>
             </View>
           </View>
-        </View>
-        
-        {/* Arrow */}
-        <ChevronRight size={20} color="#CBD5E1" strokeWidth={2} />
-      </TouchableOpacity>
+          
+          {/* Right section */}
+          <View style={styles.rightSection}>
+            <View style={styles.badge}>
+              <View style={styles.liveDot} />
+              <Text style={styles.badgeText}>In 30m</Text>
+            </View>
+            <ChevronRight size={18} color="#94A3B8" strokeWidth={2} />
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 }
@@ -54,61 +68,79 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+    // Premium shadow
+    shadowColor: '#1E3A5F',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E8F0FE',
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: Colors.primary,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#EEF4FF',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
   },
   content: {
     flex: 1,
     gap: 6,
   },
   title: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
     color: '#0F172A',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
   timeText: {
     fontSize: 13,
+    fontFamily: 'Inter_500Medium',
     color: '#64748B',
-    fontWeight: '500',
+  },
+  dot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#CBD5E1',
+    marginHorizontal: 4,
+  },
+  rightSection: {
+    alignItems: 'flex-end',
+    gap: 10,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#DCFCE7',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
     gap: 5,
-    marginLeft: 4,
   },
-  dot: {
+  liveDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: '#22C55E',
   },
   badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
     color: '#16A34A',
   },
 });

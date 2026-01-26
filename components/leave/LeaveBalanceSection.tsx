@@ -1,74 +1,76 @@
-import { LinearGradient } from 'expo-linear-gradient';
+import Colors from '@/constants/Colors';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Briefcase, Calendar, Clock } from 'lucide-react-native';
+import { Briefcase, Calendar, ChevronRight, Clock } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { SectionHeader } from '../home';
+
+const leaveData = [
+  { id: 1, type: 'Sick', balance: 8, icon: Clock },
+  { id: 2, type: 'Earned', balance: 14, icon: Briefcase },
+  { id: 3, type: 'Holiday', balance: 10, icon: Calendar, link: '/holidays' },
+];
 
 export default function LeaveBalanceSection() {
   const router = useRouter();
+
+  const handleItemPress = (item: typeof leaveData[0]) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (item.link) {
+      router.push(item.link as any);
+    }
+  };
+
+  const handleApplyLeave = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/apply-leave');
+  };
 
   return (
     <View style={styles.container}>
       <SectionHeader title="Leave Balance" />
 
-      <View style={styles.cardWrapper}>
+      <Animated.View 
+        entering={FadeInUp.duration(400).delay(100)}
+        style={styles.cardWrapper}
+      >
         <View style={styles.card}>
           {/* Balances Row */}
           <View style={styles.balanceRow}>
-            {/* Casual / Sick */}
-            <TouchableOpacity style={styles.balanceItem} activeOpacity={0.7}>
-              <View style={[styles.iconCtx, { backgroundColor: '#E6F0FF' }]}>
-                <Clock size={20} color="#0066FF" strokeWidth={2} />
-              </View>
-              <Text style={[styles.balanceValue, { color: '#0066FF' }]}>08</Text>
-              <Text style={styles.balanceLabel}>Casual/Sick</Text>
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            {/* Earned Leave */}
-            <TouchableOpacity style={styles.balanceItem} activeOpacity={0.7}>
-              <View style={[styles.iconCtx, { backgroundColor: '#DCFCE7' }]}>
-                <Briefcase size={20} color="#00C48C" strokeWidth={2} />
-              </View>
-              <Text style={[styles.balanceValue, { color: '#00C48C' }]}>14</Text>
-              <Text style={styles.balanceLabel}>Earned</Text>
-            </TouchableOpacity>
-
-            <View style={styles.divider} />
-
-            {/* Holidays */}
-            <TouchableOpacity 
-              style={styles.balanceItem} 
-              activeOpacity={0.7}
-              onPress={() => router.push('/holidays')}
-            >
-              <View style={[styles.iconCtx, { backgroundColor: '#FEF3C7' }]}>
-                <Calendar size={20} color="#F59E0B" strokeWidth={2} />
-              </View>
-              <Text style={[styles.balanceValue, { color: '#F59E0B' }]}>10</Text>
-              <Text style={styles.balanceLabel}>Holidays</Text>
-            </TouchableOpacity>
+            {leaveData.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <React.Fragment key={item.id}>
+                  <TouchableOpacity 
+                    style={styles.balanceItem} 
+                    activeOpacity={0.7}
+                    onPress={() => handleItemPress(item)}
+                  >
+                    <View style={styles.iconContainer}>
+                      <IconComponent size={18} color={Colors.primary} strokeWidth={2} />
+                    </View>
+                    <Text style={styles.balanceValue}>{item.balance}</Text>
+                    <Text style={styles.balanceLabel}>{item.type}</Text>
+                  </TouchableOpacity>
+                  {index < leaveData.length - 1 && <View style={styles.divider} />}
+                </React.Fragment>
+              );
+            })}
           </View>
 
-          {/* Apply Button */}
+          {/* Compact Apply Button */}
           <TouchableOpacity 
             style={styles.applyBtn} 
-            onPress={() => router.push('/apply-leave')}
-            activeOpacity={0.85}
+            onPress={handleApplyLeave}
+            activeOpacity={0.8}
           >
-            <LinearGradient
-              colors={['#0052CC', '#0066FF']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.applyBtnGradient}
-            >
-              <Text style={styles.applyBtnText}>Apply Leave</Text>
-            </LinearGradient>
+            <Text style={styles.applyBtnText}>Apply Leave</Text>
+            <ChevronRight size={16} color={Colors.primary} strokeWidth={2} />
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -82,61 +84,68 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#0A1628',
+    borderRadius: 20,
+    padding: 20,
+    // Premium shadow
+    shadowColor: '#1E3A5F',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 3,
+    elevation: 4,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E8F0FE',
   },
   balanceRow: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   balanceItem: {
     flex: 1,
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   divider: {
     width: 1,
-    height: 50,
+    height: 60,
     backgroundColor: '#E2E8F0',
   },
-  iconCtx: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#EEF4FF',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
   },
   balanceValue: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 24,
+    fontFamily: 'Inter_700Bold',
+    color: '#0F172A',
     letterSpacing: -0.5,
   },
   balanceLabel: {
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
     color: '#64748B',
   },
   applyBtn: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  applyBtnGradient: {
-    paddingVertical: 12,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 12,
+    backgroundColor: '#EEF4FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
   },
   applyBtnText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontFamily: 'Inter_600SemiBold',
+    color: Colors.primary,
   },
 });
